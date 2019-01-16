@@ -12,7 +12,6 @@ tags:
   - aws
   - terraform
   - terraform-modules
-  - logging
   - s3
   - bucket
   - glacier
@@ -77,13 +76,11 @@ usage: |-
     source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
     enabled                  = "${var.enabled}"
     user_enabled             = "${var.user_enabled}"
-    s3_actions               = "${var.s3_actions}"
+    versioning_enabled       = "${var.versioning_enabled}"
+    allowed_bucket_actions   = "${var.allowed_bucket_actions}"
     name                     = "${var.name}"
     stage                    = "${var.stage}"
     namespace                = "${var.namespace}"
-    acl                      = "${var.acl}"
-    prefix                   = "${var.prefix}"
-    encryption               = "${var.encryption}"
   }
   ```
 

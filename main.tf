@@ -23,7 +23,6 @@ resource "aws_s3_bucket" "default" {
 
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
   # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
-  # TODO (Max): figure out how we can make it optional
   server_side_encryption_configuration {
     rule {
       apply_server_side_encryption_by_default {
@@ -34,4 +33,16 @@ resource "aws_s3_bucket" "default" {
   }
 
   tags = "${module.default_label.tags}"
+}
+
+module "s3_user" {
+  source        = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=feature/cp-34/terraform-aws-s3-bucket"
+  namespace     = "${var.namespace}"
+  stage         = "${var.stage}"
+  name          = "${var.name}"
+  attributes    = ["user"]
+  tags          = "${var.tags}"
+  enabled       = "${var.user_enabled}"
+  s3_actions    = ["${var.allowed_bucket_actions}"]
+  s3_resources  = ["${aws_s3_bucket.default.arn}/*"]
 }

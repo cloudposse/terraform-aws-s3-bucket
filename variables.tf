@@ -41,11 +41,6 @@ variable "policy" {
   default     = ""
 }
 
-variable "prefix" {
-  description = "(Optional) Key prefix. Used to manage object lifecycle events."
-  default     = ""
-}
-
 variable "region" {
   description = "(Optional) If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee."
   default     = ""
@@ -76,4 +71,15 @@ variable "enabled" {
   default     = "true"
 }
 
-# TODO: add vars from mail.tf
+# User variables
+
+variable "user_enabled" {
+  description = "Set to `true` to create a S3 user for bucket"
+  default     = "false"
+}
+
+variable "allowed_bucket_actions" {
+  type        = "list"
+  default     = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject", "s3:DeleteObject", "s3:ListBucket", "s3:ListBucketMultipartUploads", "s3:GetBucketLocation", "s3:AbortMultipartUpload"]
+  description = "List of actions to permit for S3 bucket"
+}

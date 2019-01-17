@@ -66,8 +66,8 @@ related:
 
 # Short description of this project
 description: |-
-  This module creates an S3 bucket with support of versioning, encryption, acl and bucket object policy.
-  If `user_enabled` module will provision a basic IAM user with permissions to access the bucket.
+  This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
+  If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
 
 # How to use this project
 usage: |-
@@ -94,7 +94,5 @@ contributors:
     github: "osterman"
   - name: "Andriy Knysh"
     github: "aknysh"
-  - name: "Vladimir"
-    github: "SweetOps"
   - name: "Maxim Mironenko"
     github: "maximmi"

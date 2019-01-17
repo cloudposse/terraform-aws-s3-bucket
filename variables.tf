@@ -1,5 +1,5 @@
 variable "namespace" {
-  description = "Namespace (e.g. `cp` or `cloudposse`)"
+  description = "Namespace (e.g. `eg` or `cp`)"
   type        = "string"
 }
 
@@ -16,23 +16,23 @@ variable "name" {
 variable "delimiter" {
   type        = "string"
   default     = "-"
-  description = "Delimiter to be used between `name`, `namespace`, `stage`, etc."
+  description = "Delimiter to be used between `namespace`, `stage`, `name` and `attributes`"
 }
 
 variable "attributes" {
   type        = "list"
   default     = []
-  description = "Additional attributes (e.g. `policy` or `role`)"
+  description = "Additional attributes (e.g. `1`)"
 }
 
 variable "tags" {
   type        = "map"
   default     = {}
-  description = "Additional tags (e.g. map('BusinessUnit`,`XYZ`)"
+  description = "Additional tags (e.g. map(`BusinessUnit`,`XYZ`)"
 }
 
 variable "acl" {
-  description = "(Optional) The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services"
+  description = "The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services"
   default     = "log-delivery-write"
 }
 
@@ -42,17 +42,17 @@ variable "policy" {
 }
 
 variable "region" {
-  description = "(Optional) If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee."
+  description = "If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee."
   default     = ""
 }
 
 variable "force_destroy" {
-  description = "(Optional, Default:false ) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable."
+  description = "A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable."
   default     = "false"
 }
 
 variable "versioning_enabled" {
-  description = "(Optional) A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket."
+  description = "A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket."
   default     = "false"
 }
 
@@ -74,7 +74,7 @@ variable "enabled" {
 # User variables
 
 variable "user_enabled" {
-  description = "Set to `true` to create a S3 user for bucket"
+  description = "Set to `true` to create an S3 user with permission to access the bucket"
   default     = "false"
 }
 

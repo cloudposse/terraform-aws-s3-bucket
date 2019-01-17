@@ -6,8 +6,8 @@
 # terraform-aws-s3-bucket [![Build Status](https://travis-ci.org/cloudposse/terraform-aws-s3-bucket.svg?branch=master)](https://travis-ci.org/cloudposse/terraform-aws-s3-bucket) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 
-This module creates an S3 bucket with support of versioning, encryption, acl and bucket object policy.
-If `user_enabled` module will provision a basic IAM user with permissions to access the bucket.
+This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
+If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
 
 
 ---
@@ -75,22 +75,22 @@ Available targets:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| acl | (Optional) The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services | string | `log-delivery-write` | no |
+| acl | The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services | string | `log-delivery-write` | no |
 | allowed_bucket_actions | List of actions to permit for S3 bucket | list | `<list>` | no |
-| attributes | Additional attributes (e.g. `policy` or `role`) | list | `<list>` | no |
-| delimiter | Delimiter to be used between `name`, `namespace`, `stage`, etc. | string | `-` | no |
+| attributes | Additional attributes (e.g. `1`) | list | `<list>` | no |
+| delimiter | Delimiter to be used between `namespace`, `stage`, `name` and `attributes` | string | `-` | no |
 | enabled | Set to `false` to prevent the module from creating any resources | string | `true` | no |
-| force_destroy | (Optional, Default:false ) A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable. | string | `false` | no |
+| force_destroy | A boolean that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable. | string | `false` | no |
 | kms_master_key_id | The AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms | string | `` | no |
 | name | Name  (e.g. `app` or `db`) | string | - | yes |
-| namespace | Namespace (e.g. `cp` or `cloudposse`) | string | - | yes |
+| namespace | Namespace (e.g. `eg` or `cp`) | string | - | yes |
 | policy | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy. | string | `` | no |
-| region | (Optional) If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee. | string | `` | no |
+| region | If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee. | string | `` | no |
 | sse_algorithm | The server-side encryption algorithm to use. Valid values are AES256 and aws:kms | string | `AES256` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | - | yes |
-| tags | Additional tags (e.g. map('BusinessUnit`,`XYZ`) | map | `<map>` | no |
-| user_enabled | Set to `true` to create a S3 user for bucket | string | `false` | no |
-| versioning_enabled | (Optional) A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket. | string | `false` | no |
+| tags | Additional tags (e.g. map(`BusinessUnit`,`XYZ`) | map | `<map>` | no |
+| user_enabled | Set to `true` to create an S3 user with permission to access the bucket | string | `false` | no |
+| versioning_enabled | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket. | string | `false` | no |
 
 ## Outputs
 
@@ -246,15 +246,13 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 ### Contributors
 
-|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Vladimir][SweetOps_avatar]][SweetOps_homepage]<br/>[Vladimir][SweetOps_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] |
-|---|---|---|---|
+|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] |
+|---|---|---|
 
   [osterman_homepage]: https://github.com/osterman
   [osterman_avatar]: https://github.com/osterman.png?size=150
   [aknysh_homepage]: https://github.com/aknysh
   [aknysh_avatar]: https://github.com/aknysh.png?size=150
-  [SweetOps_homepage]: https://github.com/SweetOps
-  [SweetOps_avatar]: https://github.com/SweetOps.png?size=150
   [maximmi_homepage]: https://github.com/maximmi
   [maximmi_avatar]: https://github.com/maximmi.png?size=150
 

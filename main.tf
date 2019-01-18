@@ -42,7 +42,7 @@ module "s3_user" {
   name         = "${var.name}"
   attributes   = "${var.attributes}"
   tags         = "${var.tags}"
-  enabled      = "${var.user_enabled}"
+  enabled      = "${var.enabled == "true" && var.user_enabled == "true" : "true" : "false"}"
   s3_actions   = ["${var.allowed_bucket_actions}"]
   s3_resources = ["${aws_s3_bucket.default.arn}/*"]
 }

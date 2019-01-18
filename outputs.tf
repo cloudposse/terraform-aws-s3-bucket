@@ -14,11 +14,13 @@ output "user_unique_id" {
 }
 
 output "access_key_id" {
+  sensitive   = true
   value       = "${module.s3_user.access_key_id}"
   description = "The access key ID"
 }
 
 output "secret_access_key" {
+  sensitive   = true
   value       = "${module.s3_user.secret_access_key}"
   description = "The secret access key. This will be written to the state file in plain-text"
 }

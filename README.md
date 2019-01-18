@@ -9,6 +9,10 @@
 This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
 If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
 
+This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
+
+We do not recommend creating IAM users this way for any other purpose.
+
 
 ---
 
@@ -76,13 +80,13 @@ Available targets:
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| acl | The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services | string | `log-delivery-write` | no |
+| acl | The canned ACL to apply. We recommend `log-delivery-write` for compatibility with AWS services | string | `log-delivery-write` | no |
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list | `<list>` | no |
 | attributes | Additional attributes (e.g. `1`) | list | `<list>` | no |
 | delimiter | Delimiter to be used between `namespace`, `stage`, `name` and `attributes` | string | `-` | no |
 | enabled | Set to `false` to prevent the module from creating any resources | string | `true` | no |
 | force_destroy | A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable. | string | `false` | no |
-| kms_master_key_id | The AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms | string | `` | no |
+| kms_master_key_id | The AWS KMS master key ID used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | string | `` | no |
 | name | Name  (e.g. `app` or `db`) | string | - | yes |
 | namespace | Namespace (e.g. `eg` or `cp`) | string | - | yes |
 | policy | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy. | string | `` | no |
@@ -243,8 +247,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 ### Contributors
 
-|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] |
-|---|---|---|
+|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] |
+|---|---|---|---|
 
   [osterman_homepage]: https://github.com/osterman
   [osterman_avatar]: https://github.com/osterman.png?size=150
@@ -252,6 +256,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [aknysh_avatar]: https://github.com/aknysh.png?size=150
   [maximmi_homepage]: https://github.com/maximmi
   [maximmi_avatar]: https://github.com/maximmi.png?size=150
+  [joshmyers_homepage]: https://github.com/joshmyers
+  [joshmyers_avatar]: https://github.com/joshmyers.png?size=150
 
 
 

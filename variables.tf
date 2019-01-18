@@ -34,7 +34,7 @@ variable "tags" {
 variable "acl" {
   type        = "string"
   default     = "log-delivery-write"
-  description = "The canned ACL to apply. We recommend log-delivery-write for compatibility with AWS services"
+  description = "The canned ACL to apply. We recommend `log-delivery-write` for compatibility with AWS services"
 }
 
 variable "policy" {
@@ -70,7 +70,7 @@ variable "sse_algorithm" {
 variable "kms_master_key_id" {
   type        = "string"
   default     = ""
-  description = "The AWS KMS master key ID used for the SSE-KMS encryption. This can only be used when you set the value of sse_algorithm as aws:kms. The default aws/s3 AWS KMS master key is used if this element is absent while the sse_algorithm is aws:kms"
+  description = "The AWS KMS master key ID used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms`"
 }
 
 variable "enabled" {

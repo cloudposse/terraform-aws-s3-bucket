@@ -68,6 +68,10 @@ related:
 description: |-
   This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
   If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
+  
+  This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
+  
+  We do not recommend creating IAM users this way for any other purpose.
 
 # How to use this project
 usage: |-
@@ -96,3 +100,5 @@ contributors:
     github: "aknysh"
   - name: "Maxim Mironenko"
     github: "maximmi"
+  - name: "Josh Myers"
+    github: "joshmyers"

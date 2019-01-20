@@ -49,3 +49,8 @@ output "secret_access_key" {
   value       = "${module.s3_user.secret_access_key}"
   description = "The secret access key. This will be written to the state file in plain-text"
 }
+
+output "s3_bucket_arn" {
+  value       = "${aws_s3_bucket.default.arn}"
+  description = "S3 bucket ARN"
+}

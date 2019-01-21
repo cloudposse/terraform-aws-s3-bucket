@@ -33,8 +33,8 @@ variable "tags" {
 
 variable "acl" {
   type        = "string"
-  default     = "log-delivery-write"
-  description = "The canned ACL to apply. We recommend `log-delivery-write` for compatibility with AWS services"
+  default     = "private"
+  description = "The canned ACL to apply. We recommend `private` to avoid exposing sensitive information"
 }
 
 variable "policy" {

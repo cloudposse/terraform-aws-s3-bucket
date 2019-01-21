@@ -3,7 +3,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
-| acl | The canned ACL to apply. We recommend `log-delivery-write` for compatibility with AWS services | string | `log-delivery-write` | no |
+| acl | The canned ACL to apply. We recommend `private` to avoid exposing sensitive information | string | `private` | no |
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list | `<list>` | no |
 | attributes | Additional attributes (e.g. `1`) | list | `<list>` | no |
 | delimiter | Delimiter to be used between `namespace`, `stage`, `name` and `attributes` | string | `-` | no |
@@ -25,8 +25,14 @@
 | Name | Description |
 |------|-------------|
 | access_key_id | The access key ID |
+| bucket_arn | Bucket ARN |
+| bucket_domain_name | FQDN of bucket |
+| bucket_id | Bucket Name (aka ID) |
+| enabled | Is module enabled |
+| s3_bucket_arn | S3 bucket ARN |
 | secret_access_key | The secret access key. This will be written to the state file in plain-text |
 | user_arn | The ARN assigned by AWS for the user |
+| user_enabled | Is user creation enabled |
 | user_name | Normalized IAM user name |
 | user_unique_id | The user unique ID assigned by AWS |
 

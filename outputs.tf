@@ -1,3 +1,28 @@
+output "bucket_domain_name" {
+  value       = "${var.enabled == "true" ? join("", aws_s3_bucket.default.*.bucket_domain_name) : ""}"
+  description = "FQDN of bucket"
+}
+
+output "bucket_id" {
+  value       = "${var.enabled == "true" ? join("", aws_s3_bucket.default.*.id) : ""}"
+  description = "Bucket Name (aka ID)"
+}
+
+output "bucket_arn" {
+  value       = "${var.enabled == "true" ? join("", aws_s3_bucket.default.*.arn) : ""}"
+  description = "Bucket ARN"
+}
+
+output "enabled" {
+  value       = "${var.enabled}"
+  description = "Is module enabled"
+}
+
+output "user_enabled" {
+  value       = "${var.user_enabled}"
+  description = "Is user creation enabled"
+}
+
 output "user_name" {
   value       = "${module.s3_user.user_name}"
   description = "Normalized IAM user name"

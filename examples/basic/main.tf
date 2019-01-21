@@ -1,5 +1,5 @@
 module "s3_bucket" {
-  source             = "../"
+  source             = "../../"
   enabled            = "true"
   name               = "s3-bucket"
   stage              = "test"

@@ -7,3 +7,11 @@
 
 # .tfvars files
 *.tfvars
+
+# IDE files
+.idea
+*.iml
+
+# Build harness files
+.build-harness
+build-harness

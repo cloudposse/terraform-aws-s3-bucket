@@ -1,0 +1,104 @@
+---
+#
+# This is the canonical configuration for the `README.md`
+# Run `make readme` to rebuild the `README.md`
+#
+
+# Name of this project
+name: terraform-aws-s3-bucket
+
+# Tags of this project
+tags:
+  - aws
+  - terraform
+  - terraform-modules
+  - s3
+  - bucket
+  - glacier
+  - standard
+  - versioning
+
+# Categories of this project
+categories:
+  - terraform-modules/storage
+
+# Logo for this project
+#logo: docs/logo.png
+
+# License of this project
+license: "APACHE2"
+
+# Canonical GitHub repo
+github_repo: cloudposse/terraform-aws-s3-bucket
+
+# Badges to display
+badges:
+  - name: "Build Status"
+    image: "https://travis-ci.org/cloudposse/terraform-aws-s3-bucket.svg?branch=master"
+    url: "https://travis-ci.org/cloudposse/terraform-aws-s3-bucket"
+  - name: "Latest Release"
+    image: "https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg"
+    url: "https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest"
+  - name: "Slack Community"
+    image: "https://slack.cloudposse.com/badge.svg"
+    url: "https://slack.cloudposse.com"
+
+related:
+  - name: "terraform-aws-cloudfront-s3-cdn"
+    description: "Terraform module to easily provision CloudFront CDN backed by an S3 origin"
+    url: "https://github.com/cloudposse/terraform-aws-cloudfront-s3-cdn"
+  - name: "terraform-aws-s3-website"
+    description: "Terraform Module for Creating S3 backed Websites and Route53 DNS"
+    url: "https://github.com/cloudposse/terraform-aws-s3-website"
+  - name: "terraform-aws-user-data-s3-backend"
+    description: "Terraform Module to Offload User Data to S3"
+    url: "https://github.com/cloudposse/terraform-aws-user-data-s3-backend"
+  - name: "terraform-aws-s3-logs-athena-query"
+    description: "A Terraform module that creates an Athena Database and Structure for querying S3 access logs"
+    url: "https://github.com/cloudposse/terraform-aws-s3-logs-athena-query"
+  - name: "terraform-aws-lb-s3-bucket"
+    description: "Terraform module to provision an S3 bucket with built in IAM policy to allow AWS Load Balancers to ship access logs"
+    url: "https://github.com/cloudposse/terraform-aws-lb-s3-bucket"
+  - name: "terraform-aws-s3-log-storage"
+    description: "Terraform module creates an S3 bucket suitable for receiving logs from other AWS services such as S3, CloudFront, and CloudTrail"
+    url: "https://github.com/cloudposse/terraform-aws-s3-log-storage"
+
+
+# Short description of this project
+description: |-
+  This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
+  If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
+  
+  This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
+  
+  We do not recommend creating IAM users this way for any other purpose.
+
+# How to use this project
+usage: |-
+  ```hcl
+  module "s3_bucket" {
+    source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+    enabled                  = "${var.enabled}"
+    user_enabled             = "${var.user_enabled}"
+    versioning_enabled       = "${var.versioning_enabled}"
+    allowed_bucket_actions   = "${var.allowed_bucket_actions}"
+    name                     = "${var.name}"
+    stage                    = "${var.stage}"
+    namespace                = "${var.namespace}"
+  }
+  ```
+
+include:
+  - "docs/targets.md"
+  - "docs/terraform.md"
+
+# Contributors to this project
+contributors:
+  - name: "Erik Osterman"
+    github: "osterman"
+  - name: "Andriy Knysh"
+    github: "aknysh"
+  - name: "Maxim Mironenko"
+    github: "maximmi"
+  - name: "Josh Myers"
+    github: "joshmyers"

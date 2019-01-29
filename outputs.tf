@@ -51,6 +51,6 @@ output "secret_access_key" {
 }
 
 output "s3_bucket_arn" {
-  value       = "${aws_s3_bucket.default.arn}"
+  value       = "${join("", aws_s3_bucket.default.*.arn)}"
   description = "S3 bucket ARN"
 }

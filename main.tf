@@ -48,9 +48,10 @@ module "s3_user" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count        = "${var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
-  bucket       = "${aws_s3_bucket.default.id}"
-  policy       = <<POLICY
+  count  = "${var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
+  bucket = "${aws_s3_bucket.default.id}"
+
+  policy = <<POLICY
  {
      "Version": "2012-10-17",
      "Id": "PutObjPolicy",

@@ -46,3 +46,40 @@ module "s3_user" {
   s3_actions   = ["${var.allowed_bucket_actions}"]
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", "${join("", aws_s3_bucket.default.*.arn)}"]
 }
+
+resource "aws_s3_bucket_policy" "default" {
+  count        = "${var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
+  bucket       = "${aws_s3_bucket.default.id}"
+  policy       = <<POLICY
+ {
+     "Version": "2012-10-17",
+     "Id": "PutObjPolicy",
+     "Statement": [
+           {
+                "Sid": "DenyIncorrectEncryptionHeader",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::${aws_s3_bucket.default.arn}/*",
+                "Condition": {
+                        "StringNotEquals": {
+                               "s3:x-amz-server-side-encryption": "${var.sse_algorithm}"
+                         }
+                }
+           },
+           {
+                "Sid": "DenyUnEncryptedObjectUploads",
+                "Effect": "Deny",
+                "Principal": "*",
+                "Action": "s3:PutObject",
+                "Resource": "arn:aws:s3:::${aws_s3_bucket.default.arn}/*",
+                "Condition": {
+                        "Null": {
+                               "s3:x-amz-server-side-encryption": true
+                        }
+               }
+           }
+     ]
+ }
+POLICY
+}

@@ -48,8 +48,8 @@ module "s3_user" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count  = "${var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
-  bucket = "${aws_s3_bucket.default.id}"
+  count  = "${var.enabled == "true" && var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
+  bucket = "${join("", aws_s3_bucket.default.*.id)}"
 
   policy = <<POLICY
 {

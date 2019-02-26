@@ -94,5 +94,5 @@ variable "allowed_bucket_actions" {
 variable "allow_encrypted_uploads_only" {
   type        = "string"
   default     = "false"
-  description = "Set tp `true` to prevent uploads of unencrypted objects to S3 bucket"
+  description = "Set to `true` to prevent uploads of unencrypted objects to S3 bucket"
 }

@@ -106,7 +106,6 @@ Available targets:
 | bucket_domain_name | FQDN of bucket |
 | bucket_id | Bucket Name (aka ID) |
 | enabled | Is module enabled |
-| s3_bucket_arn | S3 bucket ARN |
 | secret_access_key | The secret access key. This will be written to the state file in plain-text |
 | user_arn | The ARN assigned by AWS for the user |
 | user_enabled | Is user creation enabled |

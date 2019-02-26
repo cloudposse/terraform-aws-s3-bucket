@@ -52,35 +52,35 @@ resource "aws_s3_bucket_policy" "default" {
   bucket = "${aws_s3_bucket.default.id}"
 
   policy = <<POLICY
- {
-     "Version": "2012-10-17",
-     "Id": "PutObjPolicy",
-     "Statement": [
-           {
-                "Sid": "DenyIncorrectEncryptionHeader",
-                "Effect": "Deny",
-                "Principal": "*",
-                "Action": "s3:PutObject",
-                "Resource": "arn:aws:s3:::${aws_s3_bucket.default.arn}/*",
-                "Condition": {
-                        "StringNotEquals": {
-                               "s3:x-amz-server-side-encryption": "${var.sse_algorithm}"
-                         }
-                }
-           },
-           {
-                "Sid": "DenyUnEncryptedObjectUploads",
-                "Effect": "Deny",
-                "Principal": "*",
-                "Action": "s3:PutObject",
-                "Resource": "arn:aws:s3:::${aws_s3_bucket.default.arn}/*",
-                "Condition": {
-                        "Null": {
-                               "s3:x-amz-server-side-encryption": true
-                        }
-               }
-           }
-     ]
- }
+{
+   "Version": "2012-10-17",
+   "Id": "PutObjPolicy",
+   "Statement": [
+         {
+              "Sid": "DenyIncorrectEncryptionHeader",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/*",
+              "Condition": {
+                      "StringNotEquals": {
+                             "s3:x-amz-server-side-encryption": "${var.sse_algorithm}"
+                       }
+              }
+         },
+         {
+              "Sid": "DenyUnEncryptedObjectUploads",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Action": "s3:PutObject",
+              "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/*",
+              "Condition": {
+                      "Null": {
+                             "s3:x-amz-server-side-encryption": true
+                      }
+             }
+         }
+   ]
+}
 POLICY
 }

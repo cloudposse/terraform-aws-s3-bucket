@@ -3,6 +3,7 @@
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | acl | The canned ACL to apply. We recommend `private` to avoid exposing sensitive information | string | `private` | no |
+| allow_encrypted_uploads_only | Set tp `true` to prevent uploads of unencrypted objects to S3 bucket | string | `false` | no |
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list | `<list>` | no |
 | attributes | Additional attributes (e.g. `1`) | list | `<list>` | no |
 | delimiter | Delimiter to be used between `namespace`, `stage`, `name` and `attributes` | string | `-` | no |

@@ -47,40 +47,49 @@ module "s3_user" {
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", "${join("", aws_s3_bucket.default.*.arn)}"]
 }
 
+data "aws_iam_policy_document" "bucket_policy" {
+  count = "${var.enabled == "true" && var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
+
+  statement {
+    sid       = "DenyIncorrectEncryptionHeader"
+    effect    = "Deny"
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "StringNotEquals"
+      values   = ["${var.sse_algorithm}"]
+      variable = "s3:x-amz-server-side-encryption"
+    }
+  }
+
+  statement {
+    sid       = "DenyUnEncryptedObjectUploads"
+    effect    = "Deny"
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.default.id}/*"]
+
+    principals {
+      identifiers = ["*"]
+      type        = "*"
+    }
+
+    condition {
+      test     = "Null"
+      values   = ["true"]
+      variable = "s3:x-amz-server-side-encryption"
+    }
+  }
+}
+
 resource "aws_s3_bucket_policy" "default" {
   count  = "${var.enabled == "true" && var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
   bucket = "${join("", aws_s3_bucket.default.*.id)}"
 
-  policy = <<POLICY
-{
-   "Version": "2012-10-17",
-   "Id": "PutObjPolicy",
-   "Statement": [
-         {
-              "Sid": "DenyIncorrectEncryptionHeader",
-              "Effect": "Deny",
-              "Principal": "*",
-              "Action": "s3:PutObject",
-              "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/*",
-              "Condition": {
-                      "StringNotEquals": {
-                             "s3:x-amz-server-side-encryption": "${var.sse_algorithm}"
-                       }
-              }
-         },
-         {
-              "Sid": "DenyUnEncryptedObjectUploads",
-              "Effect": "Deny",
-              "Principal": "*",
-              "Action": "s3:PutObject",
-              "Resource": "arn:aws:s3:::${aws_s3_bucket.default.id}/*",
-              "Condition": {
-                      "Null": {
-                             "s3:x-amz-server-side-encryption": true
-                      }
-             }
-         }
-   ]
-}
-POLICY
+  policy = "${join("", data.aws_iam_policy_document.bucket_policy.*.json)}"
 }

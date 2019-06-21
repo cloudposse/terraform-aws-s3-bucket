@@ -1,5 +1,5 @@
 module "default_label" {
-  source     = "git::https://github.com/rverma-nikiai/terraform-null-label.git?ref=master"
+  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=master"
   enabled    = var.enabled
   namespace  = var.namespace
   stage      = var.stage
@@ -36,7 +36,7 @@ resource "aws_s3_bucket" "default" {
 }
 
 module "s3_user" {
-  source       = "git::https://github.com/rverma-nikiai/terraform-aws-iam-s3-user.git?ref=master"
+  source       = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=master"
   namespace    = var.namespace
   stage        = var.stage
   name         = var.name

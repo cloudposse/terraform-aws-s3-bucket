@@ -1,5 +1,5 @@
 module "default_label" {
-  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=master"
+  source     = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.13.0"
   enabled    = var.enabled
   namespace  = var.namespace
   stage      = var.stage

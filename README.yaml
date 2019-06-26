@@ -33,9 +33,9 @@ github_repo: cloudposse/terraform-aws-s3-bucket
 
 # Badges to display
 badges:
-  - name: "Build Status"
-    image: "https://travis-ci.org/cloudposse/terraform-aws-s3-bucket.svg?branch=master"
-    url: "https://travis-ci.org/cloudposse/terraform-aws-s3-bucket"
+  - name: "Codefresh Build Status"
+    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-s3-bucket?type=cf-1"
+    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d13993639efa9451b1a2aa4"
   - name: "Latest Release"
     image: "https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg"
     url: "https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest"
@@ -68,9 +68,9 @@ related:
 description: |-
   This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
   If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
-  
+
   This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
-  
+
   We do not recommend creating IAM users this way for any other purpose.
 
 # How to use this project
@@ -78,13 +78,13 @@ usage: |-
   ```hcl
   module "s3_bucket" {
     source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
-    enabled                  = "${var.enabled}"
-    user_enabled             = "${var.user_enabled}"
-    versioning_enabled       = "${var.versioning_enabled}"
-    allowed_bucket_actions   = "${var.allowed_bucket_actions}"
-    name                     = "${var.name}"
-    stage                    = "${var.stage}"
-    namespace                = "${var.namespace}"
+    enabled                  = true
+    user_enabled             = true
+    versioning_enabled       = false
+    allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+    name                     = "app"
+    stage                    = "test"
+    namespace                = "eg"
   }
   ```
 

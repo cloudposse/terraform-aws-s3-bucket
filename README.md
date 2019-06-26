@@ -3,7 +3,7 @@
 
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
-# terraform-aws-s3-bucket [![Build Status](https://travis-ci.org/cloudposse/terraform-aws-s3-bucket.svg?branch=master)](https://travis-ci.org/cloudposse/terraform-aws-s3-bucket) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# terraform-aws-s3-bucket [![Codefresh Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-s3-bucket?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d13993639efa9451b1a2aa4) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 
 This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
@@ -47,16 +47,21 @@ We literally have [*hundreds of terraform modules*][terraform_modules] that are 
 
 ## Usage
 
+
+**IMPORTANT:** The `master` branch is used in `source` just as an example. In your code, do not pin to `master` because there may be breaking changes between releases.
+Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-s3-bucket/releases).
+
+
 ```hcl
 module "s3_bucket" {
   source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
-  enabled                  = "${var.enabled}"
-  user_enabled             = "${var.user_enabled}"
-  versioning_enabled       = "${var.versioning_enabled}"
-  allowed_bucket_actions   = "${var.allowed_bucket_actions}"
-  name                     = "${var.name}"
-  stage                    = "${var.stage}"
-  namespace                = "${var.namespace}"
+  enabled                  = true
+  user_enabled             = true
+  versioning_enabled       = false
+  allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+  name                     = "app"
+  stage                    = "test"
+  namespace                = "eg"
 }
 ```
 
@@ -80,22 +85,22 @@ Available targets:
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | acl | The canned ACL to apply. We recommend `private` to avoid exposing sensitive information | string | `private` | no |
-| allow_encrypted_uploads_only | Set to `true` to prevent uploads of unencrypted objects to S3 bucket | string | `false` | no |
-| allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list | `<list>` | no |
-| attributes | Additional attributes (e.g. `1`) | list | `<list>` | no |
+| allow_encrypted_uploads_only | Set to `true` to prevent uploads of unencrypted objects to S3 bucket | bool | `false` | no |
+| allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list(string) | `<list>` | no |
+| attributes | Additional attributes (e.g. `1`) | list(string) | `<list>` | no |
 | delimiter | Delimiter to be used between `namespace`, `stage`, `name` and `attributes` | string | `-` | no |
-| enabled | Set to `false` to prevent the module from creating any resources | string | `true` | no |
-| force_destroy | A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable. | string | `false` | no |
+| enabled | Set to `false` to prevent the module from creating any resources | bool | `true` | no |
+| force_destroy | A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable | bool | `false` | no |
 | kms_master_key_id | The AWS KMS master key ID used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | string | `` | no |
-| name | Name  (e.g. `app` or `db`) | string | - | yes |
-| namespace | Namespace (e.g. `eg` or `cp`) | string | - | yes |
-| policy | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy. | string | `` | no |
-| region | If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee. | string | `` | no |
+| name | Name  (e.g. `app` or `cluster`) | string | - | yes |
+| namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
+| policy | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy | string | `` | no |
+| region | If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee | string | `` | no |
 | sse_algorithm | The server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms` | string | `AES256` | no |
-| stage | Stage (e.g. `prod`, `dev`, `staging`) | string | - | yes |
-| tags | Additional tags (e.g. `{ BusinessUnit = "XYZ" }` | map | `<map>` | no |
-| user_enabled | Set to `true` to create an S3 user with permission to access the bucket | string | `false` | no |
-| versioning_enabled | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket. | string | `false` | no |
+| stage | Stage (e.g. `prod`, `dev`, `staging`) | string | `` | no |
+| tags | Additional tags (e.g. `{ BusinessUnit = "XYZ" }` | map(string) | `<map>` | no |
+| user_enabled | Set to `true` to create an IAM user with permission to access the bucket | bool | `false` | no |
+| versioning_enabled | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket | bool | `false` | no |
 
 ## Outputs
 

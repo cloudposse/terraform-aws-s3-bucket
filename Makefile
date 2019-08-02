@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 export TERRAFORM_VERSION = 0.12.3
-
+export BUILD_HARNESS_BRANCH = terraform-lint-0-12
 
 # List of targets the `readme` target should call before generating the readme
 export README_DEPS ?= docs/targets.md docs/terraform.md

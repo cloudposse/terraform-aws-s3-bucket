@@ -129,3 +129,14 @@ variable "noncurrent_version_expiration_days" {
   default     = 90
   description = "Specifies when noncurrent object versions expire"
 }
+
+variable "cors_rule_inputs" {
+  type = list(object({
+    allowed_headers = list(string)
+    allowed_methods = list(string)
+    allowed_origins = list(string)
+    expose_headers  = list(string)
+    max_age_seconds = number
+  }))
+  default = null
+}

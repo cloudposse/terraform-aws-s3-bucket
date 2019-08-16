@@ -87,9 +87,14 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 }
 
+module "aggregated_policy" {
+  source = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.1.2"
+  source_documents = "${flatten(list(data.aws_iam_policy_document.bucket_policy.*.json, var.additional_bucket_policies))}"
+}
+
 resource "aws_s3_bucket_policy" "default" {
-  count  = "${var.enabled == "true" && var.allow_encrypted_uploads_only == "true" ? 1 : 0}"
+  count  = "${(var.enabled == "true" && var.allow_encrypted_uploads_only == "true") || length(var.additional_bucket_policies) > 0 ? 1 : 0}"
   bucket = "${join("", aws_s3_bucket.default.*.id)}"
 
-  policy = "${join("", data.aws_iam_policy_document.bucket_policy.*.json)}"
+  policy = "${module.aggregated_policy.result_document}"
 }

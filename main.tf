@@ -88,7 +88,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 module "aggregated_policy" {
-  source = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.1.2"
+  source           = "git::https://github.com/cloudposse/terraform-aws-iam-policy-document-aggregator.git?ref=tags/0.1.2"
   source_documents = "${flatten(list(data.aws_iam_policy_document.bucket_policy.*.json, var.additional_bucket_policies))}"
 }
 

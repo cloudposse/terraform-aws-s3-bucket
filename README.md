@@ -85,7 +85,7 @@ Available targets:
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
 | acl | The canned ACL to apply. We recommend `private` to avoid exposing sensitive information | string | `private` | no |
-| additional_bucket_policies | Set this to a list of strings container valid JSON policy statements if you want to add arbitrary additions to the bucket policy | list | `<list>` | no |
+| additional_bucket_policies | Set this to a list of strings containing valid JSON policy statements if you want to add arbitrary additions to the bucket policy | list | `<list>` | no |
 | allow_encrypted_uploads_only | Set to `true` to prevent uploads of unencrypted objects to S3 bucket | string | `false` | no |
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list | `<list>` | no |
 | attributes | Additional attributes (e.g. `1`) | list | `<list>` | no |

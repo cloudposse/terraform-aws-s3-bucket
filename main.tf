@@ -95,8 +95,8 @@ module "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count  = "${var.enabled == "true" && (var.allow_encrypted_uploads_only == "true" || length(var.additional_bucket_policies) > 0) ? 1 : 0}"
-  bucket = "${join("", aws_s3_bucket.default.*.id)}"
+  count = "${var.enabled == "true" && (var.allow_encrypted_uploads_only == "true" || length(var.additional_bucket_policies) > 0) ? 1 : 0}"
 
+  bucket = "${join("", aws_s3_bucket.default.*.id)}"
   policy = "${join("", module.aggregated_policy.*.result_document)}"
 }

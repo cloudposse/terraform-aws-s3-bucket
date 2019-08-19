@@ -100,5 +100,5 @@ variable "allow_encrypted_uploads_only" {
 variable "additional_bucket_policies" {
   type        = "list"
   default     = []
-  description = "Set this to a list of strings container valid JSON policy statements if you want to add arbitrary additions to the bucket policy"
+  description = "Set this to a list of strings containing valid JSON policy statements if you want to add arbitrary additions to the bucket policy"
 }

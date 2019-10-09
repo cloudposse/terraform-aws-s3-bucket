@@ -98,3 +98,27 @@ variable "allow_encrypted_uploads_only" {
   default     = false
   description = "Set to `true` to prevent uploads of unencrypted objects to S3 bucket"
 }
+
+variable "lifecycle_rule_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable or disable lifecycle rule"
+}
+
+variable "prefix" {
+  type        = string
+  default     = ""
+  description = "Prefix identifying one or more objects to which the rule applies"
+}
+
+variable "noncurrent_version_transition_days" {
+  type        = number
+  default     = 30
+  description = "Number of days to persist in the standard storage tier before moving to the glacier tier infrequent access tier"
+}
+
+variable "noncurrent_version_expiration_days" {
+  type        = number
+  default     = 90
+  description = "Specifies when noncurrent object versions expire"
+}

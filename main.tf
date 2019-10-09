@@ -21,6 +21,23 @@ resource "aws_s3_bucket" "default" {
     enabled = var.versioning_enabled
   }
 
+  lifecycle_rule {
+    id      = module.default_label.id
+    enabled = var.lifecycle_rule_enabled
+    prefix  = var.prefix
+    tags    = module.default_label.tags
+
+    noncurrent_version_transition {
+      days          = var.noncurrent_version_transition_days
+      storage_class = "GLACIER"
+    }
+
+    noncurrent_version_expiration {
+      days = var.noncurrent_version_expiration_days
+    }
+  }
+
+
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
   # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
   server_side_encryption_configuration {

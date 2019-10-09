@@ -92,9 +92,13 @@ Available targets:
 | enabled | Set to `false` to prevent the module from creating any resources | bool | `true` | no |
 | force_destroy | A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable | bool | `false` | no |
 | kms_master_key_arn | The AWS KMS master key ARN used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | string | `` | no |
+| lifecycle_rule_enabled | Enable or disable lifecycle rule | bool | `false` | no |
 | name | Name  (e.g. `app` or `cluster`) | string | - | yes |
 | namespace | Namespace (e.g. `eg` or `cp`) | string | `` | no |
+| noncurrent_version_expiration_days | Specifies when noncurrent object versions expire | number | `90` | no |
+| noncurrent_version_transition_days | Number of days to persist in the standard storage tier before moving to the glacier tier infrequent access tier | number | `30` | no |
 | policy | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy | string | `` | no |
+| prefix | Prefix identifying one or more objects to which the rule applies | string | `` | no |
 | region | If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee | string | `` | no |
 | sse_algorithm | The server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms` | string | `AES256` | no |
 | stage | Stage (e.g. `prod`, `dev`, `staging`) | string | `` | no |
@@ -261,13 +265,13 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 |---|---|---|---|
 
   [osterman_homepage]: https://github.com/osterman
-  [osterman_avatar]: https://github.com/osterman.png?size=150
+  [osterman_avatar]: https://img.cloudposse.com/150x150/https://github.com/osterman.png
   [aknysh_homepage]: https://github.com/aknysh
-  [aknysh_avatar]: https://github.com/aknysh.png?size=150
+  [aknysh_avatar]: https://img.cloudposse.com/150x150/https://github.com/aknysh.png
   [maximmi_homepage]: https://github.com/maximmi
-  [maximmi_avatar]: https://github.com/maximmi.png?size=150
+  [maximmi_avatar]: https://img.cloudposse.com/150x150/https://github.com/maximmi.png
   [joshmyers_homepage]: https://github.com/joshmyers
-  [joshmyers_avatar]: https://github.com/joshmyers.png?size=150
+  [joshmyers_avatar]: https://img.cloudposse.com/150x150/https://github.com/joshmyers.png
 
 
 

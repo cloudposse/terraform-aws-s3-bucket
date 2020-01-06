@@ -1,24 +1,37 @@
 variable "namespace" {
   type        = string
-  description = "Namespace (e.g. `eg` or `cp`)"
   default     = ""
+  description = "Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp'"
+}
+
+variable "environment" {
+  type        = string
+  default     = ""
+  description = "Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT'"
 }
 
 variable "stage" {
   type        = string
-  description = "Stage (e.g. `prod`, `dev`, `staging`)"
   default     = ""
+  description = "Stage, e.g. 'prod', 'staging', 'dev', OR 'source', 'build', 'test', 'deploy', 'release'"
 }
 
 variable "name" {
   type        = string
-  description = "Name  (e.g. `app` or `cluster`)"
+  default     = ""
+  description = "Solution name, e.g. 'app' or 'jenkins'"
+}
+
+variable "enabled" {
+  type        = bool
+  default     = true
+  description = "Set to false to prevent the module from creating any resources"
 }
 
 variable "delimiter" {
   type        = string
   default     = "-"
-  description = "Delimiter to be used between `namespace`, `stage`, `name` and `attributes`"
+  description = "Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes`"
 }
 
 variable "attributes" {
@@ -30,7 +43,7 @@ variable "attributes" {
 variable "tags" {
   type        = map(string)
   default     = {}
-  description = "Additional tags (e.g. `{ BusinessUnit = \"XYZ\" }`"
+  description = "Additional tags (e.g. `map('BusinessUnit','XYZ')`"
 }
 
 variable "acl" {
@@ -73,12 +86,6 @@ variable "kms_master_key_arn" {
   type        = string
   default     = ""
   description = "The AWS KMS master key ARN used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms`"
-}
-
-variable "enabled" {
-  type        = bool
-  default     = true
-  description = "Set to `false` to prevent the module from creating any resources"
 }
 
 variable "user_enabled" {

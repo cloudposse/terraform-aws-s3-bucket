@@ -139,4 +139,6 @@ variable "cors_rule_inputs" {
     max_age_seconds = number
   }))
   default = null
+
+  description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }

@@ -7,9 +7,12 @@
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list(string) | `<list>` | no |
 | attributes | Additional attributes (e.g. `1`) | list(string) | `<list>` | no |
 | delimiter | Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes` | string | `-` | no |
+| enable_glacier_transition | Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files | bool | `true` | no |
 | enabled | Set to false to prevent the module from creating any resources | bool | `true` | no |
 | environment | Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT' | string | `` | no |
+| expiration_days | Number of days after which to expunge the objects | number | `90` | no |
 | force_destroy | A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable | bool | `false` | no |
+| glacier_transition_days | Number of days after which to move the data to the glacier storage tier | number | `60` | no |
 | kms_master_key_arn | The AWS KMS master key ARN used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | string | `` | no |
 | lifecycle_rule_enabled | Enable or disable lifecycle rule | bool | `false` | no |
 | name | Solution name, e.g. 'app' or 'jenkins' | string | `` | no |
@@ -21,6 +24,7 @@
 | region | If specified, the AWS region this bucket should reside in. Otherwise, the region used by the callee | string | `` | no |
 | sse_algorithm | The server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms` | string | `AES256` | no |
 | stage | Stage, e.g. 'prod', 'staging', 'dev', OR 'source', 'build', 'test', 'deploy', 'release' | string | `` | no |
+| standard_transition_days | Number of days to persist in the standard storage tier before moving to the infrequent access tier | number | `30` | no |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')` | map(string) | `<map>` | no |
 | user_enabled | Set to `true` to create an IAM user with permission to access the bucket | bool | `false` | no |
 | versioning_enabled | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket | bool | `false` | no |

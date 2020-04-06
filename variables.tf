@@ -129,3 +129,27 @@ variable "noncurrent_version_expiration_days" {
   default     = 90
   description = "Specifies when noncurrent object versions expire"
 }
+
+variable "standard_transition_days" {
+  type        = number
+  default     = 30
+  description = "Number of days to persist in the standard storage tier before moving to the infrequent access tier"
+}
+
+variable "glacier_transition_days" {
+  type        = number
+  default     = 60
+  description = "Number of days after which to move the data to the glacier storage tier"
+}
+
+variable "enable_glacier_transition" {
+  type        = bool
+  default     = true
+  description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
+}
+
+variable "expiration_days" {
+  type        = number
+  default     = 90
+  description = "Number of days after which to expunge the objects"
+}

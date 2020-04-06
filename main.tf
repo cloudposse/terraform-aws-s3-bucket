@@ -28,14 +28,37 @@ resource "aws_s3_bucket" "default" {
     prefix  = var.prefix
     tags    = module.label.tags
 
-    noncurrent_version_transition {
-      days          = var.noncurrent_version_transition_days
-      storage_class = "GLACIER"
-    }
-
     noncurrent_version_expiration {
       days = var.noncurrent_version_expiration_days
     }
+
+    dynamic "noncurrent_version_transition" {
+      for_each = var.enable_glacier_transition ? [1] : []
+
+      content {
+        days          = var.noncurrent_version_transition_days
+        storage_class = "GLACIER"
+      }
+    }
+
+    transition {
+      days          = var.standard_transition_days
+      storage_class = "STANDARD_IA"
+    }
+
+    dynamic "transition" {
+      for_each = var.enable_glacier_transition ? [1] : []
+
+      content {
+        days          = var.glacier_transition_days
+        storage_class = "GLACIER"
+      }
+    }
+
+    expiration {
+      days = var.expiration_days
+    }
+
   }
 
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html

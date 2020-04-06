@@ -23,10 +23,11 @@ resource "aws_s3_bucket" "default" {
   }
 
   lifecycle_rule {
-    id      = module.label.id
-    enabled = var.lifecycle_rule_enabled
-    prefix  = var.prefix
-    tags    = module.label.tags
+    id                                     = module.label.id
+    enabled                                = var.lifecycle_rule_enabled
+    prefix                                 = var.prefix
+    tags                                   = module.label.tags
+    abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
 
     noncurrent_version_expiration {
       days = var.noncurrent_version_expiration_days

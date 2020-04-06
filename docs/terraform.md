@@ -2,6 +2,7 @@
 
 | Name | Description | Type | Default | Required |
 |------|-------------|:----:|:-----:|:-----:|
+| abort_incomplete_multipart_upload_days | Maximum time (in days) that you want to allow multipart uploads to remain in progress | number | `5` | no |
 | acl | The canned ACL to apply. We recommend `private` to avoid exposing sensitive information | string | `private` | no |
 | allow_encrypted_uploads_only | Set to `true` to prevent uploads of unencrypted objects to S3 bucket | bool | `false` | no |
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list(string) | `<list>` | no |

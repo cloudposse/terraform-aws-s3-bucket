@@ -134,3 +134,11 @@ resource "aws_s3_bucket_policy" "default" {
   bucket = join("", aws_s3_bucket.default.*.id)
   policy = join("", data.aws_iam_policy_document.bucket_policy.*.json)
 }
+
+resource "aws_s3_bucket_public_access_block" "default" {
+  count = var.enable_block_public_access ? 1 : 0
+
+  bucket              = join("", aws_s3_bucket.default.*.id)
+  block_public_acls   = true
+  block_public_policy = true
+}

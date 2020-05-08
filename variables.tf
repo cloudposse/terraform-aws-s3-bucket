@@ -166,3 +166,8 @@ variable "lifecycle_tags" {
   default     = {}
 }
 
+variable "enable_block_public_access" {
+  type        = bool
+  description = "Enables blocking all public access capabilities to the created bucket."
+  default     = false
+}

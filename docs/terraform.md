@@ -9,6 +9,7 @@
 | attributes | Additional attributes (e.g. `1`) | list(string) | `<list>` | no |
 | delimiter | Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes` | string | `-` | no |
 | enable_glacier_transition | Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files | bool | `true` | no |
+| enable_standard_ia_transition | Enables the transition to STANDARD_IA | bool | `false` | no |
 | enabled | Set to false to prevent the module from creating any resources | bool | `true` | no |
 | environment | Environment, e.g. 'prod', 'staging', 'dev', 'pre-prod', 'UAT' | string | `` | no |
 | expiration_days | Number of days after which to expunge the objects | number | `90` | no |

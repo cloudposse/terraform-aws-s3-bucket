@@ -47,7 +47,7 @@ resource "aws_s3_bucket" "default" {
 
       content {
         days          = var.glacier_transition_days != null ? var.glacier_transition_days : var.standard_transition_days
-        storage_class = var.enable_glacier_transition == "GLACIER" ? "STANDARD_IA" : ""
+        storage_class = var.enable_glacier_transition ? "GLACIER" : "STANDARD_IA"
       }
     }
 

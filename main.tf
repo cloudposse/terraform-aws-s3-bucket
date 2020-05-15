@@ -42,17 +42,21 @@ resource "aws_s3_bucket" "default" {
       }
     }
 
-    transition {
-      days          = var.standard_transition_days
-      storage_class = "STANDARD_IA"
-    }
-
     dynamic "transition" {
       for_each = var.enable_glacier_transition ? [1] : []
 
       content {
         days          = var.glacier_transition_days
         storage_class = "GLACIER"
+      }
+    }
+
+    dynamic "transition" {
+      for_each = var.enable_standard_ia_transition ? [1] : []
+
+      content {
+        days          = var.standard_transition_days
+        storage_class = "STANDARD_IA"
       }
     }
 

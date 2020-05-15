@@ -148,6 +148,12 @@ variable "enable_glacier_transition" {
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
 }
 
+variable "enable_standard_ia_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to STANDARD_IA"
+}
+
 variable "expiration_days" {
   type        = number
   default     = 90

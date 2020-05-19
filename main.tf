@@ -23,19 +23,47 @@ resource "aws_s3_bucket" "default" {
   }
 
   lifecycle_rule {
-    id      = module.label.id
-    enabled = var.lifecycle_rule_enabled
-    prefix  = var.prefix
-    tags    = module.label.tags
-
-    noncurrent_version_transition {
-      days          = var.noncurrent_version_transition_days
-      storage_class = "GLACIER"
-    }
+    id                                     = module.label.id
+    enabled                                = var.lifecycle_rule_enabled
+    prefix                                 = var.prefix
+    tags                                   = var.lifecycle_tags
+    abort_incomplete_multipart_upload_days = var.abort_incomplete_multipart_upload_days
 
     noncurrent_version_expiration {
       days = var.noncurrent_version_expiration_days
     }
+
+    dynamic "noncurrent_version_transition" {
+      for_each = var.enable_glacier_transition ? [1] : []
+
+      content {
+        days          = var.noncurrent_version_transition_days
+        storage_class = "GLACIER"
+      }
+    }
+
+    dynamic "transition" {
+      for_each = var.enable_glacier_transition ? [1] : []
+
+      content {
+        days          = var.glacier_transition_days
+        storage_class = "GLACIER"
+      }
+    }
+
+    dynamic "transition" {
+      for_each = var.enable_standard_ia_transition ? [1] : []
+
+      content {
+        days          = var.standard_transition_days
+        storage_class = "STANDARD_IA"
+      }
+    }
+
+    expiration {
+      days = var.expiration_days
+    }
+
   }
 
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html

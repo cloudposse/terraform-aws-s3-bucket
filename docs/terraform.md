@@ -7,6 +7,7 @@
 | allow_encrypted_uploads_only | Set to `true` to prevent uploads of unencrypted objects to S3 bucket | bool | `false` | no |
 | allowed_bucket_actions | List of actions the user is permitted to perform on the S3 bucket | list(string) | `<list>` | no |
 | attributes | Additional attributes (e.g. `1`) | list(string) | `<list>` | no |
+| cors_rule_inputs | Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket | object | `null` | no |
 | delimiter | Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes` | string | `-` | no |
 | enable_glacier_transition | Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files | bool | `true` | no |
 | enable_standard_ia_transition | Enables the transition to STANDARD_IA | bool | `false` | no |

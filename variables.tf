@@ -130,6 +130,19 @@ variable "noncurrent_version_expiration_days" {
   description = "Specifies when noncurrent object versions expire"
 }
 
+variable "cors_rule_inputs" {
+  type = list(object({
+    allowed_headers = list(string)
+    allowed_methods = list(string)
+    allowed_origins = list(string)
+    expose_headers  = list(string)
+    max_age_seconds = number
+  }))
+  default = null
+
+  description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
+}
+
 variable "standard_transition_days" {
   type        = number
   default     = 30
@@ -171,4 +184,3 @@ variable "lifecycle_tags" {
   description = "Tags filter. Used to manage object lifecycle events"
   default     = {}
 }
-

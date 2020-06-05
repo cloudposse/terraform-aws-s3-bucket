@@ -7,7 +7,7 @@ on:
 jobs:
   container:
     runs-on: ubuntu-latest
-    container: cloudposse/testing.cloudposse.com:latest
+    container: cloudposse/testing.cloudposse.co:latest
     steps:
       - name: Run in container
         run: |

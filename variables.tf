@@ -184,3 +184,27 @@ variable "lifecycle_tags" {
   description = "Tags filter. Used to manage object lifecycle events"
   default     = {}
 }
+
+variable "block_public_acls" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the blocking of new public access lists on the bucket"
+}
+
+variable "block_public_policy" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the blocking of new public policies on the bucket"
+}
+
+variable "ignore_public_acls" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the ignoring of public access lists on the bucket"
+}
+
+variable "restrict_public_buckets" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the restricting of making the bucket public"
+}

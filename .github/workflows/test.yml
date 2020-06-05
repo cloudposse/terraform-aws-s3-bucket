@@ -1,0 +1,15 @@
+name: test
+on:
+  # Open a PR to update README for all PRs (as necessary)
+  pull_request: 
+    types: [opened, synchronize, reopened]
+
+jobs:
+  container:
+    runs-on: ubuntu-latest
+    container: cloudposse/testing.cloudposse.com:latest
+    steps:
+      - name: Run in container
+        run: |
+          echo This job does specify a container.
+          echo It runs in the container instead of the VM.

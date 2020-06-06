@@ -5,11 +5,18 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  container:
+  test:
     runs-on: ubuntu-latest
-    container: docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39
     steps:
+    - name: Docker Login
+      uses: azure/docker-login@v1
+      with:
+        login-server: docker.pkg.github.com
+        username: $GITHUB_ACTOR
+        password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Run in container
+        container: docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39
         run: |
           echo This job does specify a container.
           echo It runs in the container instead of the VM.

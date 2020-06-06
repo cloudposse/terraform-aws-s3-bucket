@@ -8,8 +8,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     container: cloudposse/testing.cloudposse.co:pr-91-merge
+    env: 
+      PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
     steps:
-    - name: Run in container
-      run: |
-        echo This job does specify a container.
-        echo It runs in the container instead of the VM.
+    - run:
+    - run: make init
+    - run: git -C build-harness checkout master
+    - run: make -C test/ clean init TEST_HARNESS_BRANCH=master
+    - run: make -C test/src clean init
+    - run: find . -type d -name '.terraform' | xargs rm -rf
+    - run: find . -type f -name 'terraform.tfstate*' -exec rm -f {} \;

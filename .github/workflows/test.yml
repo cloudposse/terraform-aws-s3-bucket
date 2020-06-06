@@ -14,11 +14,14 @@ jobs:
       TEST_HARNESS_BRANCH: master
       MAKE_INCLUDES: Makefile
     steps:
-    - name: checkout
+    - name: "Checkout code"
       uses: actions/checkout@v1
-    - run: make init
-    - run: make -C test/ clean init
-    - run: make -C test/src clean init
+    - name: "Initialize build-harness"
+      run: make init
+    - name: "Initialize test-harness"
+      run: make -C test/ clean init
+    - name: "Initialize terragrunt tests"
+      run: make -C test/src clean init
     - name: "Test README.md updated"
       run: make readme/lint
     - name: "Test module with bats"

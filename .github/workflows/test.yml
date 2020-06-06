@@ -12,6 +12,7 @@ jobs:
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       BUILD_HARNESS_BRANCH: master
       TEST_HARNESS_BRANCH: master
+      MAKE_INCLUDES: Makefile
     steps:
     - name: checkout
       uses: actions/checkout@v1

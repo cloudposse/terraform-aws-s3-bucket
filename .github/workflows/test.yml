@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  docker/login:
+  login:
     runs-on: ubuntu-latest
     steps:
     - name: Docker Login

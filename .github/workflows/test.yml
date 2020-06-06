@@ -10,24 +10,42 @@ jobs:
     container: cloudposse/testing.cloudposse.co:pr-91-merge
     env: 
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-      BUILD_HARNESS_BRANCH: master
-      TEST_HARNESS_BRANCH: master
       MAKE_INCLUDES: Makefile
     steps:
+
+    # Checkout the code from GitHub
     - name: "Checkout code"
       uses: actions/checkout@v1
+
+    # Initialize the build-harness which has lots of helper targets
     - name: "Initialize build-harness"
+      env:
+        BUILD_HARNESS_BRANCH: master
       run: make init
+
+    # Initialize the test-harness which has a library of bats tests
     - name: "Initialize test-harness"
+      env:
+        TEST_HARNESS_BRANCH: master
       run: make -C test/ clean init
-    - name: "Initialize terragrunt tests"
+
+    # Initialize the terratest go project
+    - name: "Initialize terratest go project"
       run: make -C test/src clean init
+
+    # Run the linter against the README
     - name: "Test README.md updated"
       run: make readme/lint
+
+    # Run the bats tests from the test-harness against the module
     - name: "Test module with bats"
       run: make -C test/ module
+
+    # Run the bats tests from the test-harness against the example
     - name: "Test `examples/complete` with bats"
       run: make -C test/ examples/complete
+
+    # Run the terratest integration tests
     - name: "Test `examples/complete` with terratest"
       run: make -C test/src
       env:

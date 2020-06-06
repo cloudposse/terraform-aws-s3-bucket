@@ -11,6 +11,8 @@ jobs:
     env: 
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
     steps:
+    - name: checkout
+      uses: actions/checkout@v1
     - run: make init
     - run: git -C build-harness checkout master
     - run: make -C test/ clean init TEST_HARNESS_BRANCH=master

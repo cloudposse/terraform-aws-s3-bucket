@@ -5,20 +5,19 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  init:
+  terraform:
     runs-on: ubuntu-latest
     container: cloudposse/testing.cloudposse.co:pr-91-merge
     env: 
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      BUILD_HARNESS_BRANCH: master
+      TEST_HARNESS_BRANCH: master
     steps:
     - name: checkout
       uses: actions/checkout@v1
     - run: make init
-    - run: git -C build-harness checkout master
-    - run: make -C test/ clean init TEST_HARNESS_BRANCH=master
+    - run: make -C test/ clean init
     - run: make -C test/src clean init
-    - run: find . -type d -name '.terraform' | xargs rm -rf
-    - run: find . -type f -name 'terraform.tfstate*' -exec rm -f {} \;
     - name: "Test README.md updated"
       run: make readme/lint
     - name: "Test module with bats"

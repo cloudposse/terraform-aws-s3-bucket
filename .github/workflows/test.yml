@@ -5,9 +5,31 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  readme:
+    runs-on: ubuntu-latest
+    container: cloudposse/testing.cloudposse.co:latest
+    env: 
+      PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      MAKE_INCLUDES: Makefile
+    steps:
+
+    # Checkout the code from GitHub
+    - name: "Checkout code"
+      uses: actions/checkout@v1
+
+    # Initialize the build-harness with make target helpers
+    - name: "Initialize build-harness"
+      env:
+        BUILD_HARNESS_BRANCH: master
+      run: make init
+
+    # Run the bats tests from the test-harness against the module
+    - name: "Test that README.md was generated from README.yaml"
+      run: make readme/lint
+
   bats:
     runs-on: ubuntu-latest
-    container: cloudposse/testing.cloudposse.co:pr-91-merge
+    container: cloudposse/testing.cloudposse.co:latest
     env: 
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       MAKE_INCLUDES: Makefile
@@ -33,7 +55,7 @@ jobs:
 
   terratest:
     runs-on: ubuntu-latest
-    container: cloudposse/testing.cloudposse.co:pr-91-merge
+    container: cloudposse/testing.cloudposse.co:latest
     env: 
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       MAKE_INCLUDES: Makefile

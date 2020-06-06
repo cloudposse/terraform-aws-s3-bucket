@@ -5,7 +5,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  test:
+  init:
     runs-on: ubuntu-latest
     container: cloudposse/testing.cloudposse.co:pr-91-merge
     env: 
@@ -19,3 +19,11 @@ jobs:
     - run: make -C test/src clean init
     - run: find . -type d -name '.terraform' | xargs rm -rf
     - run: find . -type f -name 'terraform.tfstate*' -exec rm -f {} \;
+    - name: "Test README.md updated"
+      run: make readme/lint
+    - name: "Test module with bats"
+      run: make -C test/ module
+    - name: "Test `examples/complete` with bats"
+      run: make -C test/ examples/complete
+    - name: "Test `examples/complete` with terratest"
+      run: make -C test/src

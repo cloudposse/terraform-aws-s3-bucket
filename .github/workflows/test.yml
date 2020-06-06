@@ -14,6 +14,10 @@ jobs:
         login-server: docker.pkg.github.com
         username: $GITHUB_ACTOR
         password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Docker Pull
+      run: |
+        docker pull docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39
+
   test:
     runs-on: ubuntu-latest
     container: docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39

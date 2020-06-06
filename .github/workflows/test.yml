@@ -7,7 +7,7 @@ on:
 jobs:
   container:
     runs-on: ubuntu-latest
-    container: cloudposse/testing.cloudposse.co:latest
+    container: docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39
     steps:
       - name: Run in container
         run: |

@@ -5,22 +5,9 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  login:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Docker Login
-      uses: azure/docker-login@v1
-      with:
-        login-server: docker.pkg.github.com
-        username: $GITHUB_ACTOR
-        password: ${{ secrets.GITHUB_TOKEN }}
-    - name: Docker Pull
-      run: |
-        docker pull docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39
-
   test:
     runs-on: ubuntu-latest
-    container: docker.pkg.github.com/cloudposse/testing.cloudposse.co/default:sha-2c86b39
+    container: cloudposse/testing.cloudposse.co:pr-91-merge
     steps:
     - name: Run in container
       run: |

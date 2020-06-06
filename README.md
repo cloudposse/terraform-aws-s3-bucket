@@ -42,7 +42,7 @@
 
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
-# terraform-aws-s3-bucket [![Codefresh Build Status](https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-s3-bucket?type=cf-1)](https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d13993639efa9451b1a2aa4) [![GitHub Action Tests](https://github.com/cloudposse/testing.cloudposse.co/workflows/docker/badge.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/actions) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+# terraform-aws-s3-bucket [![GitHub Action Tests](https://github.com/cloudposse/terraform-aws-s3-bucket/workflows/test/badge.svg?branch=master)](https://github.com/cloudposse/terraform-aws-s3-bucket/actions) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 
 
 This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.

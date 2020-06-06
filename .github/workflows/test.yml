@@ -7,7 +7,7 @@ on:
 jobs:
   terraform:
     runs-on: ubuntu-latest
-    container: cloudposse/testing.cloudposse.co:pr-91-merge
+    container: ${{ secrets.TEST_IMAGE }}
     env: 
       PATH: "/usr/local/terraform/0.12/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
       MAKE_INCLUDES: Makefile

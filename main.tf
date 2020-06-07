@@ -130,7 +130,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${aws_s3_bucket.default[0].id}/*"]
+    resources = ["arn:aws:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
 
     principals {
       identifiers = ["*"]

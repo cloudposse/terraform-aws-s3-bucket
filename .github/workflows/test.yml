@@ -3,6 +3,8 @@ on:
   # Open a PR to update README for all PRs (as necessary)
   pull_request: 
     types: [opened, synchronize, reopened]
+  repository_dispatch:
+    types: [test-command]
 
 jobs:
   readme:

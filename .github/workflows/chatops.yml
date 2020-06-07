@@ -1,0 +1,41 @@
+name: chatops
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  default:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: "Handle common commands"
+        uses: cloudposse/actions/github/slash-command-dispatch@0.15.0
+        with:
+          token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+          reaction-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: cloudposse/actions
+          commands: rebuild-readme, terraform-fmt
+          permission: none
+          issue-type: pull-request
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout commit"
+        uses: actions/checkout@v2
+      - name: "Run tests"
+        uses: cloudposse/actions/github/slash-command-dispatch@0.15.0
+        with:
+          token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+          reaction-token: ${{ secrets.GITHUB_TOKEN }}
+          commands: test
+          permission: none
+          issue-type: pull-request
+          reactions: false
+
+      - name: "Add reaction"
+        uses: cloudposse/actions/github/create-or-update-comment@0.15.0
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          reactions: thumbsup

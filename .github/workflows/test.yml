@@ -1,6 +1,8 @@
 name: test
 on:
-  # Open a PR to update README for all PRs (as necessary)
+  push:
+    branches:
+      - master
   pull_request: 
     types: [opened, synchronize, reopened]
   repository_dispatch:

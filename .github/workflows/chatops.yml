@@ -31,3 +31,11 @@ jobs:
           commands: test
           permission: none
           issue-type: pull-request
+          reactions: false
+
+      - name: "Add reaction"
+        uses: cloudposse/actions/github/create-or-update-comment@0.15.0
+        with:
+          comment-id: ${{ github.event.comment.id }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          reactions: thumbsup

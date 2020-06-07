@@ -38,4 +38,4 @@ jobs:
         with:
           comment-id: ${{ github.event.comment.id }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          reaction-type: thumbsup
+          reaction-type: "+1"

@@ -17,9 +17,19 @@ jobs:
       MAKE_INCLUDES: Makefile
     steps:
 
-    # Checkout the code from GitHub
-    - name: "Checkout code"
+    # Checkout the code from GitHub the default way
+    - name: "Checkout code (default)"
       uses: actions/checkout@v2
+      if: github.event.event_type != 'repository_dispatch'
+
+    # Checkout the code from GitHub Pull Request
+    - name: "Checkout code for ChatOps"
+      uses: actions/checkout@v2
+      if: github.event.event_type == 'repository_dispatch'
+      with:
+        token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }} 
 
     # Initialize the build-harness with make target helpers
     - name: "Initialize build-harness"
@@ -39,9 +49,19 @@ jobs:
       MAKE_INCLUDES: Makefile
     steps:
 
-    # Checkout the code from GitHub
-    - name: "Checkout code"
+    # Checkout the code from GitHub the default way
+    - name: "Checkout code (default)"
       uses: actions/checkout@v2
+      if: github.event.event_type != 'repository_dispatch'
+
+    # Checkout the code from GitHub Pull Request
+    - name: "Checkout code for ChatOps"
+      uses: actions/checkout@v2
+      if: github.event.event_type == 'repository_dispatch'
+      with:
+        token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }} 
 
     # Initialize the test-harness which has a library of bats tests
     - name: "Initialize test-harness"
@@ -65,9 +85,20 @@ jobs:
       MAKE_INCLUDES: Makefile
     steps:
 
-    # Checkout the code from GitHub
-    - name: "Checkout code"
+    # Checkout the code from GitHub the default way
+    - name: "Checkout code (default)"
       uses: actions/checkout@v2
+      if: github.event.event_type != 'repository_dispatch'
+
+    # Checkout the code from GitHub Pull Request
+    - name: "Checkout code for ChatOps"
+      uses: actions/checkout@v2
+      if: github.event.event_type == 'repository_dispatch'
+      with:
+        token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+        repository: ${{ github.event.pull_request.head.repo.full_name }}
+        ref: ${{ github.event.pull_request.head.ref }} 
+
 
     # Initialize the terratest go project
     - name: "Initialize terratest go project"

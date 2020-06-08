@@ -110,3 +110,21 @@ jobs:
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_KEY }}  
+
+    # Update GitHub status for dispatch events
+    - name: "Update GitHub Status for this ref"
+      uses: docker://cloudposse/github-status-updater
+      #if: ${{ github.event_name == 'repository_dispatch' }}
+      env:
+        GITHUB_ACTION: update_state
+        GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
+        GITHUB_STATE: success
+        #GITHUB_CONTEXT: terratest
+        GITHUB_CONTEXT: foobar
+        GITHUB_DESCRIPTION: "terratest passed"
+        GITHUB_TARGET_URL: https://github.com/${{ github.repository }}/runs/${{ github.run_id }}
+        GITHUB_OWNER: ${{ github.repository_owner }}
+        GITHUB_REPO: ${{ github.event.repository.name }}
+        GITHUB_REF: ${{ github.event.pull_request.head.ref }} 
+
+

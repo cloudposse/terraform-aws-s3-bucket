@@ -15,9 +15,8 @@ jobs:
     # Update GitHub status for dispatch events
     - name: "Update GitHub Status for this ref"
       #if: ${{ github.event_name == 'repository_dispatch' }}
-      runs: 
-        using: 'docker'
-        image: 'docker://cloudposse/github-status-updater'
+      uses: 'docker://cloudposse/github-status-updater'
+      with:
         args:
         - "-action update_state"
         env:

@@ -20,12 +20,12 @@ jobs:
     # Checkout the code from GitHub the default way
     - name: "Checkout code (default)"
       uses: actions/checkout@v2
-      if: github.event.event_type != 'repository_dispatch'
+      if: ${{ github.event_name != 'repository_dispatch' }}
 
     # Checkout the code from GitHub Pull Request
     - name: "Checkout code for ChatOps"
       uses: actions/checkout@v2
-      if: github.event.event_type == 'repository_dispatch'
+      if: ${{ github.event_name == 'repository_dispatch' }}
       with:
         token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -52,12 +52,12 @@ jobs:
     # Checkout the code from GitHub the default way
     - name: "Checkout code (default)"
       uses: actions/checkout@v2
-      if: github.event.event_type != 'repository_dispatch'
+      if: ${{ github.event_name != 'repository_dispatch' }}
 
     # Checkout the code from GitHub Pull Request
     - name: "Checkout code for ChatOps"
       uses: actions/checkout@v2
-      if: github.event.event_type == 'repository_dispatch'
+      if: ${{ github.event_name == 'repository_dispatch' }}
       with:
         token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}
@@ -88,12 +88,12 @@ jobs:
     # Checkout the code from GitHub the default way
     - name: "Checkout code (default)"
       uses: actions/checkout@v2
-      if: github.event.event_type != 'repository_dispatch'
+      if: ${{ github.event_name != 'repository_dispatch' }}
 
     # Checkout the code from GitHub Pull Request
     - name: "Checkout code for ChatOps"
       uses: actions/checkout@v2
-      if: github.event.event_type == 'repository_dispatch'
+      if: ${{ github.event_name == 'repository_dispatch' }}
       with:
         token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         repository: ${{ github.event.pull_request.head.repo.full_name }}

@@ -17,13 +17,12 @@ jobs:
       #if: ${{ github.event_name == 'repository_dispatch' }}
       uses: 'docker://cloudposse/github-status-updater'
       with:
+        # We need to use args because GitHub actions overwrites many `GITHUB_*` environment variables
         args: "-action update_state -ref ${{ github.event.pull_request.head.sha }}"
       env:
-        #GITHUB_ACTION: update_state
         GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         GITHUB_STATE: success
-        #GITHUB_CONTEXT: terratest
-        GITHUB_CONTEXT: foobar
+        GITHUB_CONTEXT: 'test / terratest (pull_request)'
         GITHUB_DESCRIPTION: "terratest passed"
         GITHUB_TARGET_URL: https://github.com/${{ github.repository }}/runs/${{ github.run_id }}
         GITHUB_OWNER: ${{ github.repository_owner }}

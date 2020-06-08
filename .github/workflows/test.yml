@@ -22,7 +22,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
         GITHUB_STATE: success
-        GITHUB_CONTEXT: 'test / terratest (pull_request)'
+        GITHUB_CONTEXT: 'terratest'
         GITHUB_DESCRIPTION: "terratest passed"
         GITHUB_TARGET_URL: https://github.com/${{ github.repository }}/runs/${{ github.run_id }}
         GITHUB_OWNER: ${{ github.repository_owner }}

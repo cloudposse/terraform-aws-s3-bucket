@@ -28,7 +28,7 @@ jobs:
         GITHUB_TARGET_URL: https://github.com/${{ github.repository }}/runs/${{ github.run_id }}
         GITHUB_OWNER: ${{ github.repository_owner }}
         GITHUB_REPO: ${{ github.event.repository.name }}
-        GITHUB_REF: ${{ github.event.pull_request.head.ref }} 
+        GITHUB_REF: ${{ github.event.pull_request.head.sha }} 
 
   readme:
     runs-on: ubuntu-latest

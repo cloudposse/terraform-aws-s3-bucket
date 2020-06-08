@@ -17,8 +17,7 @@ jobs:
       #if: ${{ github.event_name == 'repository_dispatch' }}
       uses: 'docker://cloudposse/github-status-updater'
       with:
-        args:
-        - "-action update_state"
+        args: "-action update_state"
         env:
           #GITHUB_ACTION: update_state
           GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}

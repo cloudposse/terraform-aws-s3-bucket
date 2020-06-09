@@ -28,6 +28,7 @@ jobs:
         with:
           token: ${{ secrets.PUBLIC_REPO_ACCESS_TOKEN }}
           reaction-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: cloudposse/actions
           commands: test
           permission: none
           issue-type: pull-request

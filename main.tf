@@ -146,9 +146,10 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count  = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
-  policy = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+  count      = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
+  bucket     = join("", aws_s3_bucket.default.*.id)
+  policy     = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+  depends_on = [aws_s3_bucket_public_access_block.default]
 }
 
 # Refer to the terraform documentation on s3_bucket_public_access_block at

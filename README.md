@@ -162,6 +162,7 @@ Available targets:
 | bucket_arn | Bucket ARN |
 | bucket_domain_name | FQDN of bucket |
 | bucket_id | Bucket Name (aka ID) |
+| bucket_regional_domain_name | The bucket region-specific domain name |
 | enabled | Is module enabled |
 | secret_access_key | The secret access key. This will be written to the state file in plain-text |
 | user_arn | The ARN assigned by AWS for the user |

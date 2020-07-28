@@ -5,7 +5,6 @@ GOBIN    = $(GOPATH)/bin
 BASE     = $(GOPATH)/src/$(PACKAGE)
 PATH 	:= $(PATH):$(GOBIN)
 
-export TF_DATA_DIR ?= $(CURDIR)/.terraform
 export TF_CLI_ARGS_init ?= -get-plugins=true
 export GOPATH
 

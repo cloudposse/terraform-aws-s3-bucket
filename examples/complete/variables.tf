@@ -61,7 +61,7 @@ variable "grants" {
   }))
   default = null
 
-  description = "An ACL policy grant. Conflicts with `acl`. Set `acl` to `null` to use this."
+  description = "A list of ACL policy grants. Conflicts with `acl`. Set `acl` to `null` to use this."
 }
 
 variable "policy" {

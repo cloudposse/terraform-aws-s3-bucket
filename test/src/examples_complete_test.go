@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/gruntwork-io/terratest/modules/terraform"
+	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,9 +12,13 @@ import (
 func TestExamplesComplete(t *testing.T) {
 	t.Parallel()
 
+	rootFolder := "../../"
+	terraformFolderRelativeToRoot := "examples/complete"
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+
 	terraformOptions := &terraform.Options{
 		// The path to where our Terraform code is located
-		TerraformDir: "../../examples/complete",
+		TerraformDir: tempTestFolder,
 		Upgrade:      true,
 		// Variables to pass to our Terraform code using -var-file options
 		VarFiles: []string{"fixtures.us-west-1.tfvars"},
@@ -44,9 +49,13 @@ func TestExamplesComplete(t *testing.T) {
 func TestExamplesCompleteWithGrants(t *testing.T) {
 	t.Parallel()
 
+	rootFolder := "../../"
+	terraformFolderRelativeToRoot := "examples/complete"
+	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+
 	terraformOptions := &terraform.Options{
 		// The path to where our Terraform code is located
-		TerraformDir: "../../examples/complete",
+		TerraformDir: tempTestFolder,
 		Upgrade:      true,
 		// Variables to pass to our Terraform code using -var-file options
 		VarFiles: []string{"grants.us-west-1.tfvars"},

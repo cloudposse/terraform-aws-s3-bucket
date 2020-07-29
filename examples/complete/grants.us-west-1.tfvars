@@ -6,17 +6,11 @@ stage = "test"
 
 name = "s3-grants-test"
 
-acl = null
+acl = ""
 
 grants = [
   {
-    id          = "123456789"
-    type        = "CanonicalUser"
-    permissions = ["FULL_CONTROL"]
-    uri         = null
-  },
-  {
-    id          = "987654321"
+    id          = null
     type        = "Group"
     permissions = ["READ", "WRITE"]
     uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"

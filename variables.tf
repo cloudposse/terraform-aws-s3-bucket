@@ -208,3 +208,15 @@ variable "restrict_public_buckets" {
   default     = true
   description = "Set to `false` to disable the restricting of making the bucket public"
 }
+
+variable "logging_bucket" {
+  type        = string
+  default     = ""
+  description = "Bucket to write log objects to"
+}
+
+variable "logging_prefix" {
+  type        = string
+  default     = ""
+  description = "Prefix for log objects in bucket"
+}

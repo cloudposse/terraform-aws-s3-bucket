@@ -22,6 +22,8 @@
 | kms_master_key_arn | The AWS KMS master key ARN used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | string | `` | no |
 | lifecycle_rule_enabled | Enable or disable lifecycle rule | bool | `false` | no |
 | lifecycle_tags | Tags filter. Used to manage object lifecycle events | map(string) | `<map>` | no |
+| logging_bucket | S3 Bucket for Access Logs | string | '' | no |
+| logging_prefix | S3 Bucket prefix for Access Logs | string | '' | no |
 | name | Solution name, e.g. 'app' or 'jenkins' | string | `` | no |
 | namespace | Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp' | string | `` | no |
 | noncurrent_version_expiration_days | Specifies when noncurrent object versions expire | number | `90` | no |
@@ -52,4 +54,3 @@
 | user_enabled | Is user creation enabled |
 | user_name | Normalized IAM user name |
 | user_unique_id | The user unique ID assigned by AWS |
-

@@ -22,6 +22,17 @@ resource "aws_s3_bucket" "default" {
     enabled = var.versioning_enabled
   }
 
+  dynamic "logging" {
+    for_each = var.logging_bucket == null ? [] : var.logging_bucket
+
+    content {
+      logging {
+        target_bucket = var.logging_bucket
+        target_prefix = var.logging_prefix
+      }
+    }
+  }
+
   lifecycle_rule {
     id                                     = module.label.id
     enabled                                = var.lifecycle_rule_enabled

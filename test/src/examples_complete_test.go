@@ -10,7 +10,7 @@ import (
 
 // Test the Terraform module in examples/complete using Terratest.
 func TestExamplesComplete(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
@@ -47,7 +47,7 @@ func TestExamplesComplete(t *testing.T) {
 
 // Test the Terraform module in examples/complete using Terratest for grants.
 func TestExamplesCompleteWithGrants(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"

@@ -74,9 +74,12 @@ We literally have [*hundreds of terraform modules*][terraform_modules] that are 
 Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-s3-bucket/releases).
 
 
+Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html).
+
 ```hcl
 module "s3_bucket" {
   source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+  acl                      = "private"
   enabled                  = true
   user_enabled             = true
   versioning_enabled       = false
@@ -84,6 +87,37 @@ module "s3_bucket" {
   name                     = "app"
   stage                    = "test"
   namespace                = "eg"
+}
+```
+
+Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access to another account and for logging.
+
+```hcl
+module "s3_bucket" {
+  source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+  acl                      = ""
+  enabled                  = true
+  user_enabled             = true
+  versioning_enabled       = false
+  allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+  name                     = "app"
+  stage                    = "test"
+  namespace                = "eg"
+
+  grants = [
+    {
+      id          = "012abc345def678ghi901" # Canonical user or account id
+      type        = "CanonicalUser"
+      permissions = ["FULL_CONTROL"]
+      uri         = null
+    },
+    {
+      id          = null
+      type        = "Group"
+      permissions = ["READ", "WRITE"]
+      uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+    },
+  ]
 }
 ```
 

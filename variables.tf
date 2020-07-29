@@ -49,7 +49,19 @@ variable "tags" {
 variable "acl" {
   type        = string
   default     = "private"
-  description = "The canned ACL to apply. We recommend `private` to avoid exposing sensitive information"
+  description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
+}
+
+variable "grants" {
+  type = list(object({
+    id          = string
+    type        = string
+    permissions = list(string)
+    uri         = string
+  }))
+  default = null
+
+  description = "An ACL policy grant. Conflicts with `acl`. Set `acl` to `null` to use this."
 }
 
 variable "policy" {

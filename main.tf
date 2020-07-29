@@ -13,10 +13,11 @@ module "label" {
 resource "aws_s3_bucket" "default" {
   count         = var.enabled ? 1 : 0
   bucket        = module.label.id
-  acl           = var.acl
+  acl           = try(length(var.grants), 0) == 0 ? var.acl : null
   region        = var.region
   force_destroy = var.force_destroy
   policy        = var.policy
+  tags          = module.label.tags
 
   versioning {
     enabled = var.versioning_enabled
@@ -63,7 +64,6 @@ resource "aws_s3_bucket" "default" {
     expiration {
       days = var.expiration_days
     }
-
   }
 
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
@@ -77,7 +77,6 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  tags = module.label.tags
   dynamic "cors_rule" {
     for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
 
@@ -90,6 +89,16 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
+  dynamic "grant" {
+    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : var.grants
+
+    content {
+      id          = grant.value.id
+      type        = grant.value.type
+      permissions = grant.value.permissions
+      uri         = grant.value.uri
+    }
+  }
 }
 
 module "s3_user" {

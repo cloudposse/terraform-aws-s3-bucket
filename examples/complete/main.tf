@@ -11,6 +11,7 @@ module "s3_bucket" {
   namespace                    = var.namespace
   stage                        = var.stage
   name                         = var.name
+  attributes                   = var.attributes
   acl                          = var.acl
   force_destroy                = var.force_destroy
   grants                       = var.grants

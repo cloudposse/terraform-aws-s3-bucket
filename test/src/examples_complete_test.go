@@ -42,7 +42,7 @@ func TestExamplesComplete(t *testing.T) {
 	// Run `terraform output` to get the value of an output variable
 	userName := terraform.Output(t, terraformOptions, "user_name")
 
-	expectedUserName := "eg-test-s3-test"
+	expectedUserName := "eg-test-s3-" + attributes[0] + "-test"
 	// Verify we're getting back the outputs we expect
 	assert.Equal(t, expectedUserName, userName)
 
@@ -85,7 +85,7 @@ func TestExamplesCompleteWithGrants(t *testing.T) {
 	// Run `terraform output` to get the value of an output variable
 	userName := terraform.Output(t, terraformOptions, "user_name")
 
-	expectedUserName := "eg-test-s3-grants-test"
+	expectedUserName := "eg-test-s3-grants-" + attributes[0] + "-test"
 	// Verify we're getting back the outputs we expect
 	assert.Equal(t, expectedUserName, userName)
 

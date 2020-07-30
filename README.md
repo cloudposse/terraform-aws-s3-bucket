@@ -74,9 +74,12 @@ We literally have [*hundreds of terraform modules*][terraform_modules] that are 
 Instead pin to the release tag (e.g. `?ref=tags/x.y.z`) of one of our [latest releases](https://github.com/cloudposse/terraform-aws-s3-bucket/releases).
 
 
+Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html).
+
 ```hcl
 module "s3_bucket" {
   source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+  acl                      = "private"
   enabled                  = true
   user_enabled             = true
   versioning_enabled       = false
@@ -84,6 +87,37 @@ module "s3_bucket" {
   name                     = "app"
   stage                    = "test"
   namespace                = "eg"
+}
+```
+
+Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access to another account and for logging.
+
+```hcl
+module "s3_bucket" {
+  source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+  acl                      = ""
+  enabled                  = true
+  user_enabled             = true
+  versioning_enabled       = false
+  allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+  name                     = "app"
+  stage                    = "test"
+  namespace                = "eg"
+
+  grants = [
+    {
+      id          = "012abc345def678ghi901" # Canonical user or account id
+      type        = "CanonicalUser"
+      permissions = ["FULL_CONTROL"]
+      uri         = null
+    },
+    {
+      id          = null
+      type        = "Group"
+      permissions = ["READ", "WRITE"]
+      uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+    },
+  ]
 }
 ```
 
@@ -101,6 +135,7 @@ Available targets:
   help/all                            Display help for all targets
   help/short                          This help short screen
   lint                                Lint terraform code
+  test/%                              Run Terraform commands in the examples/complete folder; e.g. make test/plan
 
 ```
 <!-- markdownlint-restore -->
@@ -124,7 +159,7 @@ Available targets:
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | abort\_incomplete\_multipart\_upload\_days | Maximum time (in days) that you want to allow multipart uploads to remain in progress | `number` | `5` | no |
-| acl | The canned ACL to apply. We recommend `private` to avoid exposing sensitive information | `string` | `"private"` | no |
+| acl | The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`. | `string` | `"private"` | no |
 | allow\_encrypted\_uploads\_only | Set to `true` to prevent uploads of unencrypted objects to S3 bucket | `bool` | `false` | no |
 | allowed\_bucket\_actions | List of actions the user is permitted to perform on the S3 bucket | `list(string)` | <pre>[<br>  "s3:PutObject",<br>  "s3:PutObjectAcl",<br>  "s3:GetObject",<br>  "s3:DeleteObject",<br>  "s3:ListBucket",<br>  "s3:ListBucketMultipartUploads",<br>  "s3:GetBucketLocation",<br>  "s3:AbortMultipartUpload"<br>]</pre> | no |
 | attributes | Additional attributes (e.g. `1`) | `list(string)` | `[]` | no |
@@ -139,6 +174,7 @@ Available targets:
 | expiration\_days | Number of days after which to expunge the objects | `number` | `90` | no |
 | force\_destroy | A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable | `bool` | `false` | no |
 | glacier\_transition\_days | Number of days after which to move the data to the glacier storage tier | `number` | `60` | no |
+| grants | An ACL policy grant. Conflicts with `acl`. Set `acl` to `null` to use this. | <pre>list(object({<br>    id          = string<br>    type        = string<br>    permissions = list(string)<br>    uri         = string<br>  }))</pre> | `null` | no |
 | ignore\_public\_acls | Set to `false` to disable the ignoring of public access lists on the bucket | `bool` | `true` | no |
 | kms\_master\_key\_arn | The AWS KMS master key ARN used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | `string` | `""` | no |
 | lifecycle\_rule\_enabled | Enable or disable lifecycle rule | `bool` | `false` | no |

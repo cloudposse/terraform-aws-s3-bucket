@@ -114,52 +114,97 @@ module "s3_user" {
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
 }
 
-data "aws_partition" "current" {}
+data "aws_partition" "current" {
+  count = var.enabled ? 1 : 0
+}
 
 data "aws_iam_policy_document" "bucket_policy" {
-  count = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
+  count = var.enabled ? 1 : 0
 
-  statement {
-    sid       = "DenyIncorrectEncryptionHeader"
-    effect    = "Deny"
-    actions   = ["s3:PutObject"]
-    resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+  dynamic "statement" {
+    for_each = var.allow_encrypted_uploads_only ? [1] : []
 
-    principals {
-      identifiers = ["*"]
-      type        = "*"
-    }
+    content {
+      sid       = "DenyIncorrectEncryptionHeader"
+      effect    = "Deny"
+      actions   = ["s3:PutObject"]
+      resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
 
-    condition {
-      test     = "StringNotEquals"
-      values   = [var.sse_algorithm]
-      variable = "s3:x-amz-server-side-encryption"
+      principals {
+        identifiers = ["*"]
+        type        = "*"
+      }
+
+      condition {
+        test     = "StringNotEquals"
+        values   = [var.sse_algorithm]
+        variable = "s3:x-amz-server-side-encryption"
+      }
     }
   }
 
-  statement {
-    sid       = "DenyUnEncryptedObjectUploads"
-    effect    = "Deny"
-    actions   = ["s3:PutObject"]
-    resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+  dynamic "statement" {
+    for_each = var.allow_encrypted_uploads_only ? [1] : []
 
-    principals {
-      identifiers = ["*"]
-      type        = "*"
+    content {
+      sid       = "DenyUnEncryptedObjectUploads"
+      effect    = "Deny"
+      actions   = ["s3:PutObject"]
+      resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+
+      principals {
+        identifiers = ["*"]
+        type        = "*"
+      }
+
+      condition {
+        test     = "Null"
+        values   = ["true"]
+        variable = "s3:x-amz-server-side-encryption"
+      }
     }
+  }
 
-    condition {
-      test     = "Null"
-      values   = ["true"]
-      variable = "s3:x-amz-server-side-encryption"
+  dynamic "statement" {
+    for_each = var.allow_ssl_requests_only ? [1] : []
+
+    content {
+      sid     = "ForceSSLOnlyAccess"
+      effect  = "Deny"
+      actions = ["s3:*"]
+      resources = [
+        "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
+        "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"
+      ]
+
+      principals {
+        identifiers = ["*"]
+        type        = "*"
+      }
+
+      condition {
+        test     = "Bool"
+        values   = ["false"]
+        variable = "aws:SecureTransport"
+      }
     }
   }
 }
 
+# Merge user defined bucket policy with additional policies defined within this module.
+# This prevents overriding the user defined policy (var.policy) as long as the `sid` values are distinct.
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
+data "aws_iam_policy_document" "aggregated_policy" {
+  count         = var.enabled ? 1 : 0
+  source_json   = var.policy
+  override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+}
+
+# The bucket policy resource will only be created if there are enabled policies.
 resource "aws_s3_bucket_policy" "default" {
-  count      = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
+  count      = var.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
-  policy     = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+  policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]
 }
 

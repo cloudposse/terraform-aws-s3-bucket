@@ -118,6 +118,12 @@ variable "allow_encrypted_uploads_only" {
   description = "Set to `true` to prevent uploads of unencrypted objects to S3 bucket"
 }
 
+variable "allow_ssl_requests_only" {
+  type        = bool
+  default     = false
+  description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
+}
+
 variable "lifecycle_rule_enabled" {
   type        = bool
   default     = false

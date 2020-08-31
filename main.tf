@@ -16,7 +16,6 @@ resource "aws_s3_bucket" "default" {
   acl           = try(length(var.grants), 0) == 0 ? var.acl : null
   region        = var.region
   force_destroy = var.force_destroy
-  policy        = var.policy
   tags          = module.label.tags
 
   versioning {
@@ -118,8 +117,13 @@ data "aws_partition" "current" {
   count = var.enabled ? 1 : 0
 }
 
+# Merge user defined bucket policy with additional policies.
+# This prevents overriding the user defined policy (var.policy) as long as the `sid` values are distinct.
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
 data "aws_iam_policy_document" "bucket_policy" {
   count = var.enabled ? 1 : 0
+
+  source_json = var.policy
 
   dynamic "statement" {
     for_each = var.allow_encrypted_uploads_only ? [1] : []
@@ -191,20 +195,11 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 }
 
-# Merge user defined bucket policy with additional policies defined within this module.
-# This prevents overriding the user defined policy (var.policy) as long as the `sid` values are distinct.
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document#argument-reference
-data "aws_iam_policy_document" "aggregated_policy" {
-  count         = var.enabled ? 1 : 0
-  source_json   = var.policy
-  override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
-}
-
 # The bucket policy resource will only be created if there are enabled policies.
 resource "aws_s3_bucket_policy" "default" {
   count      = var.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
-  policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
+  policy     = join("", data.aws_iam_policy_document.bucket_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]
 }
 

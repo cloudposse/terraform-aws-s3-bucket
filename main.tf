@@ -13,10 +13,11 @@ module "label" {
 resource "aws_s3_bucket" "default" {
   count         = var.enabled ? 1 : 0
   bucket        = module.label.id
-  acl           = var.acl
+  acl           = try(length(var.grants), 0) == 0 ? var.acl : null
   region        = var.region
   force_destroy = var.force_destroy
   policy        = var.policy
+  tags          = module.label.tags
 
   versioning {
     enabled = var.versioning_enabled
@@ -42,11 +43,6 @@ resource "aws_s3_bucket" "default" {
       }
     }
 
-    transition {
-      days          = var.standard_transition_days
-      storage_class = "STANDARD_IA"
-    }
-
     dynamic "transition" {
       for_each = var.enable_glacier_transition ? [1] : []
 
@@ -56,10 +52,18 @@ resource "aws_s3_bucket" "default" {
       }
     }
 
+    dynamic "transition" {
+      for_each = var.enable_standard_ia_transition ? [1] : []
+
+      content {
+        days          = var.standard_transition_days
+        storage_class = "STANDARD_IA"
+      }
+    }
+
     expiration {
       days = var.expiration_days
     }
-
   }
 
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
@@ -73,7 +77,28 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
-  tags = module.label.tags
+  dynamic "cors_rule" {
+    for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
+
+    content {
+      allowed_headers = cors_rule.value.allowed_headers
+      allowed_methods = cors_rule.value.allowed_methods
+      allowed_origins = cors_rule.value.allowed_origins
+      expose_headers  = cors_rule.value.expose_headers
+      max_age_seconds = cors_rule.value.max_age_seconds
+    }
+  }
+
+  dynamic "grant" {
+    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : var.grants
+
+    content {
+      id          = grant.value.id
+      type        = grant.value.type
+      permissions = grant.value.permissions
+      uri         = grant.value.uri
+    }
+  }
 }
 
 module "s3_user" {
@@ -114,7 +139,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${aws_s3_bucket.default[0].id}/*"]
+    resources = ["arn:aws:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
 
     principals {
       identifiers = ["*"]
@@ -130,7 +155,21 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count  = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
+  count      = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
+  bucket     = join("", aws_s3_bucket.default.*.id)
+  policy     = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+  depends_on = [aws_s3_bucket_public_access_block.default]
+}
+
+# Refer to the terraform documentation on s3_bucket_public_access_block at
+# https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
+# for the nuances of the blocking options
+resource "aws_s3_bucket_public_access_block" "default" {
+  count  = var.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
-  policy = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+
+  block_public_acls       = var.block_public_acls
+  block_public_policy     = var.block_public_policy
+  ignore_public_acls      = var.ignore_public_acls
+  restrict_public_buckets = var.restrict_public_buckets
 }

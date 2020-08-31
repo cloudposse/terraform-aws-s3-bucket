@@ -49,7 +49,19 @@ variable "tags" {
 variable "acl" {
   type        = string
   default     = "private"
-  description = "The canned ACL to apply. We recommend `private` to avoid exposing sensitive information"
+  description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
+}
+
+variable "grants" {
+  type = list(object({
+    id          = string
+    type        = string
+    permissions = list(string)
+    uri         = string
+  }))
+  default = null
+
+  description = "An ACL policy grant. Conflicts with `acl`. Set `acl` to `null` to use this."
 }
 
 variable "policy" {
@@ -130,6 +142,19 @@ variable "noncurrent_version_expiration_days" {
   description = "Specifies when noncurrent object versions expire"
 }
 
+variable "cors_rule_inputs" {
+  type = list(object({
+    allowed_headers = list(string)
+    allowed_methods = list(string)
+    allowed_origins = list(string)
+    expose_headers  = list(string)
+    max_age_seconds = number
+  }))
+  default = null
+
+  description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
+}
+
 variable "standard_transition_days" {
   type        = number
   default     = 30
@@ -146,6 +171,12 @@ variable "enable_glacier_transition" {
   type        = bool
   default     = true
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
+}
+
+variable "enable_standard_ia_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to STANDARD_IA"
 }
 
 variable "expiration_days" {
@@ -166,3 +197,26 @@ variable "lifecycle_tags" {
   default     = {}
 }
 
+variable "block_public_acls" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the blocking of new public access lists on the bucket"
+}
+
+variable "block_public_policy" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the blocking of new public policies on the bucket"
+}
+
+variable "ignore_public_acls" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the ignoring of public access lists on the bucket"
+}
+
+variable "restrict_public_buckets" {
+  type        = bool
+  default     = true
+  description = "Set to `false` to disable the restricting of making the bucket public"
+}

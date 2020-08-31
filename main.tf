@@ -1,5 +1,5 @@
 module "label" {
-  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.17.0"
+  source      = "git::https://github.com/cloudposse/terraform-null-label.git?ref=tags/0.19.2"
   enabled     = var.enabled
   namespace   = var.namespace
   environment = var.environment
@@ -102,7 +102,7 @@ resource "aws_s3_bucket" "default" {
 }
 
 module "s3_user" {
-  source       = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=tags/0.6.0"
+  source       = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=tags/0.9.0"
   namespace    = var.namespace
   stage        = var.stage
   environment  = var.environment

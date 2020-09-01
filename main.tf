@@ -114,6 +114,8 @@ module "s3_user" {
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
 }
 
+data "aws_partition" "current" {}
+
 data "aws_iam_policy_document" "bucket_policy" {
   count = var.enabled && var.allow_encrypted_uploads_only ? 1 : 0
 
@@ -121,7 +123,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     sid       = "DenyIncorrectEncryptionHeader"
     effect    = "Deny"
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
 
     principals {
       identifiers = ["*"]
@@ -139,7 +141,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     sid       = "DenyUnEncryptedObjectUploads"
     effect    = "Deny"
     actions   = ["s3:PutObject"]
-    resources = ["arn:aws:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+    resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
 
     principals {
       identifiers = ["*"]

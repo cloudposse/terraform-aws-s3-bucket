@@ -139,6 +139,7 @@ Available targets:
 
 ```
 <!-- markdownlint-restore -->
+<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
@@ -210,6 +211,7 @@ Available targets:
 | user\_name | Normalized IAM user name |
 | user\_unique\_id | The user unique ID assigned by AWS |
 
+<!-- markdownlint-restore -->
 
 
 

@@ -1,9 +1,10 @@
+<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.0, < 0.14.0 |
-| aws | ~> 2.0 |
+| terraform | >= 0.12.0 |
+| aws | >= 2.0 |
 | local | ~> 1.2 |
 | null | ~> 2.0 |
 
@@ -11,7 +12,7 @@
 
 | Name | Version |
 |------|---------|
-| aws | ~> 2.0 |
+| aws | >= 2.0 |
 
 ## Inputs
 
@@ -69,3 +70,4 @@
 | user\_name | Normalized IAM user name |
 | user\_unique\_id | The user unique ID assigned by AWS |
 
+<!-- markdownlint-restore -->

@@ -7,6 +7,7 @@ module "label" {
   name        = var.name
   delimiter   = var.delimiter
   attributes  = var.attributes
+  label_order = var.label_order
   tags        = var.tags
 }
 

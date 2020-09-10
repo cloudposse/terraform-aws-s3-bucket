@@ -34,6 +34,12 @@ variable "delimiter" {
   description = "Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes`"
 }
 
+variable "label_order" {
+  type        = list(string)
+  default     = []
+  description = "The naming order of the id output and Name tag"
+}
+
 variable "attributes" {
   type        = list(string)
   default     = []

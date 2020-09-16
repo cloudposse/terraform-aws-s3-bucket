@@ -145,7 +145,7 @@ Available targets:
 | Name | Version |
 |------|---------|
 | terraform | >= 0.12.0 |
-| aws | >= 2.0 |
+| aws | >= 3.0 |
 | local | >= 1.2 |
 | null | >= 2.0 |
 
@@ -153,7 +153,7 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| aws | >= 2.0 |
+| aws | >= 3.0 |
 
 ## Inputs
 
@@ -203,6 +203,7 @@ Available targets:
 | bucket\_arn | Bucket ARN |
 | bucket\_domain\_name | FQDN of bucket |
 | bucket\_id | Bucket Name (aka ID) |
+| bucket\_region | Bucket region |
 | bucket\_regional\_domain\_name | The bucket region-specific domain name |
 | enabled | Is module enabled |
 | secret\_access\_key | The secret access key. This will be written to the state file in plain-text |

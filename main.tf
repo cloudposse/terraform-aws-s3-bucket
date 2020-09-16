@@ -14,7 +14,6 @@ resource "aws_s3_bucket" "default" {
   count         = var.enabled ? 1 : 0
   bucket        = module.label.id
   acl           = try(length(var.grants), 0) == 0 ? var.acl : null
-  region        = var.region
   force_destroy = var.force_destroy
   policy        = var.policy
   tags          = module.label.tags
@@ -102,7 +101,7 @@ resource "aws_s3_bucket" "default" {
 }
 
 module "s3_user" {
-  source       = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=tags/0.9.0"
+  source       = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=tags/0.10.1"
   namespace    = var.namespace
   stage        = var.stage
   environment  = var.environment

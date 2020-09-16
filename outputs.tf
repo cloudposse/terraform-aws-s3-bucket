@@ -18,6 +18,11 @@ output "bucket_arn" {
   description = "Bucket ARN"
 }
 
+output "bucket_region" {
+  value       = var.enabled ? join("", aws_s3_bucket.default.*.region) : ""
+  description = "Bucket region"
+}
+
 output "enabled" {
   value       = var.enabled
   description = "Is module enabled"

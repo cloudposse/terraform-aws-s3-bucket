@@ -1,3 +1,5 @@
+enabled = true
+
 region = "us-west-1"
 
 namespace = "eg"

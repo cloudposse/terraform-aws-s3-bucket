@@ -119,7 +119,7 @@ resource "aws_s3_bucket" "default" {
 
           dynamic "source_selection_criteria" {
             for_each = try(rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
-            
+
             content {
               sse_kms_encrypted_objects {
                 enabled = source_selection_criteria.value

@@ -203,8 +203,9 @@ variable "replication_rules" {
   #     tags = map(string)
   #   })
   # }))
-  # default = null
 
   type        = any
+  default     = null
   description = "Specifies the replication rules if S3 bucket replication is enabled"
 }
+

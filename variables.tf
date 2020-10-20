@@ -34,22 +34,18 @@ variable "versioning_enabled" {
   description = "A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket"
 }
 
-variable "enable_logging" {
-  type = bool
-  default = false
-  description = "Bucket logging is enabled"
-}
-
-variable "logging_target_bucket" {
-  type = string
-  default = ""
-  description = "S3 bucket name to deliver access logs to. Required when enable_logging = true"
-}
-
-variable "logging_target_prefix" {
-  type = string
-  default = ""
-  description = "Specify a key prefix for log objects. Valid only when enable_logging = true"
+variable "logging" {
+  type = object({
+    enabled     = bool
+    bucket_name = string
+    prefix      = string
+  })
+  default = {
+    enabled     = false,
+    bucket_name = "",
+    prefix      = "",
+  }
+  description = "Bucket access logging configuration."
 }
 
 variable "sse_algorithm" {

@@ -34,6 +34,15 @@ variable "versioning_enabled" {
   description = "A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket"
 }
 
+variable "logging" {
+  type = object({
+    bucket_name = string
+    prefix      = string
+  })
+  default = null
+  description = "Bucket access logging configuration."
+}
+
 variable "sse_algorithm" {
   type        = string
   default     = "AES256"

@@ -53,6 +53,14 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
+  dynamic "logging" {
+    for_each = var.logging == null ? [] : [1]
+    content {
+      target_bucket = var.logging["bucket_name"]
+      target_prefix = var.logging["prefix"]
+    }
+  }
+
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
   # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
   server_side_encryption_configuration {

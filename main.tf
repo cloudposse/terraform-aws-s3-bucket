@@ -127,9 +127,13 @@ resource "aws_s3_bucket" "default" {
             }
           }
 
-          filter {
-            prefix = try(rules.value.filter.prefix, null)
-            tags   = try(rules.value.filter.tags, {})
+          dynamic "filter" {
+            for_each = try(rules.value.filter, null) == null ? [] : [rules.value.filter]
+
+            content {
+              prefix = try(filter.value.prefix, null)
+              tags   = try(filter.value.tags, {})
+            }
           }
         }
       }

@@ -30,7 +30,7 @@ resource "aws_iam_policy" "replication" {
 }
 
 data "aws_iam_policy_document" "replication" {
-  count = var.s3_replication_enabled ? 1 : 0
+  count = module.this.enabled && var.s3_replication_enabled ? 1 : 0
 
   statement {
     sid    = "AllowPrimaryToGetReplicationConfiguration"

@@ -175,3 +175,46 @@ variable "restrict_public_buckets" {
   default     = true
   description = "Set to `false` to disable the restricting of making the bucket public"
 }
+
+variable "s3_replication_enabled" {
+  type        = bool
+  default     = false
+  description = "Set this to true and specify `s3_replica_bucket_arn` to enable replication. `versioning_enabled` must also be `true`."
+}
+
+variable "s3_replica_bucket_arn" {
+  type        = string
+  default     = ""
+  description = "The ARN of the S3 replica bucket (destination)"
+}
+
+variable "replication_rules" {
+  # type = list(object({
+  #   id          = string
+  #   priority    = number
+  #   prefix      = string
+  #   status      = string
+  #   destination = object({
+  #     storage_class              = string
+  #     replica_kms_key_id         = string
+  #     access_control_translation = object({
+  #       owner = string
+  #     })
+  #     account_id                 = string
+  #   })
+  #   source_selection_criteria = object({
+  #     sse_kms_encrypted_objects = object({
+  #       enabled = bool
+  #     })
+  #   })
+  #   filter = object({
+  #     prefix = string
+  #     tags = map(string)
+  #   })
+  # }))
+
+  type        = list(any)
+  default     = null
+  description = "Specifies the replication rules if S3 bucket replication is enabled"
+}
+

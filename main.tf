@@ -94,6 +94,59 @@ resource "aws_s3_bucket" "default" {
       uri         = grant.value.uri
     }
   }
+
+  dynamic "replication_configuration" {
+    for_each = var.s3_replication_enabled ? [1] : []
+
+    content {
+      role = aws_iam_role.replication[0].arn
+
+      dynamic "rules" {
+        for_each = var.replication_rules == null ? [] : var.replication_rules
+
+        content {
+          id       = rules.value.id
+          priority = try(rules.value.priority, 0)
+          prefix   = try(rules.value.prefix, null)
+          status   = try(rules.value.status, null)
+
+          destination {
+            bucket             = var.s3_replica_bucket_arn
+            storage_class      = try(rules.value.destination.storage_class, "STANDARD")
+            replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
+            account_id         = try(rules.value.destination.account_id, null)
+
+            dynamic "access_control_translation" {
+              for_each = try(rules.value.destination.access_control_translation.owner, null) == null ? [] : [rules.value.destination.access_control_translation.owner]
+
+              content {
+                owner = access_control_translation.value
+              }
+            }
+          }
+
+          dynamic "source_selection_criteria" {
+            for_each = try(rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
+
+            content {
+              sse_kms_encrypted_objects {
+                enabled = source_selection_criteria.value
+              }
+            }
+          }
+
+          dynamic "filter" {
+            for_each = try(rules.value.filter, null) == null ? [] : [rules.value.filter]
+
+            content {
+              prefix = try(filter.value.prefix, null)
+              tags   = try(filter.value.tags, {})
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 module "s3_user" {
@@ -166,3 +219,4 @@ resource "aws_s3_bucket_public_access_block" "default" {
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
 }
+

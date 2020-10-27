@@ -104,7 +104,7 @@ resource "aws_s3_bucket" "default" {
 
           destination {
             bucket             = var.s3_replica_bucket_arn
-            storage_class      = rules.value.destination.storage_class
+            storage_class      = try(rules.value.destination.storage_class, "STANDARD")
             replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
             account_id         = try(rules.value.destination.account_id, null)
 

@@ -4,7 +4,7 @@
 | Name | Version |
 |------|---------|
 | terraform | >= 0.12.0 |
-| aws | >= 3.0 |
+| aws | >= 2.0 |
 | local | >= 1.2 |
 | null | >= 2.0 |
 
@@ -12,7 +12,7 @@
 
 | Name | Version |
 |------|---------|
-| aws | >= 3.0 |
+| aws | >= 2.0 |
 
 ## Inputs
 

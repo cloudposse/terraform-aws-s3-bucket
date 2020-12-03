@@ -156,7 +156,7 @@ module "s3_user" {
   s3_actions   = var.allowed_bucket_actions
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
 
-  # context = module.this.context
+  context = module.this.context
 }
 
 data "aws_partition" "current" {}

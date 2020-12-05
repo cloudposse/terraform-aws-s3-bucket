@@ -1,4 +1,6 @@
+<!-- markdownlint-disable -->
 # terraform-aws-s3-bucket [![GitHub Action Tests](https://github.com/cloudposse/terraform-aws-s3-bucket/workflows/test/badge.svg?branch=master)](https://github.com/cloudposse/terraform-aws-s3-bucket/actions) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
+<!-- markdownlint-restore -->
 
 [![README Header][readme_header_img]][readme_header_link]
 
@@ -372,8 +374,10 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 ### Contributors
 
+<!-- markdownlint-disable -->
 |  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] |
 |---|---|---|---|
+<!-- markdownlint-restore -->
 
   [osterman_homepage]: https://github.com/osterman
   [osterman_avatar]: https://img.cloudposse.com/150x150/https://github.com/osterman.png

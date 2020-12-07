@@ -150,7 +150,7 @@ resource "aws_s3_bucket" "default" {
 }
 
 module "s3_user" {
-  source       = "git::ssh://git@github.com/jurgenweber/terraform-aws-iam-s3-user.git?ref=test"
+  source       = "git::ssh://git@github.com/jurgenweber/terraform-aws-iam-s3-user.git?ref=master"
   # source       = "git::https://github.com/cloudposse/terraform-aws-iam-s3-user.git?ref=0.11.1"
   enabled      = module.this.enabled && var.user_enabled ? true : false
   s3_actions   = var.allowed_bucket_actions

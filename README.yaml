@@ -33,9 +33,9 @@ github_repo: cloudposse/terraform-aws-s3-bucket
 
 # Badges to display
 badges:
-  - name: "Codefresh Build Status"
-    image: "https://g.codefresh.io/api/badges/pipeline/cloudposse/terraform-modules%2Fterraform-aws-s3-bucket?type=cf-1"
-    url: "https://g.codefresh.io/public/accounts/cloudposse/pipelines/5d13993639efa9451b1a2aa4"
+  - name: "GitHub Action Tests"
+    image: "https://github.com/cloudposse/terraform-aws-s3-bucket/workflows/test/badge.svg?branch=master"
+    url: "https://github.com/cloudposse/terraform-aws-s3-bucket/actions"
   - name: "Latest Release"
     image: "https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg"
     url: "https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest"
@@ -73,11 +73,17 @@ description: |-
 
   We do not recommend creating IAM users this way for any other purpose.
 
+  It blocks public access to the bucket by default.
+  https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+
 # How to use this project
 usage: |-
+  Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html).
+
   ```hcl
   module "s3_bucket" {
     source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+    acl                      = "private"
     enabled                  = true
     user_enabled             = true
     versioning_enabled       = false
@@ -85,6 +91,37 @@ usage: |-
     name                     = "app"
     stage                    = "test"
     namespace                = "eg"
+  }
+  ```
+
+  Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access to another account and for logging.
+
+  ```hcl
+  module "s3_bucket" {
+    source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+    acl                      = ""
+    enabled                  = true
+    user_enabled             = true
+    versioning_enabled       = false
+    allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+    name                     = "app"
+    stage                    = "test"
+    namespace                = "eg"
+
+    grants = [
+      {
+        id          = "012abc345def678ghi901" # Canonical user or account id
+        type        = "CanonicalUser"
+        permissions = ["FULL_CONTROL"]
+        uri         = null
+      },
+      {
+        id          = null
+        type        = "Group"
+        permissions = ["READ", "WRITE"]
+        uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+      },
+    ]
   }
   ```
 

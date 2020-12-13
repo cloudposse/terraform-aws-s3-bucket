@@ -19,8 +19,8 @@
 #
 
 module "this" {
-  source              = "cloudposse/label/null"
-  version             = "0.22.0"
+  source  = "cloudposse/label/null"
+  version = "0.22.0"
 
   enabled             = var.enabled
   namespace           = var.namespace

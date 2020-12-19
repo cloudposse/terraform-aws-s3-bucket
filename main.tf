@@ -48,8 +48,12 @@ resource "aws_s3_bucket" "default" {
       }
     }
 
-    expiration {
-      days = var.expiration_days
+    dynameic "expiration" {
+      for_each = var.enable_current_object_expiration ? [1] : []
+
+      content {
+        days = var.expiration_days
+      }
     }
   }
 

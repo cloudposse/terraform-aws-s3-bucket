@@ -134,6 +134,12 @@ variable "enable_standard_ia_transition" {
   description = "Enables the transition to STANDARD_IA"
 }
 
+variable "enable_current_object_expiration" {
+  type        = bool
+  default     = true
+  description = "Enables the expiration of current objects"
+}
+
 variable "expiration_days" {
   type        = number
   default     = 90

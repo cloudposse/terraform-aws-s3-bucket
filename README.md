@@ -87,7 +87,9 @@ Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overvie
 
 ```hcl
 module "s3_bucket" {
-  source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+  source = "cloudposse/s3-bucket/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
   acl                      = "private"
   enabled                  = true
   user_enabled             = true
@@ -103,7 +105,9 @@ Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
 
 ```hcl
 module "s3_bucket" {
-  source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+  source = "cloudposse/s3-bucket/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version     = "x.x.x"
   acl                      = ""
   enabled                  = true
   user_enabled             = true
@@ -144,7 +148,6 @@ Available targets:
   help/all                            Display help for all targets
   help/short                          This help short screen
   lint                                Lint terraform code
-  test/%                              Run Terraform commands in the examples/complete folder; e.g. make test/plan
 
 ```
 <!-- markdownlint-restore -->
@@ -153,7 +156,7 @@ Available targets:
 
 | Name | Version |
 |------|---------|
-| terraform | >= 0.12.0 |
+| terraform | >= 0.12.26 |
 | aws | >= 2.0 |
 | local | >= 1.2 |
 | null | >= 2.0 |
@@ -325,7 +328,7 @@ In general, PRs are welcome. We follow the typical "fork-and-pull" Git workflow.
 
 ## Copyright
 
-Copyright © 2017-2020 [Cloud Posse, LLC](https://cpco.io/copyright)
+Copyright © 2017-2021 [Cloud Posse, LLC](https://cpco.io/copyright)
 
 
 

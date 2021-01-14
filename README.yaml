@@ -82,7 +82,9 @@ usage: |-
 
   ```hcl
   module "s3_bucket" {
-    source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+    source = "cloudposse/s3-bucket/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
     acl                      = "private"
     enabled                  = true
     user_enabled             = true
@@ -98,7 +100,9 @@ usage: |-
 
   ```hcl
   module "s3_bucket" {
-    source                   = "git::https://github.com/cloudposse/terraform-aws-s3-bucket.git?ref=master"
+    source = "cloudposse/s3-bucket/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version     = "x.x.x"
     acl                      = ""
     enabled                  = true
     user_enabled             = true

@@ -159,8 +159,6 @@ Available targets:
 |------|---------|
 | terraform | >= 0.12.26 |
 | aws | >= 2.0 |
-| local | >= 1.2 |
-| null | >= 2.0 |
 
 ## Providers
 
@@ -199,6 +197,7 @@ Available targets:
 | lifecycle\_rule\_enabled | Enable or disable lifecycle rule | `bool` | `false` | no |
 | lifecycle\_tags | Tags filter. Used to manage object lifecycle events | `map(string)` | `{}` | no |
 | logging | Bucket access logging configuration. | <pre>object({<br>    bucket_name = string<br>    prefix      = string<br>  })</pre> | `null` | no |
+| mfa\_delete | A boolean that indicates that versions of S3 objects can only be deleted with MFA. ( Terraform cannot apply changes of this value; https://github.com/terraform-providers/terraform-provider-aws/issues/629 ) | `bool` | `true` | no |
 | name | Solution name, e.g. 'app' or 'jenkins' | `string` | `null` | no |
 | namespace | Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp' | `string` | `null` | no |
 | noncurrent\_version\_expiration\_days | Specifies when noncurrent object versions expire | `number` | `90` | no |
@@ -215,7 +214,7 @@ Available targets:
 | standard\_transition\_days | Number of days to persist in the standard storage tier before moving to the infrequent access tier | `number` | `30` | no |
 | tags | Additional tags (e.g. `map('BusinessUnit','XYZ')` | `map(string)` | `{}` | no |
 | user\_enabled | Set to `true` to create an IAM user with permission to access the bucket | `bool` | `false` | no |
-| versioning\_enabled | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket | `bool` | `false` | no |
+| versioning\_enabled | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket | `bool` | `true` | no |
 
 ## Outputs
 

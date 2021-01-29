@@ -223,9 +223,3 @@ variable "replication_rules" {
   default     = null
   description = "Specifies the replication rules if S3 bucket replication is enabled"
 }
-
-variable "mfa_delete" {
-  type        = bool
-  description = "A boolean that indicates that versions of S3 objects can only be deleted with MFA. ( Terraform cannot apply changes of this value; https://github.com/terraform-providers/terraform-provider-aws/issues/629 )"
-  default     = true
-}

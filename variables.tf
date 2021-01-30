@@ -30,7 +30,7 @@ variable "force_destroy" {
 
 variable "versioning_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = "A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket"
 }
 
@@ -223,4 +223,3 @@ variable "replication_rules" {
   default     = null
   description = "Specifies the replication rules if S3 bucket replication is enabled"
 }
-

@@ -8,8 +8,12 @@ resource "aws_s3_bucket" "default" {
   policy        = var.policy
   tags          = module.this.tags
 
-  versioning {
-    enabled = var.versioning_enabled
+  dynamic "versioning" {
+    for_each = var.versioning_enabled ? [1] : []
+
+    content {
+      enabled = var.versioning_enabled
+    }
   }
 
   lifecycle_rule {

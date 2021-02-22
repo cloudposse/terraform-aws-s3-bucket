@@ -122,6 +122,12 @@ variable "glacier_transition_days" {
   description = "Number of days after which to move the data to the glacier storage tier"
 }
 
+variable "deeparchive_transition_days" {
+  type        = number
+  default     = 90
+  description = "Number of days after which to move the data to the glacier deep archive storage tier"
+}
+
 variable "enable_glacier_transition" {
   type        = bool
   default     = true

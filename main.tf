@@ -42,6 +42,15 @@ resource "aws_s3_bucket" "default" {
     }
 
     dynamic "transition" {
+      for_each = var.enable_deeparchive_transition ? [1] : []
+
+      content {
+        days          = var.deeparchive_transition_days
+        storage_class = "DEEP_ARCHIVE"
+      }
+    }
+
+    dynamic "transition" {
       for_each = var.enable_standard_ia_transition ? [1] : []
 
       content {
@@ -227,4 +236,3 @@ resource "aws_s3_bucket_public_access_block" "default" {
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
 }
-

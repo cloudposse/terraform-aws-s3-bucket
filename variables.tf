@@ -134,6 +134,11 @@ variable "enable_glacier_transition" {
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
 }
 
+variable "enable_deeparchive_transition" {
+  type        = bool
+  default     = true
+  description = "Enables the transition to AWS Glacier Deep Archive which can cause unnecessary costs for huge amount of small files"
+}
 variable "enable_standard_ia_transition" {
   type        = bool
   default     = false

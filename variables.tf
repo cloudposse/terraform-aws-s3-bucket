@@ -85,10 +85,16 @@ variable "prefix" {
   description = "Prefix identifying one or more objects to which the rule applies"
 }
 
-variable "noncurrent_version_transition_days" {
+variable "noncurrent_version_glacier_transition_days" {
   type        = number
   default     = 30
-  description = "Number of days to persist in the standard storage tier before moving to the glacier tier infrequent access tier"
+  description = "Number of days to persist in the standard storage tier before moving to the glacier infrequent access tier"
+}
+
+variable "noncurrent_version_deeparchive_transition_days" {
+  type        = number
+  default     = 60
+  description = "Number of days to persist in the standard storage tier before moving to the glacier deeparchive access tier"
 }
 
 variable "noncurrent_version_expiration_days" {
@@ -122,12 +128,23 @@ variable "glacier_transition_days" {
   description = "Number of days after which to move the data to the glacier storage tier"
 }
 
+variable "deeparchive_transition_days" {
+  type        = number
+  default     = 90
+  description = "Number of days after which to move the data to the glacier deep archive storage tier"
+}
+
 variable "enable_glacier_transition" {
   type        = bool
   default     = true
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
 }
 
+variable "enable_deeparchive_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to AWS Glacier Deep Archive which can cause unnecessary costs for huge amount of small files"
+}
 variable "enable_standard_ia_transition" {
   type        = bool
   default     = false

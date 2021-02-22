@@ -50,7 +50,7 @@
 | delimiter | Delimiter to be used between `namespace`, `environment`, `stage`, `name` and `attributes`.<br>Defaults to `-` (hyphen). Set to `""` to use no delimiter at all. | `string` | `null` | no |
 | enable\_current\_object\_expiration | Enables the expiration of current objects | `bool` | `true` | no |
 | enable\_deeparchive\_transition | Enables the transition to AWS Glacier Deep Archive which can cause unnecessary costs for huge amount of small files | `bool` | `false` | no |
-| enable\_glacier\_transition | Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files | `bool` | `false` | no |
+| enable\_glacier\_transition | Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files | `bool` | `true` | no |
 | enable\_standard\_ia\_transition | Enables the transition to STANDARD\_IA | `bool` | `false` | no |
 | enabled | Set to false to prevent the module from creating any resources | `bool` | `null` | no |
 | environment | Environment, e.g. 'uw2', 'us-west-2', OR 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |

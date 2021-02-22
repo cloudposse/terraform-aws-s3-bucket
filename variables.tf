@@ -136,7 +136,7 @@ variable "deeparchive_transition_days" {
 
 variable "enable_glacier_transition" {
   type        = bool
-  default     = false
+  default     = true
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
 }
 

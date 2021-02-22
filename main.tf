@@ -27,8 +27,17 @@ resource "aws_s3_bucket" "default" {
       for_each = var.enable_glacier_transition ? [1] : []
 
       content {
-        days          = var.noncurrent_version_transition_days
+        days          = var.noncurrent_version_glacier_transition_days
         storage_class = "GLACIER"
+      }
+    }
+
+    dynamic "noncurrent_version_transition" {
+      for_each = var.enable_deeparchive_transition ? [1] : []
+
+      content {
+        days          = var.noncurrent_version_deeparchive_transition_days
+        storage_class = "DEEP_ARCHIVE"
       }
     }
 
@@ -49,6 +58,8 @@ resource "aws_s3_bucket" "default" {
         storage_class = "DEEP_ARCHIVE"
       }
     }
+
+
 
     dynamic "transition" {
       for_each = var.enable_standard_ia_transition ? [1] : []

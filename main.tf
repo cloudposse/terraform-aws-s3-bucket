@@ -8,8 +8,12 @@ resource "aws_s3_bucket" "default" {
   policy        = var.policy
   tags          = module.this.tags
 
-  versioning {
-    enabled = var.versioning_enabled
+  dynamic "versioning" {
+    for_each = var.bucket_versioning ? [1] : [0]
+
+    content {
+      enabled = var.versioning_enabled
+    }
   }
 
   lifecycle_rule {
@@ -74,7 +78,9 @@ resource "aws_s3_bucket" "default" {
       for_each = var.enable_current_object_expiration ? [1] : []
 
       content {
-        days = var.expiration_days
+        days                         = var.expiration_days
+        date                         = var.expiration_date
+        expired_object_delete_marker = var.expiration_expired_object_delete_marker
       }
     }
   }

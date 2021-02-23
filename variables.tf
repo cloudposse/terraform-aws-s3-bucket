@@ -28,10 +28,16 @@ variable "force_destroy" {
   description = "A boolean string that indicates all objects should be deleted from the bucket so that the bucket can be destroyed without error. These objects are not recoverable"
 }
 
-variable "versioning_enabled" {
+variable "bucket_versioning" {
   type        = bool
   default     = true
   description = "A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket"
+}
+
+variable "versioning_enabled" {
+  type        = bool
+  default     = true
+  description = "A state of versioning. Controls versioning state enabled/suspended"
 }
 
 variable "logging" {
@@ -161,6 +167,18 @@ variable "expiration_days" {
   type        = number
   default     = 90
   description = "Number of days after which to expunge the objects"
+}
+
+variable "expiration_date" {
+  type        = string
+  default     = null
+  description = "Specifies the date after which you want the corresponding action to take effect"
+}
+
+variable "expiration_expired_object_delete_marker" {
+  type        = bool
+  default     = false
+  description = "Direct Amazon S3 to delete expired object delete markers. This cannot be specified with Days or Date in a Lifecycle Expiration Policy"
 }
 
 variable "abort_incomplete_multipart_upload_days" {

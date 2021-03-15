@@ -1,7 +1,39 @@
+# -----------------------------------------------------------------------------
+# Variables: Common AWS Provider - Autoloaded from Terragrunt
+# -----------------------------------------------------------------------------
+
+variable "aws_region" {
+  description = "The AWS region (e.g. ap-southeast-2). Autoloaded from region.tfvars."
+  type        = string
+  default     = ""
+}
+
+variable "aws_account_id" {
+  description = "The AWS account id of the provider being deployed to (e.g. 12345678). Autoloaded from account.tfvars"
+  type        = string
+  default     = ""
+}
+
+variable "aws_assume_role_arn" {
+  description = "(Optional) - ARN of the IAM role when optionally connecting to AWS via assumed role. Autoloaded from account.tfvars."
+  type        = string
+  default     = ""
+}
+
+# -----------------------------------------------------------------------------
+# Variables: TF-MOD-AWS-S3-BUCKET
+# -----------------------------------------------------------------------------
+
 variable "acl" {
   type        = string
   default     = "private"
   description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
+}
+
+variable "bucket_name" {
+  type        = string
+  default     = ""
+  description = "The name of the bucket. If omitted, Terraform will assign a random, unique name. Must be less than or equal to 63 characters in length."
 }
 
 variable "grants" {

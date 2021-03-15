@@ -1,3 +1,7 @@
+# -----------------------------------------------------------------------------
+# Outputs: TF-MOD-AWS-S3-BUCKET
+# -----------------------------------------------------------------------------
+
 output "bucket_domain_name" {
   value       = module.this.enabled ? join("", aws_s3_bucket.default.*.bucket_domain_name) : ""
   description = "FQDN of bucket"

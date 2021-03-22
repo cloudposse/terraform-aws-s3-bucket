@@ -174,13 +174,13 @@ variable "deeparchive_transition_days" {
 
 variable "enable_glacier_transition" {
   type        = bool
-  default     = true
+  default     = false
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
 }
 
 variable "enable_intelligent_tiering_transition" {
   type        = bool
-  default     = true
+  default     = false
   description = "Enables the transition to AWS Intelligent Tiering"
 }
 
@@ -197,7 +197,7 @@ variable "enable_standard_ia_transition" {
 
 variable "enable_current_object_expiration" {
   type        = bool
-  default     = true
+  default     = false
   description = "Enables the expiration of current objects"
 }
 

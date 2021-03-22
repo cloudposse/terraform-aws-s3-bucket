@@ -170,6 +170,68 @@ variable "cors_rule_inputs" {
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }
 
+<<<<<<< HEAD
+=======
+variable "standard_transition_days" {
+  type        = number
+  default     = 30
+  description = "Number of days to persist in the standard storage tier before moving to the infrequent access tier"
+}
+
+variable "intelligent_tiering_transition_days" {
+  type        = number
+  default     = 30
+  description = "Number of days to persist in the intelligent tiering storage tier"
+}
+
+variable "glacier_transition_days" {
+  type        = number
+  default     = 60
+  description = "Number of days after which to move the data to the glacier storage tier"
+}
+
+variable "deeparchive_transition_days" {
+  type        = number
+  default     = 90
+  description = "Number of days after which to move the data to the glacier deep archive storage tier"
+}
+
+variable "enable_glacier_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
+}
+
+variable "enable_intelligent_tiering_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to AWS Intelligent Tiering"
+}
+
+variable "enable_deeparchive_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to AWS Glacier Deep Archive which can cause unnecessary costs for huge amount of small files"
+}
+variable "enable_standard_ia_transition" {
+  type        = bool
+  default     = false
+  description = "Enables the transition to STANDARD_IA"
+}
+
+variable "enable_current_object_expiration" {
+  type        = bool
+  default     = false
+  description = "Enables the expiration of current objects"
+}
+
+variable "expiration_days" {
+  type        = number
+  default     = 90
+  description = "Number of days after which to expunge the objects"
+}
+
+>>>>>>> 541c1b1 (fixed variable defaults)
 variable "abort_incomplete_multipart_upload_days" {
   type        = number
   default     = 5

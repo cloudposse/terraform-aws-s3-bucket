@@ -162,7 +162,7 @@ variable "intelligent_tiering_transition_days" {
 
 variable "glacier_transition_days" {
   type        = number
-  default     = 60
+  default     = 1095
   description = "Number of days after which to move the data to the glacier storage tier"
 }
 

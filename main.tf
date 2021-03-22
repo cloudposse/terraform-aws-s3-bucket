@@ -59,6 +59,15 @@ resource "aws_s3_bucket" "default" {
       }
     }
 
+    dynamic "transition" {
+      for_each = var.enable_intelligent_tiering_transition ? [1] : []
+
+      content {
+        days          = var.intelligent_tiering_transition_days
+        storage_class = "INTELLIGENT_TIERING"
+      }
+    }
+
 
 
     dynamic "transition" {

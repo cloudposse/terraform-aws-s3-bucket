@@ -154,6 +154,12 @@ variable "standard_transition_days" {
   description = "Number of days to persist in the standard storage tier before moving to the infrequent access tier"
 }
 
+variable "intelligent_tiering_transition_days" {
+  type        = number
+  default     = 30
+  description = "Number of days to persist in the intelligent tiering storage tier"
+}
+
 variable "glacier_transition_days" {
   type        = number
   default     = 60
@@ -170,6 +176,12 @@ variable "enable_glacier_transition" {
   type        = bool
   default     = true
   description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
+}
+
+variable "enable_intelligent_tiering_transition" {
+  type        = bool
+  default     = true
+  description = "Enables the transition to AWS Intelligent Tiering"
 }
 
 variable "enable_deeparchive_transition" {

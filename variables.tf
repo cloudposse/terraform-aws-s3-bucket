@@ -201,6 +201,12 @@ variable "enable_current_object_expiration" {
   description = "Enables the expiration of current objects"
 }
 
+variable "enable_non_current_object_expiration" {
+  type        = bool
+  default     = false
+  description = "Enables the expiration of current objects"
+}
+
 variable "expiration_days" {
   type        = number
   default     = 90

@@ -172,3 +172,9 @@ variable "restrict_public_buckets" {
   default     = true
   description = "Set to `false` to disable the restricting of making the bucket public"
 }
+
+variable "bucket_name" {
+  type        = string
+  default     = null
+  description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
+}

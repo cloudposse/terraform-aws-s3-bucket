@@ -240,3 +240,9 @@ variable "replication_rules" {
   default     = null
   description = "Specifies the replication rules if S3 bucket replication is enabled"
 }
+
+variable "bucket_name" {
+  type        = string
+  default     = null
+  description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
+}

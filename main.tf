@@ -1,8 +1,12 @@
+locals {
+  bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
+}
+
 resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` check until bridgecrew will support dynamic blocks (https://github.com/bridgecrewio/checkov/issues/776).
   #bridgecrew:skip=CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).
   count         = module.this.enabled ? 1 : 0
-  bucket        = module.this.id
+  bucket        = local.bucket_name
   acl           = try(length(var.grants), 0) == 0 ? var.acl : null
   force_destroy = var.force_destroy
   policy        = var.policy
@@ -177,7 +181,7 @@ resource "aws_s3_bucket" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "0.15.1"
+  version = "0.15.2"
 
   enabled      = module.this.enabled && var.user_enabled ? true : false
   s3_actions   = var.allowed_bucket_actions

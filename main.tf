@@ -191,11 +191,11 @@ module "s3_user" {
 }
 
 data "aws_partition" "current" {
-  count = var.enabled ? 1 : 0
+  count = module.this.enabled ? 1 : 0
 }
 
 data "aws_iam_policy_document" "bucket_policy" {
-  count = var.enabled ? 1 : 0
+  count = module.this.enabled ? 1 : 0
 
   dynamic "statement" {
     for_each = var.allow_encrypted_uploads_only ? [1] : []
@@ -268,7 +268,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {
-  count         = var.enabled ? 1 : 0
+  count         = module.this.enabled ? 1 : 0
   source_json   = var.policy
   override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
 }

@@ -190,9 +190,7 @@ module "s3_user" {
   context = module.this.context
 }
 
-data "aws_partition" "current" {
-  count = module.this.enabled ? 1 : 0
-}
+data "aws_partition" "current" {}
 
 data "aws_iam_policy_document" "bucket_policy" {
   count = module.this.enabled ? 1 : 0

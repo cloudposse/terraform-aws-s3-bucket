@@ -17,4 +17,5 @@ allowed_bucket_actions = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject", "s3
 object_lock_configuration = {
   mode = "GOVERNANCE"
   days = 366
+  years = null
 }

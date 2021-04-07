@@ -252,3 +252,18 @@ variable "bucket_name" {
   default     = null
   description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
 }
+
+variable "object_lock_configuration" {
+  type = object({
+    object_lock_enabled = string # Valid value is 'Enabled'
+    rule = object({
+      default_retention = object({
+        mode = string # Valid values are GOVERNANCE and COMPLIANCE.
+        days = number
+        years = number
+      })
+    })
+  })
+  default = null
+  description = "A configuration of S3 object locking. With S3 Object Lock, you can store objects using a write-once-read-many (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+}

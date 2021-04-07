@@ -177,6 +177,8 @@ resource "aws_s3_bucket" "default" {
       }
     }
   }
+
+  object_lock_configuration = var.object_lock_configuration
 }
 
 module "s3_user" {

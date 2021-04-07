@@ -6,7 +6,7 @@ stage = "test"
 
 name = "s3-object-lock-test"
 
-acl = ""
+acl = "private"
 
 force_destroy = false
 

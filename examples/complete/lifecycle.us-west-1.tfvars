@@ -19,7 +19,7 @@ lifecycle_rules = [
     enable_standard_ia_transition    = false
     enable_current_object_expiration = true
 
-    abort_incomplete_multipart_upload_days         = 1
+    abort_incomplete_multipart_upload_days         = null
     noncurrent_version_glacier_transition_days     = 0
     noncurrent_version_deeparchive_transition_days = 0
     noncurrent_version_expiration_days             = 30

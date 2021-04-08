@@ -177,6 +177,20 @@ resource "aws_s3_bucket" "default" {
       }
     }
   }
+
+  dynamic "object_lock_configuration" {
+    for_each = var.object_lock_configuration != null ? [1] : []
+    content {
+      object_lock_enabled = "Enabled"
+      rule {
+        default_retention {
+          mode  = var.object_lock_configuration.mode
+          days  = var.object_lock_configuration.days
+          years = var.object_lock_configuration.years
+        }
+      }
+    }
+  }
 }
 
 module "s3_user" {

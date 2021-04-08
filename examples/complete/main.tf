@@ -14,6 +14,7 @@ module "s3_bucket" {
   allow_encrypted_uploads_only = var.allow_encrypted_uploads_only
   allowed_bucket_actions       = var.allowed_bucket_actions
   bucket_name                  = var.bucket_name
+  object_lock_configuration    = var.object_lock_configuration
 
   context = module.this.context
 }

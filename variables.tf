@@ -100,7 +100,7 @@ variable "lifecycle_rules" {
     deeparchive_transition_days = number
     expiration_days             = number
   }))
-  default     = default = [{
+  default     = [{
     enabled = false
     prefix  = ""
     tags    = {}

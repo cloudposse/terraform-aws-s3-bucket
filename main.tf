@@ -17,7 +17,7 @@ resource "aws_s3_bucket" "default" {
   }
 
   dynamic "lifecycle_rule" {
-    for_each                               = var.lifecycle_rules
+    for_each = var.lifecycle_rules
     content {
       enabled                                = lifecycle_rule.value.enabled
       prefix                                 = lifecycle_rule.value.prefix

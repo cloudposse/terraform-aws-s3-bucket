@@ -94,11 +94,11 @@ variable "lifecycle_rules" {
     noncurrent_version_glacier_transition_days     = number
     noncurrent_version_deeparchive_transition_days = number
     noncurrent_version_expiration_days             = number
-    
-    standard_transition_days                       = number
-    glacier_transition_days                        = number
-    deeparchive_transition_days                    = number
-    expiration_days                                = number
+
+    standard_transition_days    = number
+    glacier_transition_days     = number
+    deeparchive_transition_days = number
+    expiration_days             = number
   }))
   default     = []
   description = "A list of lifecycle rules"

@@ -100,7 +100,26 @@ variable "lifecycle_rules" {
     deeparchive_transition_days = number
     expiration_days             = number
   }))
-  default     = []
+  default     = default = [{
+    enabled = false
+    prefix  = ""
+    tags    = {}
+
+    enable_glacier_transition        = true
+    enable_deeparchive_transition    = false
+    enable_standard_ia_transition    = false
+    enable_current_object_expiration = true
+
+    abort_incomplete_multipart_upload_days         = 90
+    noncurrent_version_glacier_transition_days     = 30
+    noncurrent_version_deeparchive_transition_days = 60
+    noncurrent_version_expiration_days             = 90
+
+    standard_transition_days    = 30
+    glacier_transition_days     = 60
+    deeparchive_transition_days = 90
+    expiration_days             = 90
+  }]
   description = "A list of lifecycle rules"
 }
 

@@ -104,7 +104,7 @@ func TestExamplesCompleteWithObjectLock(t *testing.T) {
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
-  varFiles := []string{"object-lock.us-west-1.tfvars"}
+	varFiles := []string{"object-lock.us-west-1.tfvars"}
 
 	tempTestFolder := test_structure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
 
@@ -129,7 +129,7 @@ func TestExamplesCompleteWithObjectLock(t *testing.T) {
 	userName := terraform.Output(t, terraformOptions, "user_name")
 
 	expectedUserName := "eg-test-s3-object-lock-test-" + attributes[0]
-  
+
 	// Verify we're getting back the outputs we expect
 	assert.Equal(t, expectedUserName, userName)
 

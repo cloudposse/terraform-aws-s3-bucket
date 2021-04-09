@@ -79,34 +79,48 @@ variable "allow_ssl_requests_only" {
   description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
 }
 
-variable "lifecycle_rule_enabled" {
-  type        = bool
-  default     = false
-  description = "Enable or disable lifecycle rule"
-}
+variable "lifecycle_rules" {
+  type = list(object({
+    prefix  = string
+    enabled = bool
+    tags    = map(string)
 
-variable "prefix" {
-  type        = string
-  default     = ""
-  description = "Prefix identifying one or more objects to which the rule applies"
-}
+    enable_glacier_transition        = bool
+    enable_deeparchive_transition    = bool
+    enable_standard_ia_transition    = bool
+    enable_current_object_expiration = bool
 
-variable "noncurrent_version_glacier_transition_days" {
-  type        = number
-  default     = 30
-  description = "Number of days to persist in the standard storage tier before moving to the glacier infrequent access tier"
-}
+    abort_incomplete_multipart_upload_days         = number
+    noncurrent_version_glacier_transition_days     = number
+    noncurrent_version_deeparchive_transition_days = number
+    noncurrent_version_expiration_days             = number
 
-variable "noncurrent_version_deeparchive_transition_days" {
-  type        = number
-  default     = 60
-  description = "Number of days to persist in the standard storage tier before moving to the glacier deeparchive access tier"
-}
+    standard_transition_days    = number
+    glacier_transition_days     = number
+    deeparchive_transition_days = number
+    expiration_days             = number
+  }))
+  default = [{
+    enabled = false
+    prefix  = ""
+    tags    = {}
 
-variable "noncurrent_version_expiration_days" {
-  type        = number
-  default     = 90
-  description = "Specifies when noncurrent object versions expire"
+    enable_glacier_transition        = true
+    enable_deeparchive_transition    = false
+    enable_standard_ia_transition    = false
+    enable_current_object_expiration = true
+
+    abort_incomplete_multipart_upload_days         = 90
+    noncurrent_version_glacier_transition_days     = 30
+    noncurrent_version_deeparchive_transition_days = 60
+    noncurrent_version_expiration_days             = 90
+
+    standard_transition_days    = 30
+    glacier_transition_days     = 60
+    deeparchive_transition_days = 90
+    expiration_days             = 90
+  }]
+  description = "A list of lifecycle rules"
 }
 
 variable "cors_rule_inputs" {
@@ -122,63 +136,10 @@ variable "cors_rule_inputs" {
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }
 
-variable "standard_transition_days" {
-  type        = number
-  default     = 30
-  description = "Number of days to persist in the standard storage tier before moving to the infrequent access tier"
-}
-
-variable "glacier_transition_days" {
-  type        = number
-  default     = 60
-  description = "Number of days after which to move the data to the glacier storage tier"
-}
-
-variable "deeparchive_transition_days" {
-  type        = number
-  default     = 90
-  description = "Number of days after which to move the data to the glacier deep archive storage tier"
-}
-
-variable "enable_glacier_transition" {
-  type        = bool
-  default     = true
-  description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
-}
-
-variable "enable_deeparchive_transition" {
-  type        = bool
-  default     = false
-  description = "Enables the transition to AWS Glacier Deep Archive which can cause unnecessary costs for huge amount of small files"
-}
-variable "enable_standard_ia_transition" {
-  type        = bool
-  default     = false
-  description = "Enables the transition to STANDARD_IA"
-}
-
-variable "enable_current_object_expiration" {
-  type        = bool
-  default     = true
-  description = "Enables the expiration of current objects"
-}
-
-variable "expiration_days" {
-  type        = number
-  default     = 90
-  description = "Number of days after which to expunge the objects"
-}
-
 variable "abort_incomplete_multipart_upload_days" {
   type        = number
   default     = 5
   description = "Maximum time (in days) that you want to allow multipart uploads to remain in progress"
-}
-
-variable "lifecycle_tags" {
-  type        = map(string)
-  description = "Tags filter. Used to manage object lifecycle events"
-  default     = {}
 }
 
 variable "block_public_acls" {

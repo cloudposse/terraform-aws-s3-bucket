@@ -1,3 +1,4 @@
+
 <!-- markdownlint-disable -->
 # terraform-aws-s3-bucket [![GitHub Action Tests](https://github.com/cloudposse/terraform-aws-s3-bucket/workflows/test/badge.svg?branch=master)](https://github.com/cloudposse/terraform-aws-s3-bucket/actions) [![Latest Release](https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg)](https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest) [![Slack Community](https://slack.cloudposse.com/badge.svg)](https://slack.cloudposse.com)
 <!-- markdownlint-restore -->
@@ -37,7 +38,6 @@ We do not recommend creating IAM users this way for any other purpose.
 It blocks public access to the bucket by default.
 https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
 
-
 ---
 
 This project is part of our comprehensive ["SweetOps"](https://cpco.io/sweetops) approach towards DevOps.
@@ -62,7 +62,6 @@ It's 100% Open Source and licensed under the [APACHE2](LICENSE).
 
 
 We literally have [*hundreds of terraform modules*][terraform_modules] that are Open Source and well-maintained. Check them out!
-
 
 
 

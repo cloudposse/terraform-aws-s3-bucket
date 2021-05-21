@@ -114,11 +114,14 @@ resource "aws_s3_bucket" "default" {
 
   # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
   # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm     = var.sse_algorithm
-        kms_master_key_id = var.kms_master_key_arn
+  dynamic "server_side_encryption_configuration" {
+    for_each = var.sse_algorithm == "" ? [] : [1]
+    content {
+      rule {
+        apply_server_side_encryption_by_default {
+          sse_algorithm     = var.sse_algorithm
+          kms_master_key_id = var.kms_master_key_arn
+        }
       }
     }
   }

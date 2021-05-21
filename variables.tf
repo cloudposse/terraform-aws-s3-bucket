@@ -77,7 +77,7 @@ variable "logging" {
 
 variable "sse_algorithm" {
   type        = string
-  default     = "AES256"
+  default     = ""
   description = "The server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms`"
 }
 

@@ -90,6 +90,7 @@
 | <a name="output_bucket_region"></a> [bucket\_region](#output\_bucket\_region) | Bucket region |
 | <a name="output_bucket_regional_domain_name"></a> [bucket\_regional\_domain\_name](#output\_bucket\_regional\_domain\_name) | The bucket region-specific domain name |
 | <a name="output_enabled"></a> [enabled](#output\_enabled) | Is module enabled |
+| <a name="output_replication_role_arn"></a> [replication\_role\_arn](#output\_replication\_role\_arn) | The ARN of the replication IAM Role |
 | <a name="output_secret_access_key"></a> [secret\_access\_key](#output\_secret\_access\_key) | The secret access key. This will be written to the state file in plain-text |
 | <a name="output_user_arn"></a> [user\_arn](#output\_user\_arn) | The ARN assigned by AWS for the user |
 | <a name="output_user_enabled"></a> [user\_enabled](#output\_user\_enabled) | Is user creation enabled |

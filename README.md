@@ -262,6 +262,7 @@ Available targets:
 | <a name="output_bucket_region"></a> [bucket\_region](#output\_bucket\_region) | Bucket region |
 | <a name="output_bucket_regional_domain_name"></a> [bucket\_regional\_domain\_name](#output\_bucket\_regional\_domain\_name) | The bucket region-specific domain name |
 | <a name="output_enabled"></a> [enabled](#output\_enabled) | Is module enabled |
+| <a name="output_replication_role_arn"></a> [replication\_role\_arn](#output\_replication\_role\_arn) | The ARN of the replication IAM Role |
 | <a name="output_secret_access_key"></a> [secret\_access\_key](#output\_secret\_access\_key) | The secret access key. This will be written to the state file in plain-text |
 | <a name="output_user_arn"></a> [user\_arn](#output\_user\_arn) | The ARN assigned by AWS for the user |
 | <a name="output_user_enabled"></a> [user\_enabled](#output\_user\_enabled) | Is user creation enabled |
@@ -278,6 +279,7 @@ Like this project? Please give it a ★ on [our GitHub](https://github.com/cloud
 Are you using this project or any of our other projects? Consider [leaving a testimonial][testimonial]. =)
 
 
+
 ## Related Projects
 
 Check out these related projects.
@@ -288,8 +290,6 @@ Check out these related projects.
 - [terraform-aws-s3-logs-athena-query](https://github.com/cloudposse/terraform-aws-s3-logs-athena-query) - A Terraform module that creates an Athena Database and Structure for querying S3 access logs
 - [terraform-aws-lb-s3-bucket](https://github.com/cloudposse/terraform-aws-lb-s3-bucket) - Terraform module to provision an S3 bucket with built in IAM policy to allow AWS Load Balancers to ship access logs
 - [terraform-aws-s3-log-storage](https://github.com/cloudposse/terraform-aws-s3-log-storage) - Terraform module creates an S3 bucket suitable for receiving logs from other AWS services such as S3, CloudFront, and CloudTrail
-
-
 
 ## Help
 

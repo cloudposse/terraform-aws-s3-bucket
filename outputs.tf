@@ -48,6 +48,11 @@ output "user_unique_id" {
   description = "The user unique ID assigned by AWS"
 }
 
+output "replication_role_arn" {
+  value       = module.this.enabled && var.s3_replication_enabled ? join("", aws_iam_role.replication.*.arn) : ""
+  description = "The ARN of the replication IAM Role"
+}
+
 output "access_key_id" {
   sensitive   = true
   value       = module.s3_user.access_key_id

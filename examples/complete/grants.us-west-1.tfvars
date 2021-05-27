@@ -1,14 +1,21 @@
-enabled = true
-
 region = "us-west-1"
 
 namespace = "eg"
 
 stage = "test"
 
-name = "s3-test"
+name = "s3-grants-test"
 
-acl = "private"
+acl = ""
+
+grants = [
+  {
+    id          = null
+    type        = "Group"
+    permissions = ["READ", "WRITE"]
+    uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+  },
+]
 
 force_destroy = true
 

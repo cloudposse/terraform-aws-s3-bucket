@@ -136,6 +136,32 @@ variable "cors_rule_inputs" {
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }
 
+variable "website_inputs" {
+
+  type = list(object({
+    index_document           = string
+    error_document           = string
+    redirect_all_requests_to = string
+    routing_rules = list(object({
+      RoutingRuleCondition = object({
+        KeyPrefixEquals             = string
+        HttpErrorCodeReturnedEquals = string
+      })
+      RedirectRule = object({
+        HostName             = string
+        HttpRedirectCode     = string
+        Protocol             = string
+        ReplaceKeyPrefixWith = string
+        ReplaceKeyWith       = string
+      })
+    }))
+  }))
+  default = null
+
+  description = "Specifies the static website hosting configuration object."
+}
+
+
 variable "abort_incomplete_multipart_upload_days" {
   type        = number
   default     = 5

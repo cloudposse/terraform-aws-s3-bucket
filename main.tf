@@ -25,8 +25,12 @@ resource "aws_s3_bucket" "default" {
       tags                                   = lifecycle_rule.value.tags
       abort_incomplete_multipart_upload_days = lifecycle_rule.value.abort_incomplete_multipart_upload_days
 
-      noncurrent_version_expiration {
-        days = lifecycle_rule.value.noncurrent_version_expiration_days
+      dynamic "noncurrent_version_expiration" {
+        for_each = lifecycle_rule.value.enable_noncurrent_version_expiration ? [1] : []
+
+        content {
+          days = lifecycle_rule.value.noncurrent_version_expiration_days
+        }
       }
 
       dynamic "noncurrent_version_transition" {

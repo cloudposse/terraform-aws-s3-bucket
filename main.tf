@@ -105,6 +105,16 @@ resource "aws_s3_bucket" "default" {
     }
   }
 
+  dynamic "website" {
+    for_each = var.website_inputs == null ? [] : var.website_inputs
+    content {
+      index_document           = website.value.index_document
+      error_document           = website.value.error_document
+      redirect_all_requests_to = website.value.redirect_all_requests_to
+      routing_rules            = website.value.routing_rules
+    }
+  }
+
   dynamic "cors_rule" {
     for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
 

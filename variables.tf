@@ -223,3 +223,16 @@ variable "object_lock_configuration" {
   default     = null
   description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
 }
+
+variable "website_inputs" {
+
+  type = list(object({
+    index_document           = string
+    error_document           = string
+    redirect_all_requests_to = string
+    routing_rules            = string
+  }))
+  default = null
+
+  description = "Specifies the static website hosting configuration object."
+}

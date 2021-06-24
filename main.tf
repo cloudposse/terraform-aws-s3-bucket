@@ -1,6 +1,7 @@
 locals {
   bucket_name         = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
   replication_enabled = length(var.replication_rules) > 0
+  bucket_arn          = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
 }
 
 resource "aws_s3_bucket" "default" {
@@ -220,9 +221,6 @@ module "s3_user" {
 
 data "aws_partition" "current" {}
 
-locals {
-  this_bucket_arn = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
-}
 data "aws_iam_policy_document" "bucket_policy" {
   count = module.this.enabled ? 1 : 0
 
@@ -233,7 +231,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid       = "DenyIncorrectEncryptionHeader"
       effect    = "Deny"
       actions   = ["s3:PutObject"]
-      resources = ["${local.this_bucket_arn}/*"]
+      resources = ["${local.bucket_arn}/*"]
 
       principals {
         identifiers = ["*"]
@@ -255,7 +253,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid       = "DenyUnEncryptedObjectUploads"
       effect    = "Deny"
       actions   = ["s3:PutObject"]
-      resources = ["${local.this_bucket_arn}/*"]
+      resources = ["${local.bucket_arn}/*"]
 
       principals {
         identifiers = ["*"]
@@ -277,7 +275,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid       = "ForceSSLOnlyAccess"
       effect    = "Deny"
       actions   = ["s3:*"]
-      resources = [local.this_bucket_arn, "${local.this_bucket_arn}/*"]
+      resources = [local.bucket_arn, "${local.bucket_arn}/*"]
 
       principals {
         identifiers = ["*"]
@@ -304,7 +302,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         "s3:GetObjectVersionTagging",
         "s3:ObjectOwnerOverrideToBucketOwner"
       ]
-      resources = ["${local.this_bucket_arn}/*"]
+      resources = ["${local.bucket_arn}/*"]
       principals {
         type        = "AWS"
         identifiers = var.replication_source_roles
@@ -317,7 +315,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     content {
       sid       = "CrossAccountReplicationBucket"
       actions   = ["s3:List*", "s3:GetBucketVersioning", "s3:PutBucketVersioning"]
-      resources = [local.this_bucket_arn]
+      resources = [local.bucket_arn]
       principals {
         type        = "AWS"
         identifiers = var.replication_source_roles

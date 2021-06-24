@@ -219,6 +219,9 @@ module "s3_user" {
 
 data "aws_partition" "current" {}
 
+locals {
+  this_bucket_arn = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
+}
 data "aws_iam_policy_document" "bucket_policy" {
   count = module.this.enabled ? 1 : 0
 
@@ -229,7 +232,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid       = "DenyIncorrectEncryptionHeader"
       effect    = "Deny"
       actions   = ["s3:PutObject"]
-      resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+      resources = ["${local.this_bucket_arn}/*"]
 
       principals {
         identifiers = ["*"]
@@ -251,7 +254,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid       = "DenyUnEncryptedObjectUploads"
       effect    = "Deny"
       actions   = ["s3:PutObject"]
-      resources = ["arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"]
+      resources = ["${local.this_bucket_arn}/*"]
 
       principals {
         identifiers = ["*"]
@@ -270,13 +273,10 @@ data "aws_iam_policy_document" "bucket_policy" {
     for_each = var.allow_ssl_requests_only ? [1] : []
 
     content {
-      sid     = "ForceSSLOnlyAccess"
-      effect  = "Deny"
-      actions = ["s3:*"]
-      resources = [
-        "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
-        "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*"
-      ]
+      sid       = "ForceSSLOnlyAccess"
+      effect    = "Deny"
+      actions   = ["s3:*"]
+      resources = [local.this_bucket_arn, "${local.this_bucket_arn}/*"]
 
       principals {
         identifiers = ["*"]

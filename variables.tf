@@ -236,3 +236,9 @@ variable "website_inputs" {
 
   description = "Specifies the static website hosting configuration object."
 }
+
+variable "replication_source_roles" {
+  type        = list(string)
+  default     = []
+  description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket. (For replication within the same AWS account, it's not necessary to adjust the bucket policy.)"
+}

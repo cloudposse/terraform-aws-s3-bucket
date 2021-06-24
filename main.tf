@@ -290,6 +290,39 @@ data "aws_iam_policy_document" "bucket_policy" {
       }
     }
   }
+
+  dynamic "statement" {
+    for_each = length(var.replication_source_roles) > 0 ? [1] : []
+
+    content {
+      sid = "CrossAccountReplicationObjects"
+      actions = [
+        "s3:ReplicateObject",
+        "s3:ReplicateDelete",
+        "s3:ReplicateTags",
+        "s3:GetObjectVersionTagging",
+        "s3:ObjectOwnerOverrideToBucketOwner"
+      ]
+      resources = ["${local.this_bucket_arn}/*"]
+      principals {
+        type        = "AWS"
+        identifiers = var.replication_source_roles
+      }
+    }
+  }
+  dynamic "statement" {
+    for_each = length(var.replication_source_roles) > 0 ? [1] : []
+
+    content {
+      sid       = "CrossAccountReplicationBucket"
+      actions   = ["s3:List*", "s3:GetBucketVersioning", "s3:PutBucketVersioning"]
+      resources = [local.this_bucket_arn]
+      principals {
+        type        = "AWS"
+        identifiers = var.replication_source_roles
+      }
+    }
+  }
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {

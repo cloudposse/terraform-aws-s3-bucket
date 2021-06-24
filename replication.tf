@@ -56,7 +56,7 @@ data "aws_iam_policy_document" "replication" {
       "s3:ObjectOwnerOverrideToBucketOwner"
     ]
 
-    resources = ["${var.s3_replica_bucket_arn}/*"]
+    resources = toset([for rule in var.replication_rules : "${rule.destination.bucket}/*"])
   }
 }
 

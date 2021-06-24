@@ -172,12 +172,6 @@ variable "s3_replication_enabled" {
   description = "Set this to true and specify `s3_replica_bucket_arn` to enable replication. `versioning_enabled` must also be `true`."
 }
 
-variable "s3_replica_bucket_arn" {
-  type        = string
-  default     = ""
-  description = "The ARN of the S3 replica bucket (destination)"
-}
-
 variable "replication_rules" {
   # type = list(object({
   #   id          = string
@@ -185,6 +179,7 @@ variable "replication_rules" {
   #   prefix      = string
   #   status      = string
   #   destination = object({
+  #     bucket                     = string
   #     storage_class              = string
   #     replica_kms_key_id         = string
   #     access_control_translation = object({
@@ -202,10 +197,8 @@ variable "replication_rules" {
   #     tags = map(string)
   #   })
   # }))
-
-  type        = list(any)
   default     = null
-  description = "Specifies the replication rules if S3 bucket replication is enabled"
+  description = "S3 replication rules"
 }
 
 variable "bucket_name" {

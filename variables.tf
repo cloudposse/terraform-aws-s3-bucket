@@ -166,12 +166,6 @@ variable "restrict_public_buckets" {
   description = "Set to `false` to disable the restricting of making the bucket public"
 }
 
-variable "s3_replication_enabled" {
-  type        = bool
-  default     = false
-  description = "Set this to true and specify `s3_replica_bucket_arn` to enable replication. `versioning_enabled` must also be `true`."
-}
-
 variable "replication_rules" {
   # type = list(object({
   #   id          = string
@@ -197,7 +191,7 @@ variable "replication_rules" {
   #     tags = map(string)
   #   })
   # }))
-  default     = null
+  default     = []
   description = "S3 replication rules"
 }
 

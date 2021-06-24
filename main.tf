@@ -1,5 +1,6 @@
 locals {
-  bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
+  bucket_name         = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
+  replication_enabled = length(var.replication_rules) > 0
 }
 
 resource "aws_s3_bucket" "default" {
@@ -139,7 +140,7 @@ resource "aws_s3_bucket" "default" {
   }
 
   dynamic "replication_configuration" {
-    for_each = var.s3_replication_enabled ? [1] : []
+    for_each = local.replication_enabled ? [1] : []
 
     content {
       role = aws_iam_role.replication[0].arn

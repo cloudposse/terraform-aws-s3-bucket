@@ -1,6 +1,7 @@
 locals {
+  enabled             = module.this.enabled
   bucket_name         = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  replication_enabled = length(var.replication_rules) > 0
+  replication_enabled = local.enabled && var.s3_replication_enabled
   bucket_arn          = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
 }
 
@@ -9,7 +10,7 @@ resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).
   #bridgecrew:skip=BC_AWS_S3_16:Skipping `Ensure S3 bucket versioning is enabled` because dynamic blocks are not supported by checkov
   #bridgecrew:skip=BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because variables are not understood
-  count         = module.this.enabled ? 1 : 0
+  count         = local.enabled ? 1 : 0
   bucket        = local.bucket_name
   acl           = try(length(var.grants), 0) == 0 ? var.acl : null
   force_destroy = var.force_destroy
@@ -156,7 +157,9 @@ resource "aws_s3_bucket" "default" {
           status   = try(rules.value.status, null)
 
           destination {
-            bucket             = rules.value.destination.bucket
+            # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
+            # s3_replica_bucket_arn to specify single destination for all rules
+            bucket             = try(length(rules.value.destination.bucket), 0) > 0 ? rules.value.destination.bucket : var.s3_replica_bucket_arn
             storage_class      = try(rules.value.destination.storage_class, "STANDARD")
             replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
             account_id         = try(rules.value.destination.account_id, null)
@@ -212,7 +215,7 @@ module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
   version = "0.15.2"
 
-  enabled      = module.this.enabled && var.user_enabled ? true : false
+  enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
 
@@ -222,7 +225,7 @@ module "s3_user" {
 data "aws_partition" "current" {}
 
 data "aws_iam_policy_document" "bucket_policy" {
-  count = module.this.enabled ? 1 : 0
+  count = local.enabled ? 1 : 0
 
   dynamic "statement" {
     for_each = var.allow_encrypted_uploads_only ? [1] : []
@@ -325,13 +328,13 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {
-  count         = module.this.enabled ? 1 : 0
+  count         = local.enabled ? 1 : 0
   source_json   = var.policy
   override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = module.this.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || var.policy != "") ? 1 : 0
+  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]
@@ -341,7 +344,7 @@ resource "aws_s3_bucket_policy" "default" {
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
 # for the nuances of the blocking options
 resource "aws_s3_bucket_public_access_block" "default" {
-  count  = module.this.enabled ? 1 : 0
+  count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   block_public_acls       = var.block_public_acls

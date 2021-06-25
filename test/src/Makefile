@@ -15,7 +15,9 @@ init:
 ## Run tests
 test: init
 	# Verify we have valid AWS credential
-	aws sts get-caller-identity >/dev/null
+	if command -v aws >/dev/null; then \
+	  (unset AWS_PROFILE; aws sts get-caller-identity >/dev/null); \
+	fi
 	go test -v -timeout 10m -run TestExamplesComplete
 
 ## Run tests in docker container

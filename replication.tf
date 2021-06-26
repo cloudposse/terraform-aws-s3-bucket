@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "replication" {
 
     resources = toset(concat(
       ["${var.s3_replica_bucket_arn}/*"],
-      [for rule in var.replication_rules : "${rule.value.destination.bucket}/*"],
+      [for rule in var.replication_rules : "${rule.destination.bucket}/*"],
     ))
   }
 }

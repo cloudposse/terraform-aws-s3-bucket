@@ -210,7 +210,7 @@ variable "replication_rules" {
 
   type        = list(any)
   default     = null
-  description = "Specifies the replication rules for S3 bucket replication if enabled"
+  description = "Specifies the replication rules for S3 bucket replication if enabled. You must also set s3_replication_enabled to true."
 }
 
 variable "bucket_name" {

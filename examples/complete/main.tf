@@ -4,9 +4,10 @@ locals {
     id     = "replication-test-explicit-bucket"
     status = "Enabled"
     prefix = "/extra"
-    bucket = module.s3_bucket_replication_target_extra[0].bucket_arn
-  } : {}
-  replication_rules = local.replication_enabled ? concat(var.replication_rules, [local.extra_rule]) : []
+    priority = 5
+    destination_bucket = module.s3_bucket_replication_target_extra[0].bucket_arn
+  } : null
+  replication_rules = local.replication_enabled ? concat(var.replication_rules, [local.extra_rule]) : null
 }
 
 provider "aws" {
@@ -42,7 +43,7 @@ module "s3_bucket_replication_target" {
   acl                      = "private"
   force_destroy            = true
   versioning_enabled       = true
-  replication_source_roles = [module.s3_bucket.replication_role_arn]
+  s3_replication_source_roles = [module.s3_bucket.replication_role_arn]
 
   attributes = ["target"]
   context    = module.this.context
@@ -57,7 +58,7 @@ module "s3_bucket_replication_target_extra" {
   acl                      = "private"
   force_destroy            = true
   versioning_enabled       = true
-  replication_source_roles = [module.s3_bucket.replication_role_arn]
+  s3_replication_source_roles = [module.s3_bucket.replication_role_arn]
 
   attributes = ["target", "extra"]
   context    = module.this.context

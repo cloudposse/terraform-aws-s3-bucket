@@ -182,14 +182,17 @@ variable "s3_replica_bucket_arn" {
     EOT
 }
 
-variable "replication_rules" {
+variable "s3_replication_rules" {
   # type = list(object({
   #   id          = string
   #   priority    = number
   #   prefix      = string
   #   status      = string
+  #   # destination_bucket is specified here rather than inside the destination object
+  #   # to make it easier to work with the Terraform type system and create a list of consistent type.
+  #   destination_bucket = string # destination bucket ARN, overrides s3_replica_bucket_arn
+  #
   #   destination = object({
-  #     bucket                     = string # destination bucket ARN
   #     storage_class              = string
   #     replica_kms_key_id         = string
   #     access_control_translation = object({
@@ -202,6 +205,7 @@ variable "replication_rules" {
   #       enabled = bool
   #     })
   #   })
+  #   # filter.prefix overrides top level prefix
   #   filter = object({
   #     prefix = string
   #     tags = map(string)
@@ -211,6 +215,18 @@ variable "replication_rules" {
   type        = list(any)
   default     = null
   description = "Specifies the replication rules for S3 bucket replication if enabled. You must also set s3_replication_enabled to true."
+}
+
+variable "replication_rules" {
+  type        = list(any)
+  default     = null
+  description = "DEPRECATED: Use s3_replication_rules instead."
+}
+
+variable "s3_replication_source_roles" {
+  type        = list(string)
+  default     = []
+  description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy)."
 }
 
 variable "bucket_name" {
@@ -240,10 +256,4 @@ variable "website_inputs" {
   default = null
 
   description = "Specifies the static website hosting configuration object."
-}
-
-variable "replication_source_roles" {
-  type        = list(string)
-  default     = []
-  description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy)."
 }

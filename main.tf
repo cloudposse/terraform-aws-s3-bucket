@@ -3,6 +3,10 @@ locals {
   bucket_name         = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
   replication_enabled = local.enabled && var.s3_replication_enabled
   bucket_arn          = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
+
+  # Deprecate `replication_rules` in favor of `s3_replication_rules` to keep all the replication related
+  # inputs grouped under s3_replica[tion]
+  s3_replication_rules = var.replication_rules == null ? var.s3_replication_rules : var.replication_rules
 }
 
 resource "aws_s3_bucket" "default" {
@@ -148,18 +152,21 @@ resource "aws_s3_bucket" "default" {
       role = aws_iam_role.replication[0].arn
 
       dynamic "rules" {
-        for_each = var.replication_rules == null ? [] : var.replication_rules
+        for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules
 
         content {
           id       = rules.value.id
           priority = try(rules.value.priority, 0)
-          prefix   = try(rules.value.prefix, null)
+          # `prefix` at this level is a V1 feature, replaced in V2 with the filter block.
+          # `prefix` conflicts with `filter`, and for multiple destinations, a filter block
+          # is required even if it empty, so we always implement `prefix` as a filter.
+          # OBSOLETE: prefix   = try(rules.value.prefix, null)
           status   = try(rules.value.status, null)
 
           destination {
             # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
             # s3_replica_bucket_arn to specify single destination for all rules
-            bucket             = try(length(rules.value.destination.bucket), 0) > 0 ? rules.value.destination.bucket : var.s3_replica_bucket_arn
+            bucket             = try(length(rules.value.destination_bucket), 0) > 0 ? rules.value.destination_bucket : var.s3_replica_bucket_arn
             storage_class      = try(rules.value.destination.storage_class, "STANDARD")
             replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
             account_id         = try(rules.value.destination.account_id, null)
@@ -183,11 +190,14 @@ resource "aws_s3_bucket" "default" {
             }
           }
 
+          # Replication to multiple destination buckets requires that priority is specified in the rules object.
+          # If the corresponding rule requires no filter, an empty configuration block filter {} must be specified.
+          # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
           dynamic "filter" {
-            for_each = try(rules.value.filter, null) == null ? [] : [rules.value.filter]
+            for_each = try(rules.value.filter, null) == null ? ["empty"] : [rules.value.filter]
 
             content {
-              prefix = try(filter.value.prefix, null)
+              prefix = try(filter.value.prefix, try(rules.value.prefix, null))
               tags   = try(filter.value.tags, {})
             }
           }
@@ -294,7 +304,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = length(var.replication_source_roles) > 0 ? [1] : []
+    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
     content {
       sid = "CrossAccountReplicationObjects"
@@ -308,12 +318,12 @@ data "aws_iam_policy_document" "bucket_policy" {
       resources = ["${local.bucket_arn}/*"]
       principals {
         type        = "AWS"
-        identifiers = var.replication_source_roles
+        identifiers = var.s3_replication_source_roles
       }
     }
   }
   dynamic "statement" {
-    for_each = length(var.replication_source_roles) > 0 ? [1] : []
+    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
     content {
       sid       = "CrossAccountReplicationBucket"
@@ -321,7 +331,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       resources = [local.bucket_arn]
       principals {
         type        = "AWS"
-        identifiers = var.replication_source_roles
+        identifiers = var.s3_replication_source_roles
       }
     }
   }
@@ -334,7 +344,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.replication_source_roles) > 0 || var.policy != "") ? 1 : 0
+  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]

@@ -1,13 +1,13 @@
 locals {
-  replication_enabled = length(var.replication_rules) > 0
+  replication_enabled = length(var.s3_replication_rules) > 0
   extra_rule = local.replication_enabled ? {
-    id     = "replication-test-explicit-bucket"
-    status = "Enabled"
-    prefix = "/extra"
-    priority = 5
+    id                 = "replication-test-explicit-bucket"
+    status             = "Enabled"
+    prefix             = "/extra"
+    priority           = 5
     destination_bucket = module.s3_bucket_replication_target_extra[0].bucket_arn
   } : null
-  replication_rules = local.replication_enabled ? concat(var.replication_rules, [local.extra_rule]) : null
+  s3_replication_rules = local.replication_enabled ? concat(var.s3_replication_rules, [local.extra_rule]) : null
 }
 
 provider "aws" {
@@ -29,7 +29,7 @@ module "s3_bucket" {
   object_lock_configuration    = var.object_lock_configuration
   s3_replication_enabled       = local.replication_enabled
   s3_replica_bucket_arn        = join("", module.s3_bucket_replication_target.*.bucket_arn)
-  replication_rules            = local.replication_rules
+  s3_replication_rules         = local.s3_replication_rules
 
   context = module.this.context
 }
@@ -39,10 +39,10 @@ module "s3_bucket_replication_target" {
 
   source = "../../"
 
-  user_enabled             = true
-  acl                      = "private"
-  force_destroy            = true
-  versioning_enabled       = true
+  user_enabled                = true
+  acl                         = "private"
+  force_destroy               = true
+  versioning_enabled          = true
   s3_replication_source_roles = [module.s3_bucket.replication_role_arn]
 
   attributes = ["target"]
@@ -54,10 +54,10 @@ module "s3_bucket_replication_target_extra" {
 
   source = "../../"
 
-  user_enabled             = true
-  acl                      = "private"
-  force_destroy            = true
-  versioning_enabled       = true
+  user_enabled                = true
+  acl                         = "private"
+  force_destroy               = true
+  versioning_enabled          = true
   s3_replication_source_roles = [module.s3_bucket.replication_role_arn]
 
   attributes = ["target", "extra"]

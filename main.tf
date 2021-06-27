@@ -161,7 +161,7 @@ resource "aws_s3_bucket" "default" {
           # `prefix` conflicts with `filter`, and for multiple destinations, a filter block
           # is required even if it empty, so we always implement `prefix` as a filter.
           # OBSOLETE: prefix   = try(rules.value.prefix, null)
-          status   = try(rules.value.status, null)
+          status = try(rules.value.status, null)
 
           destination {
             # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with

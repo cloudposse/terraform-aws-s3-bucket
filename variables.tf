@@ -169,7 +169,7 @@ variable "restrict_public_buckets" {
 variable "s3_replication_enabled" {
   type        = bool
   default     = false
-  description = "Set this to true and specify `replication_rules` to enable replication. `versioning_enabled` must also be `true`."
+  description = "Set this to true and specify `s3_replication_rules` to enable replication. `versioning_enabled` must also be `true`."
 }
 
 variable "s3_replica_bucket_arn" {
@@ -177,8 +177,8 @@ variable "s3_replica_bucket_arn" {
   default     = ""
   description = <<-EOT
     A single S3 bucket ARN to use for all replication rules.
-    Note: Destination bucket can be specified in the replication rule
-    itself, in which case it will take precedence over this variable.
+    Note: The destination bucket can be specified in the replication rule itself
+    (which is allows for multiple destinations), in which case it will take precedence over this variable.
     EOT
 }
 

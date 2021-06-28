@@ -178,7 +178,7 @@ variable "s3_replica_bucket_arn" {
   description = <<-EOT
     A single S3 bucket ARN to use for all replication rules.
     Note: The destination bucket can be specified in the replication rule itself
-    (which is allows for multiple destinations), in which case it will take precedence over this variable.
+    (which allows for multiple destinations), in which case it will take precedence over this variable.
     EOT
 }
 

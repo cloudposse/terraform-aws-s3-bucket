@@ -28,15 +28,19 @@
 
 -->
 
-This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
+This module creates an S3 bucket with support of versioning, replication, encryption, ACL, and bucket object policy.
 If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
 
-This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
+This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage
+[AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) and
+do not already have IAM credentials. Users or systems that have IAM credentials should either be granted access directly based on
+their IAM identity or be allowed to assume an IAM role with access.
 
 We do not recommend creating IAM users this way for any other purpose.
 
-It blocks public access to the bucket by default.
-https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+This module blocks public access to the bucket by default. See `block_public_acls`, `block_public_policy`,
+and `ignore_public_acls` to change the settings. See [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html)
+for more details.
 
 ---
 
@@ -243,8 +247,8 @@ Available targets:
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
 | <a name="input_replication_rules"></a> [replication\_rules](#input\_replication\_rules) | DEPRECATED: Use s3\_replication\_rules instead. | `list(any)` | `null` | no |
 | <a name="input_restrict_public_buckets"></a> [restrict\_public\_buckets](#input\_restrict\_public\_buckets) | Set to `false` to disable the restricting of making the bucket public | `bool` | `true` | no |
-| <a name="input_s3_replica_bucket_arn"></a> [s3\_replica\_bucket\_arn](#input\_s3\_replica\_bucket\_arn) | A single S3 bucket ARN to use for all replication rules.<br>Note: Destination bucket can be specified in the replication rule<br>itself, in which case it will take precedence over this variable. | `string` | `""` | no |
-| <a name="input_s3_replication_enabled"></a> [s3\_replication\_enabled](#input\_s3\_replication\_enabled) | Set this to true and specify `replication_rules` to enable replication. `versioning_enabled` must also be `true`. | `bool` | `false` | no |
+| <a name="input_s3_replica_bucket_arn"></a> [s3\_replica\_bucket\_arn](#input\_s3\_replica\_bucket\_arn) | A single S3 bucket ARN to use for all replication rules.<br>Note: The destination bucket can be specified in the replication rule itself<br>(which is allows for multiple destinations), in which case it will take precedence over this variable. | `string` | `""` | no |
+| <a name="input_s3_replication_enabled"></a> [s3\_replication\_enabled](#input\_s3\_replication\_enabled) | Set this to true and specify `s3_replication_rules` to enable replication. `versioning_enabled` must also be `true`. | `bool` | `false` | no |
 | <a name="input_s3_replication_rules"></a> [s3\_replication\_rules](#input\_s3\_replication\_rules) | Specifies the replication rules for S3 bucket replication if enabled. You must also set s3\_replication\_enabled to true. | `list(any)` | `null` | no |
 | <a name="input_s3_replication_source_roles"></a> [s3\_replication\_source\_roles](#input\_s3\_replication\_source\_roles) | Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy). | `list(string)` | `[]` | no |
 | <a name="input_sse_algorithm"></a> [sse\_algorithm](#input\_sse\_algorithm) | The server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms` | `string` | `"AES256"` | no |

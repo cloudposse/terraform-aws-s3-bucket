@@ -49,7 +49,7 @@ output "user_unique_id" {
 }
 
 output "replication_role_arn" {
-  value       = module.this.enabled && var.s3_replication_enabled ? join("", aws_iam_role.replication.*.arn) : ""
+  value       = module.this.enabled && local.replication_enabled ? join("", aws_iam_role.replication.*.arn) : ""
   description = "The ARN of the replication IAM Role"
 }
 

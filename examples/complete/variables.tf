@@ -238,3 +238,15 @@ variable "object_lock_configuration" {
   default     = null
   description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
 }
+
+variable "privileged_principal_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether or not to create allow Privileged Principals to perform actions on the bucket."
+}
+
+variable "privileged_principal_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
+}

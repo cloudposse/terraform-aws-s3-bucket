@@ -257,3 +257,18 @@ variable "website_inputs" {
 
   description = "Specifies the static website hosting configuration object."
 }
+
+variable "privileged_principal_arns" {
+  type        = map(list(string))
+  default     = {}
+  description = <<-EOT
+    (Optional) Map of IAM Principal ARNs to lists of S3 path prefixes to grant `privileged_principal_actions` permissions.
+    Resource list will include the bucket itself along with all the prefixes. Prefixes should not begin with '/'.
+    EOT
+}
+
+variable "privileged_principal_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
+}

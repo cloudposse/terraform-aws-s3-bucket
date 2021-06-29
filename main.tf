@@ -341,7 +341,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     for_each = var.privileged_principal_arns
 
     content {
-      sid     = "AllowPrivilegedPrincipal[${{for k, v in keys(var.privileged_principal_arns) : v => k }[statement.key]}]" # add indices to Sid
+      sid     = "AllowPrivilegedPrincipal[${ { for k, v in keys(var.privileged_principal_arns) : v => k }[statement.key]}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
         "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",

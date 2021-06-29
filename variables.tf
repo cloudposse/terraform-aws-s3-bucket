@@ -169,21 +169,29 @@ variable "restrict_public_buckets" {
 variable "s3_replication_enabled" {
   type        = bool
   default     = false
-  description = "Set this to true and specify `s3_replica_bucket_arn` to enable replication. `versioning_enabled` must also be `true`."
+  description = "Set this to true and specify `s3_replication_rules` to enable replication. `versioning_enabled` must also be `true`."
 }
 
 variable "s3_replica_bucket_arn" {
   type        = string
   default     = ""
-  description = "The ARN of the S3 replica bucket (destination)"
+  description = <<-EOT
+    A single S3 bucket ARN to use for all replication rules.
+    Note: The destination bucket can be specified in the replication rule itself
+    (which allows for multiple destinations), in which case it will take precedence over this variable.
+    EOT
 }
 
-variable "replication_rules" {
+variable "s3_replication_rules" {
   # type = list(object({
   #   id          = string
   #   priority    = number
   #   prefix      = string
   #   status      = string
+  #   # destination_bucket is specified here rather than inside the destination object
+  #   # to make it easier to work with the Terraform type system and create a list of consistent type.
+  #   destination_bucket = string # destination bucket ARN, overrides s3_replica_bucket_arn
+  #
   #   destination = object({
   #     storage_class              = string
   #     replica_kms_key_id         = string
@@ -197,6 +205,7 @@ variable "replication_rules" {
   #       enabled = bool
   #     })
   #   })
+  #   # filter.prefix overrides top level prefix
   #   filter = object({
   #     prefix = string
   #     tags = map(string)
@@ -205,7 +214,19 @@ variable "replication_rules" {
 
   type        = list(any)
   default     = null
-  description = "Specifies the replication rules if S3 bucket replication is enabled"
+  description = "Specifies the replication rules for S3 bucket replication if enabled. You must also set s3_replication_enabled to true."
+}
+
+variable "replication_rules" {
+  type        = list(any)
+  default     = null
+  description = "DEPRECATED: Use s3_replication_rules instead."
+}
+
+variable "s3_replication_source_roles" {
+  type        = list(string)
+  default     = []
+  description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy)."
 }
 
 variable "bucket_name" {

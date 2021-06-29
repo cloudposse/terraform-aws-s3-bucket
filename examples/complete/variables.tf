@@ -61,6 +61,11 @@ variable "lifecycle_rules" {
   description = "A list of lifecycle rules."
 }
 
+variable "s3_replication_rules" {
+  default     = []
+  description = "S3 replication rules"
+}
+
 variable "policy" {
   type        = string
   default     = ""

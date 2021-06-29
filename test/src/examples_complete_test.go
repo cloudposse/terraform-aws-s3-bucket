@@ -2,7 +2,7 @@ package test
 
 import (
 	"bytes"
-    "encoding/json"
+	"encoding/json"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -62,7 +62,7 @@ func TestExamplesComplete(t *testing.T) {
 // Test the Terraform module in examples/complete using Terratest for grants.
 func TestExamplesCompleteWithGrants(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano()+1)
+	rand.Seed(time.Now().UnixNano() + 1)
 
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
@@ -106,7 +106,7 @@ func TestExamplesCompleteWithGrants(t *testing.T) {
 // Test the Terraform module in examples/complete using Terratest for grants.
 func TestExamplesCompleteWithObjectLock(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano()+2)
+	rand.Seed(time.Now().UnixNano() + 2)
 
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
@@ -149,7 +149,7 @@ func TestExamplesCompleteWithObjectLock(t *testing.T) {
 
 func TestExamplesCompleteWithLifecycleRules(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano()+3)
+	rand.Seed(time.Now().UnixNano() + 3)
 
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
@@ -190,10 +190,9 @@ func TestExamplesCompleteWithLifecycleRules(t *testing.T) {
 	assert.Equal(t, expectedS3BucketId, s3BucketId)
 }
 
-
 func TestExamplesCompleteWithReplication(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano()+4)
+	rand.Seed(time.Now().UnixNano() + 4)
 
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
@@ -210,7 +209,7 @@ func TestExamplesCompleteWithReplication(t *testing.T) {
 		VarFiles: varFiles,
 		Vars: map[string]interface{}{
 			"attributes": attributes,
-			"enabled": "true",
+			"enabled":    "true",
 		},
 	}
 
@@ -251,7 +250,7 @@ func TestExamplesCompleteWithReplication(t *testing.T) {
 
 func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano()+4)
+	rand.Seed(time.Now().UnixNano() + 4)
 
 	awsRegion := "us-east-2"
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
@@ -269,7 +268,7 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 		VarFiles: varFiles,
 		Vars: map[string]interface{}{
 			"attributes": attributes,
-			"enabled": "true",
+			"enabled":    "true",
 		},
 	}
 
@@ -301,7 +300,7 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 
 	// Verify that our bucket's bucket policy contains the expected statements allowing actions made by privileged principals
 	bucketPolicy := aws.GetS3BucketPolicy(t, awsRegion, bucketID)
-    expectedBucketPolicyStatementsTemplate := `
+	expectedBucketPolicyStatementsTemplate := `
     [{
         "Sid": "AllowPrivilegedPrincipal[0]",
         "Effect": "Allow",
@@ -346,27 +345,27 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
         ]
     }]
     `
-    expectedBucketPolicyStatements := strings.ReplaceAll(
-        strings.ReplaceAll(
-            expectedBucketPolicyStatementsTemplate,
-            "AWS_ACCOUNT_ID",
-            aws.GetAccountId(t),
-        ),
-        "RANDOM_ID",
-        attributes[0],
-    )
-    expectedBucketPolicyStatementsJSON := new(bytes.Buffer)
-    err := json.Compact(expectedBucketPolicyStatementsJSON, []byte(expectedBucketPolicyStatements))
-    if err != nil {
-        t.Errorf("Unexpected error when compacting JSON: %v.", err)
-    }
-    expectedBucketPolicySnippet := strings.Trim(expectedBucketPolicyStatementsJSON.String(), "[]")
+	expectedBucketPolicyStatements := strings.ReplaceAll(
+		strings.ReplaceAll(
+			expectedBucketPolicyStatementsTemplate,
+			"AWS_ACCOUNT_ID",
+			aws.GetAccountId(t),
+		),
+		"RANDOM_ID",
+		attributes[0],
+	)
+	expectedBucketPolicyStatementsJSON := new(bytes.Buffer)
+	err := json.Compact(expectedBucketPolicyStatementsJSON, []byte(expectedBucketPolicyStatements))
+	if err != nil {
+		t.Errorf("Unexpected error when compacting JSON: %v.", err)
+	}
+	expectedBucketPolicySnippet := strings.Trim(expectedBucketPolicyStatementsJSON.String(), "[]")
 	assert.Contains(t, bucketPolicy, expectedBucketPolicySnippet)
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano()+5)
+	rand.Seed(time.Now().UnixNano() + 5)
 
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
@@ -383,7 +382,7 @@ func TestExamplesCompleteDisabled(t *testing.T) {
 		VarFiles: varFiles,
 		Vars: map[string]interface{}{
 			"attributes": attributes,
-			"enabled": "false",
+			"enabled":    "false",
 		},
 	}
 

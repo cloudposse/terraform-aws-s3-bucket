@@ -42,10 +42,9 @@ resource "aws_iam_policy" "deployment_iam_policy" {
 }
 
 module "deployment_principal_label" {
-  count = var.privileged_principal_enabled ? 1 : 0
-
   source  = "cloudposse/label/null"
   version = "0.24.1"
+  enabled = var.privileged_principal_enabled
 
   attributes = ["deployment"]
 
@@ -59,15 +58,14 @@ resource "aws_iam_role" "deployment_iam_role" {
 
   assume_role_policy = join("", data.aws_iam_policy_document.deployment_assume_role.*.json)
 
-  tags = module.deployment_principal_label[0].tags
+  tags = module.deployment_principal_label.tags
 }
 
 
 module "additional_deployment_principal_label" {
-  count = var.privileged_principal_enabled ? 1 : 0
-
   source  = "cloudposse/label/null"
   version = "0.24.1"
+  enabled = var.privileged_principal_enabled
 
   attributes = ["deployment", "additional"]
 
@@ -81,7 +79,7 @@ resource "aws_iam_role" "additional_deployment_iam_role" {
 
   assume_role_policy = join("", data.aws_iam_policy_document.deployment_assume_role.*.json)
 
-  tags = module.this.tags
+  tags = module.additional_deployment_principal_label.tags
 }
 
 resource "aws_iam_role_policy_attachment" "additional_deployment_role_attachment" {

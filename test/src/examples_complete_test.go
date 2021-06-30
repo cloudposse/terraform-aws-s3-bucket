@@ -250,7 +250,7 @@ func TestExamplesCompleteWithReplication(t *testing.T) {
 
 func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 4)
+	rand.Seed(time.Now().UnixNano() + 5)
 
 	awsRegion := "us-east-2"
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
@@ -365,7 +365,7 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 
 func TestExamplesCompleteDisabled(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 5)
+	rand.Seed(time.Now().UnixNano() + 6)
 
 	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"

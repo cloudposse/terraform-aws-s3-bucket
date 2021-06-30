@@ -20,7 +20,7 @@ module "s3_bucket" {
   s3_replication_rules         = local.s3_replication_rules
   privileged_principal_arns    = var.privileged_principal_enabled ? {
     (local.principal_names[0]) = [""]
-    (local.principal_names[1]) = ["a/", "b/"]
+    (local.principal_names[1]) = ["prefix1/", "prefix2/"]
   } : {}
   privileged_principal_actions = var.privileged_principal_actions
 

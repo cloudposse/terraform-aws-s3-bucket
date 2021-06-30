@@ -339,8 +339,8 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
             "s3:AbortMultipartUpload"
         ],
         "Resource": [
-            "arn:aws:s3:::eg-test-s3-principals-test-RANDOM_ID/b/*",
-            "arn:aws:s3:::eg-test-s3-principals-test-RANDOM_ID/a/*",
+            "arn:aws:s3:::eg-test-s3-principals-test-RANDOM_ID/prefix1/*",
+            "arn:aws:s3:::eg-test-s3-principals-test-RANDOM_ID/prefix2/*",
             "arn:aws:s3:::eg-test-s3-principals-test-RANDOM_ID"
         ]
     }]

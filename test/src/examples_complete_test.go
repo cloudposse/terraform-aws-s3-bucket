@@ -89,13 +89,6 @@ func TestExamplesCompleteWithGrants(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	// Run `terraform output` to get the value of an output variable
-	userName := terraform.Output(t, terraformOptions, "user_name")
-
-	expectedUserName := "eg-test-s3-grants-test-" + attributes[0]
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedUserName, userName)
-
-	// Run `terraform output` to get the value of an output variable
 	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
 
 	expectedS3BucketId := "eg-test-s3-grants-test-" + attributes[0]
@@ -133,14 +126,6 @@ func TestExamplesCompleteWithObjectLock(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	// Run `terraform output` to get the value of an output variable
-	userName := terraform.Output(t, terraformOptions, "user_name")
-
-	expectedUserName := "eg-test-s3-object-lock-test-" + attributes[0]
-
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedUserName, userName)
-
-	// Run `terraform output` to get the value of an output variable
 	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
 	expectedS3BucketId := "eg-test-s3-object-lock-test-" + attributes[0]
 	// Verify we're getting back the outputs we expect
@@ -174,13 +159,6 @@ func TestExamplesCompleteWithLifecycleRules(t *testing.T) {
 
 	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
 	terraform.InitAndApply(t, terraformOptions)
-
-	// Run `terraform output` to get the value of an output variable
-	userName := terraform.Output(t, terraformOptions, "user_name")
-
-	expectedUserName := "eg-test-s3-lifecycle-test-" + attributes[0]
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedUserName, userName)
 
 	// Run `terraform output` to get the value of an output variable
 	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
@@ -218,13 +196,6 @@ func TestExamplesCompleteWithReplication(t *testing.T) {
 
 	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
 	terraform.InitAndApply(t, terraformOptions)
-
-	// Run `terraform output` to get the value of an output variable
-	userName := terraform.Output(t, terraformOptions, "user_name")
-
-	expectedUserName := "eg-test-s3-replication-test-" + attributes[0]
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedUserName, userName)
 
 	// Run `terraform output` to get the value of an output variable
 	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
@@ -277,13 +248,6 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 
 	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
 	terraform.InitAndApply(t, terraformOptions)
-
-	// Run `terraform output` to get the value of an output variable
-	userName := terraform.Output(t, terraformOptions, "user_name")
-
-	expectedUserName := "eg-test-s3-principals-test-" + attributes[0]
-	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedUserName, userName)
 
 	// Run `terraform output` to get the value of an output variable
 	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")

@@ -12,8 +12,6 @@ acl = "private"
 
 force_destroy = true
 
-versioning_enabled = false
-
 allow_encrypted_uploads_only = true
 
 allowed_bucket_actions = [
@@ -27,10 +25,6 @@ allowed_bucket_actions = [
   "s3:AbortMultipartUpload"
 ]
 
-user_enabled = false
-
-privileged_principal_enabled = true
-
 privileged_principal_actions = [
   "s3:PutObject",
   "s3:PutObjectAcl",
@@ -41,3 +35,9 @@ privileged_principal_actions = [
   "s3:GetBucketLocation",
   "s3:AbortMultipartUpload"
 ]
+
+privileged_principal_enabled = true
+
+versioning_enabled = false
+
+user_enabled = false

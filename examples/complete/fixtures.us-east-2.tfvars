@@ -12,6 +12,8 @@ acl = "private"
 
 force_destroy = true
 
+user_enabled = true
+
 versioning_enabled = false
 
 allow_encrypted_uploads_only = true

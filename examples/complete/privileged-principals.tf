@@ -1,9 +1,13 @@
 locals {
-  account_id      = data.aws_caller_identity.current.account_id
+  account_id = data.aws_caller_identity.current.account_id
   principal_names = [
     "arn:aws:iam::${local.account_id}:role/${join("", module.deployment_principal_label.*.id)}",
     "arn:aws:iam::${local.account_id}:role/${join("", module.additional_deployment_principal_label.*.id)}"
   ]
+  privileged_principal_arns = var.privileged_principal_enabled ? {
+    (local.principal_names[0]) = [""]
+    (local.principal_names[1]) = ["prefix1/", "prefix2/"]
+  } : {}
 }
 
 data "aws_caller_identity" "current" {}

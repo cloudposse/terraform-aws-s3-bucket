@@ -1,5 +1,5 @@
 locals {
-  account_id      = data.aws_caller_identity.current.account_id
+  account_id = data.aws_caller_identity.current.account_id
   principal_names = [
     "arn:aws:iam::${local.account_id}:role/${join("", module.deployment_principal_label.*.id)}",
     "arn:aws:iam::${local.account_id}:role/${join("", module.additional_deployment_principal_label.*.id)}"

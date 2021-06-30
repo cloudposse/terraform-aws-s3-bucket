@@ -16,8 +16,8 @@ data "aws_iam_policy_document" "deployment_assume_role" {
   count = var.privileged_principal_enabled ? 1 : 0
 
   statement {
-    actions   = ["sts:AssumeRole"]
-    effect    = "Allow"
+    actions = ["sts:AssumeRole"]
+    effect  = "Allow"
     principals {
       identifiers = ["ec2.amazonaws.com"] # example: this role can be used in an IAM Instance Profile
       type        = "Service"

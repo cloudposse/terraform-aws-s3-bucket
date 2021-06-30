@@ -111,7 +111,7 @@ Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overvie
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = "private"
   enabled                  = true
   user_enabled             = true
@@ -129,7 +129,7 @@ Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = ""
   enabled                  = true
   user_enabled             = true
@@ -162,7 +162,7 @@ Allowing specific principal ARNs to perform actions on the bucket:
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = "private"
   enabled                  = true
   user_enabled             = true

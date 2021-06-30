@@ -12,21 +12,33 @@ locals {
 
 data "aws_caller_identity" "current" {}
 
+data "aws_iam_policy_document" "deployment_assume_role" {
+  count = var.privileged_principal_enabled ? 1 : 0
+
+  statement {
+    actions   = ["sts:AssumeRole"]
+    effect    = "Allow"
+    principals {
+      identifiers = ["ec2.amazonaws.com"] # example: this role can be used in an IAM Instance Profile
+      type        = "Service"
+    }
+  }
+}
+
+data "aws_iam_policy_document" "deployment_iam_policy" {
+  count = var.privileged_principal_enabled ? 1 : 0
+
+  statement {
+    actions   = var.privileged_principal_actions
+    effect    = "Allow"
+    resources = ["arn:aws:s3:::${module.this.id}*"]
+  }
+}
+
 resource "aws_iam_policy" "deployment_iam_policy" {
   count = var.privileged_principal_enabled ? 1 : 0
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "s3:*",
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:s3:::${module.this.id}*"
-      },
-    ]
-  })
+  policy = join("", data.aws_iam_policy_document.deployment_iam_policy.*.json)
 }
 
 module "deployment_principal_label" {
@@ -45,19 +57,7 @@ resource "aws_iam_role" "deployment_iam_role" {
 
   name = join("", module.deployment_principal_label.*.id)
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
+  assume_role_policy = join("", data.aws_iam_policy_document.deployment_assume_role.*.json)
 
   tags = module.deployment_principal_label[0].tags
 }
@@ -79,19 +79,7 @@ resource "aws_iam_role" "additional_deployment_iam_role" {
 
   name = join("", module.additional_deployment_principal_label.*.id)
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Sid    = ""
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      },
-    ]
-  })
+  assume_role_policy = join("", data.aws_iam_policy_document.deployment_assume_role.*.json)
 
   tags = module.this.tags
 }

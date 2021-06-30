@@ -88,7 +88,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = "private"
     enabled                  = true
     user_enabled             = true
@@ -106,7 +106,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = ""
     enabled                  = true
     user_enabled             = true
@@ -139,7 +139,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = "private"
     enabled                  = true
     user_enabled             = true

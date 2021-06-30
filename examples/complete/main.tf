@@ -5,7 +5,7 @@ provider "aws" {
 module "s3_bucket" {
   source = "../../"
 
-  user_enabled                 = true
+  user_enabled                 = var.user_enabled
   acl                          = var.acl
   force_destroy                = var.force_destroy
   grants                       = var.grants

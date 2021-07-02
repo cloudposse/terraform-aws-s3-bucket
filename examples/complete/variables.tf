@@ -242,7 +242,7 @@ variable "object_lock_configuration" {
 variable "privileged_principal_enabled" {
   type        = bool
   default     = false
-  description = "Whether or not to create allow Privileged Principals to perform actions on the bucket."
+  description = "Whether or not to allow Privileged Principals to perform actions on the bucket"
 }
 
 variable "privileged_principal_actions" {

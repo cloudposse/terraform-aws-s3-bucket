@@ -54,8 +54,7 @@ module "deployment_principal_label" {
 resource "aws_iam_role" "deployment_iam_role" {
   count = var.privileged_principal_enabled ? 1 : 0
 
-  name = join("", module.deployment_principal_label.*.id)
-
+  name               = join("", module.deployment_principal_label.*.id)
   assume_role_policy = join("", data.aws_iam_policy_document.deployment_assume_role.*.json)
 
   tags = module.deployment_principal_label.tags
@@ -75,8 +74,7 @@ module "additional_deployment_principal_label" {
 resource "aws_iam_role" "additional_deployment_iam_role" {
   count = var.privileged_principal_enabled ? 1 : 0
 
-  name = join("", module.additional_deployment_principal_label.*.id)
-
+  name               = join("", module.additional_deployment_principal_label.*.id)
   assume_role_policy = join("", data.aws_iam_policy_document.deployment_assume_role.*.json)
 
   tags = module.additional_deployment_principal_label.tags

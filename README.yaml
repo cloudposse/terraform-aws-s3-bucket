@@ -88,7 +88,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = "private"
     enabled                  = true
     user_enabled             = true
@@ -106,7 +106,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = ""
     enabled                  = true
     user_enabled             = true
@@ -133,6 +133,39 @@ usage: |-
   }
   ```
 
+  Allowing specific principal ARNs to perform actions on the bucket:
+
+  ```hcl
+  module "s3_bucket" {
+    source = "cloudposse/s3-bucket/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version = "x.x.x"
+    acl                      = "private"
+    enabled                  = true
+    user_enabled             = true
+    versioning_enabled       = false
+    allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+    name                     = "app"
+    stage                    = "test"
+    namespace                = "eg"
+
+    privileged_principal_arns = {
+      "arn:aws:iam::123456789012:role/principal1" = ["prefix1/", "prefix2/"]
+      "arn:aws:iam::123456789012:role/principal2" = [""]
+    }
+    privileged_principal_actions = [
+      "s3:PutObject", 
+      "s3:PutObjectAcl", 
+      "s3:GetObject", 
+      "s3:DeleteObject", 
+      "s3:ListBucket", 
+      "s3:ListBucketMultipartUploads", 
+      "s3:GetBucketLocation", 
+      "s3:AbortMultipartUpload"
+    ]
+  }
+  ```
+
 include:
   - "docs/targets.md"
   - "docs/terraform.md"
@@ -147,3 +180,5 @@ contributors:
     github: "maximmi"
   - name: "Josh Myers"
     github: "joshmyers"
+  - name: "Yonatan Koren"
+    github: "korenyoni"

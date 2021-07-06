@@ -194,7 +194,7 @@ resource "aws_s3_bucket" "default" {
           # If the corresponding rule requires no filter, an empty configuration block filter {} must be specified.
           # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
           dynamic "filter" {
-            for_each = try(rules.value.filter, null) == null ? ["empty"] : [rules.value.filter]
+            for_each = try(rules.value.filter, null) == null ? [{ prefix = null, tags = {} }] : [rules.value.filter]
 
             content {
               prefix = try(filter.value.prefix, try(rules.value.prefix, null))

@@ -111,7 +111,7 @@ Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overvie
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = "private"
   enabled                  = true
   user_enabled             = true
@@ -129,7 +129,7 @@ Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = ""
   enabled                  = true
   user_enabled             = true
@@ -152,6 +152,39 @@ module "s3_bucket" {
       permissions = ["READ", "WRITE"]
       uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
     },
+  ]
+}
+```
+
+Allowing specific principal ARNs to perform actions on the bucket:
+
+```hcl
+module "s3_bucket" {
+  source = "cloudposse/s3-bucket/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version = "x.x.x"
+  acl                      = "private"
+  enabled                  = true
+  user_enabled             = true
+  versioning_enabled       = false
+  allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+  name                     = "app"
+  stage                    = "test"
+  namespace                = "eg"
+
+  privileged_principal_arns = {
+    "arn:aws:iam::123456789012:role/principal1" = ["prefix1/", "prefix2/"]
+    "arn:aws:iam::123456789012:role/principal2" = [""]
+  }
+  privileged_principal_actions = [
+    "s3:PutObject", 
+    "s3:PutObjectAcl", 
+    "s3:GetObject", 
+    "s3:DeleteObject", 
+    "s3:ListBucket", 
+    "s3:ListBucketMultipartUploads", 
+    "s3:GetBucketLocation", 
+    "s3:AbortMultipartUpload"
   ]
 }
 ```
@@ -244,6 +277,8 @@ Available targets:
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp' | `string` | `null` | no |
 | <a name="input_object_lock_configuration"></a> [object\_lock\_configuration](#input\_object\_lock\_configuration) | A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely. | <pre>object({<br>    mode  = string # Valid values are GOVERNANCE and COMPLIANCE.<br>    days  = number<br>    years = number<br>  })</pre> | `null` | no |
 | <a name="input_policy"></a> [policy](#input\_policy) | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy | `string` | `""` | no |
+| <a name="input_privileged_principal_actions"></a> [privileged\_principal\_actions](#input\_privileged\_principal\_actions) | List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`) | `list(string)` | `[]` | no |
+| <a name="input_privileged_principal_arns"></a> [privileged\_principal\_arns](#input\_privileged\_principal\_arns) | (Optional) Map of IAM Principal ARNs to lists of S3 path prefixes to grant `privileged_principal_actions` permissions.<br>Resource list will include the bucket itself along with all the prefixes. Prefixes should not begin with '/'. | `map(list(string))` | `{}` | no |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
 | <a name="input_replication_rules"></a> [replication\_rules](#input\_replication\_rules) | DEPRECATED: Use s3\_replication\_rules instead. | `list(any)` | `null` | no |
 | <a name="input_restrict_public_buckets"></a> [restrict\_public\_buckets](#input\_restrict\_public\_buckets) | Set to `false` to disable the restricting of making the bucket public | `bool` | `true` | no |
@@ -427,8 +462,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 ### Contributors
 
 <!-- markdownlint-disable -->
-|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] |
-|---|---|---|---|
+|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] | [![Yonatan Koren][korenyoni_avatar]][korenyoni_homepage]<br/>[Yonatan Koren][korenyoni_homepage] |
+|---|---|---|---|---|
 <!-- markdownlint-restore -->
 
   [osterman_homepage]: https://github.com/osterman
@@ -439,6 +474,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [maximmi_avatar]: https://img.cloudposse.com/150x150/https://github.com/maximmi.png
   [joshmyers_homepage]: https://github.com/joshmyers
   [joshmyers_avatar]: https://img.cloudposse.com/150x150/https://github.com/joshmyers.png
+  [korenyoni_homepage]: https://github.com/korenyoni
+  [korenyoni_avatar]: https://img.cloudposse.com/150x150/https://github.com/korenyoni.png
 
 [![README Footer][readme_footer_img]][readme_footer_link]
 [![Beacon][beacon]][website]

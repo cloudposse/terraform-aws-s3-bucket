@@ -6,19 +6,15 @@ namespace = "eg"
 
 stage = "test"
 
-name = "s3-test"
+name = "s3-principals-test" # s3-privileged-principals-test will hit the name length limit
 
 acl = "private"
 
 force_destroy = true
 
-user_enabled = true
-
-versioning_enabled = false
-
 allow_encrypted_uploads_only = true
 
-allowed_bucket_actions = [
+privileged_principal_actions = [
   "s3:PutObject",
   "s3:PutObjectAcl",
   "s3:GetObject",
@@ -28,3 +24,9 @@ allowed_bucket_actions = [
   "s3:GetBucketLocation",
   "s3:AbortMultipartUpload"
 ]
+
+privileged_principal_enabled = true
+
+versioning_enabled = false
+
+user_enabled = false

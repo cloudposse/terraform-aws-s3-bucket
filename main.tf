@@ -198,7 +198,7 @@ resource "aws_s3_bucket" "default" {
 
             content {
               prefix = try(filter.value.prefix, try(rules.value.prefix, null))
-              tags   = filter.value.tags
+              tags   = try(filter.value.tags, {})
             }
           }
         }

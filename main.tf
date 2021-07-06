@@ -322,6 +322,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       }
     }
   }
+
   dynamic "statement" {
     for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
@@ -332,6 +333,23 @@ data "aws_iam_policy_document" "bucket_policy" {
       principals {
         type        = "AWS"
         identifiers = var.s3_replication_source_roles
+      }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = keys(var.privileged_principal_arns)
+
+    content {
+      sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
+      actions = var.privileged_principal_actions
+      resources = distinct(flatten([
+        "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
+        formatlist("arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", var.privileged_principal_arns[statement.value]),
+      ]))
+      principals {
+        type        = "AWS"
+        identifiers = [statement.value]
       }
     }
   }

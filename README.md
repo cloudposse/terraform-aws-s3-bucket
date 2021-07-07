@@ -28,15 +28,19 @@
 
 -->
 
-This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
+This module creates an S3 bucket with support of versioning, replication, encryption, ACL, and bucket object policy.
 If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
 
-This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
+This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage
+[AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) and
+do not already have IAM credentials. Users or systems that have IAM credentials should either be granted access directly based on
+their IAM identity or be allowed to assume an IAM role with access.
 
 We do not recommend creating IAM users this way for any other purpose.
 
-It blocks public access to the bucket by default.
-https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+This module blocks public access to the bucket by default. See `block_public_acls`, `block_public_policy`,
+and `ignore_public_acls` to change the settings. See [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html)
+for more details.
 
 ---
 
@@ -107,7 +111,7 @@ Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overvie
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = "private"
   enabled                  = true
   user_enabled             = true
@@ -125,7 +129,7 @@ Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
   # Cloud Posse recommends pinning every module to a specific version
-  # version     = "x.x.x"
+  # version = "x.x.x"
   acl                      = ""
   enabled                  = true
   user_enabled             = true
@@ -148,6 +152,39 @@ module "s3_bucket" {
       permissions = ["READ", "WRITE"]
       uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
     },
+  ]
+}
+```
+
+Allowing specific principal ARNs to perform actions on the bucket:
+
+```hcl
+module "s3_bucket" {
+  source = "cloudposse/s3-bucket/aws"
+  # Cloud Posse recommends pinning every module to a specific version
+  # version = "x.x.x"
+  acl                      = "private"
+  enabled                  = true
+  user_enabled             = true
+  versioning_enabled       = false
+  allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+  name                     = "app"
+  stage                    = "test"
+  namespace                = "eg"
+
+  privileged_principal_arns = {
+    "arn:aws:iam::123456789012:role/principal1" = ["prefix1/", "prefix2/"]
+    "arn:aws:iam::123456789012:role/principal2" = [""]
+  }
+  privileged_principal_actions = [
+    "s3:PutObject", 
+    "s3:PutObjectAcl", 
+    "s3:GetObject", 
+    "s3:DeleteObject", 
+    "s3:ListBucket", 
+    "s3:ListBucketMultipartUploads", 
+    "s3:GetBucketLocation", 
+    "s3:AbortMultipartUpload"
   ]
 }
 ```
@@ -240,16 +277,21 @@ Available targets:
 | <a name="input_namespace"></a> [namespace](#input\_namespace) | Namespace, which could be your organization name or abbreviation, e.g. 'eg' or 'cp' | `string` | `null` | no |
 | <a name="input_object_lock_configuration"></a> [object\_lock\_configuration](#input\_object\_lock\_configuration) | A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely. | <pre>object({<br>    mode  = string # Valid values are GOVERNANCE and COMPLIANCE.<br>    days  = number<br>    years = number<br>  })</pre> | `null` | no |
 | <a name="input_policy"></a> [policy](#input\_policy) | A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy | `string` | `""` | no |
+| <a name="input_privileged_principal_actions"></a> [privileged\_principal\_actions](#input\_privileged\_principal\_actions) | List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`) | `list(string)` | `[]` | no |
+| <a name="input_privileged_principal_arns"></a> [privileged\_principal\_arns](#input\_privileged\_principal\_arns) | (Optional) Map of IAM Principal ARNs to lists of S3 path prefixes to grant `privileged_principal_actions` permissions.<br>Resource list will include the bucket itself along with all the prefixes. Prefixes should not begin with '/'. | `map(list(string))` | `{}` | no |
 | <a name="input_regex_replace_chars"></a> [regex\_replace\_chars](#input\_regex\_replace\_chars) | Regex to replace chars with empty string in `namespace`, `environment`, `stage` and `name`.<br>If not set, `"/[^a-zA-Z0-9-]/"` is used to remove all characters other than hyphens, letters and digits. | `string` | `null` | no |
-| <a name="input_replication_rules"></a> [replication\_rules](#input\_replication\_rules) | Specifies the replication rules if S3 bucket replication is enabled | `list(any)` | `null` | no |
+| <a name="input_replication_rules"></a> [replication\_rules](#input\_replication\_rules) | DEPRECATED: Use s3\_replication\_rules instead. | `list(any)` | `null` | no |
 | <a name="input_restrict_public_buckets"></a> [restrict\_public\_buckets](#input\_restrict\_public\_buckets) | Set to `false` to disable the restricting of making the bucket public | `bool` | `true` | no |
-| <a name="input_s3_replica_bucket_arn"></a> [s3\_replica\_bucket\_arn](#input\_s3\_replica\_bucket\_arn) | The ARN of the S3 replica bucket (destination) | `string` | `""` | no |
-| <a name="input_s3_replication_enabled"></a> [s3\_replication\_enabled](#input\_s3\_replication\_enabled) | Set this to true and specify `s3_replica_bucket_arn` to enable replication. `versioning_enabled` must also be `true`. | `bool` | `false` | no |
+| <a name="input_s3_replica_bucket_arn"></a> [s3\_replica\_bucket\_arn](#input\_s3\_replica\_bucket\_arn) | A single S3 bucket ARN to use for all replication rules.<br>Note: The destination bucket can be specified in the replication rule itself<br>(which allows for multiple destinations), in which case it will take precedence over this variable. | `string` | `""` | no |
+| <a name="input_s3_replication_enabled"></a> [s3\_replication\_enabled](#input\_s3\_replication\_enabled) | Set this to true and specify `s3_replication_rules` to enable replication. `versioning_enabled` must also be `true`. | `bool` | `false` | no |
+| <a name="input_s3_replication_rules"></a> [s3\_replication\_rules](#input\_s3\_replication\_rules) | Specifies the replication rules for S3 bucket replication if enabled. You must also set s3\_replication\_enabled to true. | `list(any)` | `null` | no |
+| <a name="input_s3_replication_source_roles"></a> [s3\_replication\_source\_roles](#input\_s3\_replication\_source\_roles) | Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy). | `list(string)` | `[]` | no |
 | <a name="input_sse_algorithm"></a> [sse\_algorithm](#input\_sse\_algorithm) | The server-side encryption algorithm to use. Valid values are `AES256` and `aws:kms` | `string` | `"AES256"` | no |
 | <a name="input_stage"></a> [stage](#input\_stage) | Stage, e.g. 'prod', 'staging', 'dev', OR 'source', 'build', 'test', 'deploy', 'release' | `string` | `null` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Additional tags (e.g. `map('BusinessUnit','XYZ')` | `map(string)` | `{}` | no |
 | <a name="input_user_enabled"></a> [user\_enabled](#input\_user\_enabled) | Set to `true` to create an IAM user with permission to access the bucket | `bool` | `false` | no |
 | <a name="input_versioning_enabled"></a> [versioning\_enabled](#input\_versioning\_enabled) | A state of versioning. Versioning is a means of keeping multiple variants of an object in the same bucket | `bool` | `true` | no |
+| <a name="input_website_inputs"></a> [website\_inputs](#input\_website\_inputs) | Specifies the static website hosting configuration object. | <pre>list(object({<br>    index_document           = string<br>    error_document           = string<br>    redirect_all_requests_to = string<br>    routing_rules            = string<br>  }))</pre> | `null` | no |
 
 ## Outputs
 
@@ -420,8 +462,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 ### Contributors
 
 <!-- markdownlint-disable -->
-|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] |
-|---|---|---|---|
+|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] | [![Yonatan Koren][korenyoni_avatar]][korenyoni_homepage]<br/>[Yonatan Koren][korenyoni_homepage] |
+|---|---|---|---|---|
 <!-- markdownlint-restore -->
 
   [osterman_homepage]: https://github.com/osterman
@@ -432,6 +474,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [maximmi_avatar]: https://img.cloudposse.com/150x150/https://github.com/maximmi.png
   [joshmyers_homepage]: https://github.com/joshmyers
   [joshmyers_avatar]: https://img.cloudposse.com/150x150/https://github.com/joshmyers.png
+  [korenyoni_homepage]: https://github.com/korenyoni
+  [korenyoni_avatar]: https://img.cloudposse.com/150x150/https://github.com/korenyoni.png
 
 [![README Footer][readme_footer_img]][readme_footer_link]
 [![Beacon][beacon]][website]

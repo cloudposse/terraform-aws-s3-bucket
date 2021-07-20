@@ -5,6 +5,8 @@
 
 [![README Header][readme_header_img]][readme_header_link]
 
+cloud support
+
 [![Cloud Posse][logo]](https://cpco.io/homepage)
 
 <!--

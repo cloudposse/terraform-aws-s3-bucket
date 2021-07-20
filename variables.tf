@@ -272,3 +272,9 @@ variable "privileged_principal_actions" {
   default     = []
   description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
 }
+
+variable "transfer_acceleration_enabled" {
+  type        = bool
+  default     = false
+  description = "Set this to true to enable S3 Transfer Acceleration for the bucket."
+}

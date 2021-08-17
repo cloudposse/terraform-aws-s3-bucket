@@ -260,7 +260,7 @@ variable "website_inputs" {
 
 variable "privileged_principal_arns" {
   type        = map(list(string))
-  default     = {}
+  default     = null
   description = <<-EOT
     (Optional) Map of IAM Principal ARNs to lists of S3 path prefixes to grant `privileged_principal_actions` permissions.
     Resource list will include the bucket itself along with all the prefixes. Prefixes should not begin with '/'.

@@ -7,7 +7,7 @@ locals {
   privileged_principal_arns = var.privileged_principal_enabled ? {
     (local.principal_names[0]) = [""]
     (local.principal_names[1]) = ["prefix1/", "prefix2/"]
-  } : {}
+  } : null
 }
 
 data "aws_caller_identity" "current" {}

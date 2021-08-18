@@ -47,3 +47,7 @@ output "user_unique_id" {
   value       = module.s3_bucket.user_unique_id
   description = "The user unique ID assigned by AWS"
 }
+
+output "DEBUG" {
+  value = [var.privileged_principal_enabled,module.s3_bucket.DEBUG-aws_s3_bucket_policy-count]
+}

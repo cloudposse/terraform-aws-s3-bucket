@@ -21,7 +21,7 @@ module "s3_bucket" {
   privileged_principal_actions  = var.privileged_principal_actions
   privileged_principal_arns     = local.privileged_principal_arns
   transfer_acceleration_enabled = true
-  policy = var.policy
+  policy                        = var.policy
 
   context = module.this.context
 }

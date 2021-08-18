@@ -49,5 +49,5 @@ output "user_unique_id" {
 }
 
 output "DEBUG" {
-  value = [var.privileged_principal_enabled,module.s3_bucket.DEBUG-aws_s3_bucket_policy-count]
+  value = [var.privileged_principal_enabled, module.s3_bucket.DEBUG-aws_s3_bucket_policy-count]
 }

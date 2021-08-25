@@ -227,7 +227,7 @@ resource "aws_s3_bucket" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "0.15.2"
+  version = "0.15.3"
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions

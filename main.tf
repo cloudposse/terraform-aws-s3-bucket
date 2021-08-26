@@ -312,7 +312,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
+    for_each = try(var.s3_replication_source_roles[0] != null, false) ? [1] : []
 
     content {
       sid = "CrossAccountReplicationObjects"
@@ -332,7 +332,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
+    for_each = try(var.s3_replication_source_roles[0] != null, false) ? [1] : []
 
     content {
       sid       = "CrossAccountReplicationBucket"
@@ -346,18 +346,18 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = keys(var.privileged_principal_arns)
+    for_each = var.privileged_principal_arns
 
     content {
       sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
         "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
-        formatlist("arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", var.privileged_principal_arns[statement.value]),
+        formatlist("arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", each.value),
       ]))
       principals {
         type        = "AWS"
-        identifiers = [statement.value]
+        identifiers = [each.key]
       }
     }
   }

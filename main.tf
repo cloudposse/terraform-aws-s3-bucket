@@ -370,7 +370,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && jsondecode(join("", data.aws_iam_policy_document.aggregated_policy.*.json)).Statement != null ? 1 : 0
+  count      = local.enabled ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]

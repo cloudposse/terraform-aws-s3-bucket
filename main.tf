@@ -7,6 +7,8 @@ locals {
   # Deprecate `replication_rules` in favor of `s3_replication_rules` to keep all the replication related
   # inputs grouped under s3_replica[tion]
   s3_replication_rules = var.replication_rules == null ? var.s3_replication_rules : var.replication_rules
+
+  public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
 }
 
 resource "aws_s3_bucket" "default" {
@@ -34,8 +36,12 @@ resource "aws_s3_bucket" "default" {
       tags                                   = lifecycle_rule.value.tags
       abort_incomplete_multipart_upload_days = lifecycle_rule.value.abort_incomplete_multipart_upload_days
 
-      noncurrent_version_expiration {
-        days = lifecycle_rule.value.noncurrent_version_expiration_days
+      dynamic "noncurrent_version_expiration" {
+        for_each = lifecycle_rule.value.enable_noncurrent_version_expiration ? [1] : []
+
+        content {
+          days = lifecycle_rule.value.noncurrent_version_expiration_days
+        }
       }
 
       dynamic "noncurrent_version_transition" {
@@ -225,7 +231,7 @@ resource "aws_s3_bucket" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "0.15.2"
+  version = "0.15.3"
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions
@@ -374,7 +380,7 @@ resource "aws_s3_bucket_policy" "default" {
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
 # for the nuances of the blocking options
 resource "aws_s3_bucket_public_access_block" "default" {
-  count  = local.enabled ? 1 : 0
+  count  = module.this.enabled && local.public_access_block_enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   block_public_acls       = var.block_public_acls

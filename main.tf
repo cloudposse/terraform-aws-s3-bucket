@@ -312,7 +312,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = try(var.s3_replication_source_roles[0] != null, false) ? [1] : []
+    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
     content {
       sid = "CrossAccountReplicationObjects"
@@ -332,7 +332,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = try(var.s3_replication_source_roles[0] != null, false) ? [1] : []
+    for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
     content {
       sid       = "CrossAccountReplicationBucket"
@@ -370,7 +370,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && (var.allow_encrypted_uploads_only || var.allow_ssl_requests_only || try(var.s3_replication_source_roles[0] != null, false) || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
+  count      = local.enabled && (var.allow_encrypted_uploads_only || var.allow_ssl_requests_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]

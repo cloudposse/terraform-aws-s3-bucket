@@ -353,11 +353,11 @@ data "aws_iam_policy_document" "bucket_policy" {
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
         "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
-        formatlist("arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", each.value),
+        formatlist("arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", statement.value),
       ]))
       principals {
         type        = "AWS"
-        identifiers = [each.key]
+        identifiers = [statement.key]
       }
     }
   }

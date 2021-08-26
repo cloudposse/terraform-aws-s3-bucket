@@ -370,7 +370,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && jsondecode(join("", data.aws_iam_policy_document.aggregated_policy.*.json)).Statement != null ? 1 : 0
+  count      = local.enabled && var.allow_encrypted_uploads_only && var.allow_ssl_requests_only && try(var.s3_replication_source_roles[0] != null, false) && var.privileged_principal_arns != {} ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]

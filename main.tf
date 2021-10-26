@@ -33,6 +33,7 @@ resource "aws_s3_bucket" "default" {
     content {
       enabled                                = lifecycle_rule.value.enabled
       prefix                                 = lifecycle_rule.value.prefix
+      id                                     = lifecycle_rule.value.id
       tags                                   = lifecycle_rule.value.tags
       abort_incomplete_multipart_upload_days = lifecycle_rule.value.abort_incomplete_multipart_upload_days
 

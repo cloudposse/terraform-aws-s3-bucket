@@ -81,6 +81,7 @@ variable "allow_ssl_requests_only" {
 
 variable "lifecycle_rules" {
   type = list(object({
+    id      = string
     prefix  = string
     enabled = bool
     tags    = map(string)
@@ -105,6 +106,7 @@ variable "lifecycle_rules" {
   }))
   default = [{
     enabled = false
+    id      = null
     prefix  = ""
     tags    = {}
 

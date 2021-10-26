@@ -85,11 +85,13 @@ variable "lifecycle_rules" {
     enabled = bool
     tags    = map(string)
 
-    enable_glacier_transition            = bool
-    enable_deeparchive_transition        = bool
-    enable_standard_ia_transition        = bool
-    enable_current_object_expiration     = bool
-    enable_noncurrent_version_expiration = bool
+    enable_glacier_transition                        = bool
+    enable_deeparchive_transition                    = bool
+    enable_standard_ia_transition                    = bool
+    enable_current_object_expiration                 = bool
+    enable_noncurrent_version_expiration             = bool
+    enable_noncurrent_version_glacier_transition     = bool
+    enable_noncurrent_version_deeparchive_transition = bool
 
     abort_incomplete_multipart_upload_days         = number
     noncurrent_version_glacier_transition_days     = number
@@ -106,11 +108,13 @@ variable "lifecycle_rules" {
     prefix  = ""
     tags    = {}
 
-    enable_glacier_transition            = true
-    enable_deeparchive_transition        = false
-    enable_standard_ia_transition        = false
-    enable_current_object_expiration     = true
-    enable_noncurrent_version_expiration = true
+    enable_glacier_transition                        = true
+    enable_deeparchive_transition                    = false
+    enable_standard_ia_transition                    = false
+    enable_current_object_expiration                 = true
+    enable_noncurrent_version_expiration             = true
+    enable_noncurrent_version_glacier_transition     = true
+    enable_noncurrent_version_deeparchive_transition = false
 
     abort_incomplete_multipart_upload_days         = 90
     noncurrent_version_glacier_transition_days     = 30

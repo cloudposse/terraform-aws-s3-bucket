@@ -45,7 +45,7 @@ resource "aws_s3_bucket" "default" {
       }
 
       dynamic "noncurrent_version_transition" {
-        for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+        for_each = lifecycle_rule.value.enable_noncurrent_version_glacier_transition ? [1] : []
 
         content {
           days          = lifecycle_rule.value.noncurrent_version_glacier_transition_days
@@ -54,7 +54,7 @@ resource "aws_s3_bucket" "default" {
       }
 
       dynamic "noncurrent_version_transition" {
-        for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+        for_each = lifecycle_rule.value.enable_noncurrent_version_deeparchive_transition ? [1] : []
 
         content {
           days          = lifecycle_rule.value.noncurrent_version_deeparchive_transition_days

@@ -216,7 +216,6 @@ func TestExamplesCompleteWithReplication(t *testing.T) {
 
 	// Verify we're getting back the outputs we expect
 	assert.NotEmptyf(t, s3ReplicationRoleArn, "If replication is enabled, we should get a Replication Role ARN.")
-
 }
 
 func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
@@ -373,5 +372,4 @@ func TestExamplesCompleteDisabled(t *testing.T) {
 
 	// Verify we're getting back the outputs we expect
 	assert.Empty(t, s3ReplicationBucketId, "When disabled, module should have no outputs.")
-
 }

@@ -388,3 +388,21 @@ resource "aws_s3_bucket_public_access_block" "default" {
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
 }
+
+# Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html
+resource "aws_s3_bucket_ownership_controls" "default" {
+  count  = local.enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  rule {
+    object_ownership = var.s3_object_ownership
+  }
+  depends_on = [time_sleep.wait_for_aws_s3_bucket_policy]
+}
+
+# Workaround S3 eventual consistency for settings objects
+resource "time_sleep" "wait_for_aws_s3_bucket_policy" {
+  depends_on       = [aws_s3_bucket_policy.default]
+  create_duration  = "30s"
+  destroy_duration = "30s"
+}

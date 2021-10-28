@@ -404,6 +404,6 @@ resource "aws_s3_bucket_ownership_controls" "default" {
 resource "time_sleep" "wait_for_aws_s3_bucket_policy" {
   count            = module.this.enabled ? 1 : 0
   depends_on       = [aws_s3_bucket_policy.default]
-  create_duration  = "30s"
-  destroy_duration = "30s"
+  create_duration  = "1m"
+  destroy_duration = "1m"
 }

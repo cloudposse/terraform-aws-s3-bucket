@@ -397,13 +397,13 @@ resource "aws_s3_bucket_ownership_controls" "default" {
   rule {
     object_ownership = var.s3_object_ownership
   }
-  depends_on = [time_sleep.wait_for_aws_s3_bucket_policy]
+  depends_on = [time_sleep.wait_for_aws_s3_bucket_settings]
 }
 
 # Workaround S3 eventual consistency for settings objects
-resource "time_sleep" "wait_for_aws_s3_bucket_policy" {
-  count            = module.this.enabled ? 1 : 0
-  depends_on       = [aws_s3_bucket_policy.default]
-  create_duration  = "1m"
-  destroy_duration = "1m"
+resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
+  count            = local.enabled ? 1 : 0
+  depends_on       = [aws_s3_bucket_public_access_block.default, aws_s3_bucket_policy.default]
+  create_duration  = "30s"
+  destroy_duration = "30s"
 }

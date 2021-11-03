@@ -252,3 +252,9 @@ variable "privileged_principal_actions" {
   default     = []
   description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
 }
+
+variable "bucket_key_enabled" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use Amazon S3 Bucket Keys for SSE-KMS that reduces the cost of SSE-KMS with Amazon S3 Bucket Keys. Refer https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html"
+}

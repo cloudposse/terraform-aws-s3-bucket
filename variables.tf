@@ -286,3 +286,9 @@ variable "s3_object_ownership" {
   default     = "ObjectWriter"
   description = "Specifies the S3 object ownership control. Valid values are `ObjectWriter` and `BucketOwnerPreferred`"
 }
+
+variable "bucket_key_enabled" {
+  type        = bool
+  default     = false
+  description = "Set this to true to use Amazon S3 Bucket Keys for SSE-KMS that reduces the cost of SSE-KMS with Amazon S3 Bucket Keys. Refer https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html"
+}

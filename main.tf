@@ -25,11 +25,11 @@ resource "aws_s3_bucket" "default" {
   acceleration_status = var.transfer_acceleration_enabled ? "Enabled" : null
 
   dynamic "versioning" {
-      for_each = var.versioning_enabled ? [true] : []
-      content {
-        enabled = true
-      }
+    for_each = var.versioning_enabled ? [true] : []
+    content {
+      enabled = true
     }
+  }
 
   dynamic "lifecycle_rule" {
     for_each = var.lifecycle_rules

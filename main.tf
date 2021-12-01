@@ -47,7 +47,7 @@ resource "aws_s3_bucket" "default" {
     }
 
     dynamic "transition" {
-      for_each = var.enable_glacier_transition && var.enable_intelligent_tiering_transition != true ? [1] : []
+      for_each = var.enable_glacier_transition && var.glacier_transition_days != null ? [1] : []
 
       content {
         days          = var.glacier_transition_days

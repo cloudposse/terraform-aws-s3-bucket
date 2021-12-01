@@ -29,15 +29,6 @@ resource "aws_s3_bucket" "default" {
     }
 
     dynamic "noncurrent_version_transition" {
-      for_each = var.enable_glacier_transition ? [1] : []
-
-      content {
-        days          = var.noncurrent_version_glacier_transition_days
-        storage_class = "GLACIER"
-      }
-    }
-
-    dynamic "noncurrent_version_transition" {
       for_each = var.enable_deeparchive_transition ? [1] : []
 
       content {

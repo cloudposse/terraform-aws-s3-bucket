@@ -56,7 +56,7 @@ resource "aws_s3_bucket" "default" {
     }
 
     dynamic "transition" {
-      for_each = var.enable_deeparchive_transition ? [1] : []
+      for_each = var.enable_deeparchive_transition && var.deeparchive_transition_days != null ? [1] : []
 
       content {
         days          = var.deeparchive_transition_days

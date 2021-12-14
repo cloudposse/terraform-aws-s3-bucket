@@ -24,8 +24,11 @@ resource "aws_s3_bucket" "default" {
   tags                = module.this.tags
   acceleration_status = var.transfer_acceleration_enabled ? "Enabled" : null
 
-  versioning {
-    enabled = var.versioning_enabled
+  dynamic "versioning" {
+    for_each = var.versioning_enabled ? [true] : []
+    content {
+      enabled = true
+    }
   }
 
   dynamic "lifecycle_rule" {
@@ -232,7 +235,7 @@ resource "aws_s3_bucket" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "0.15.5"
+  version = "0.15.7"
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions
@@ -388,4 +391,23 @@ resource "aws_s3_bucket_public_access_block" "default" {
   block_public_policy     = var.block_public_policy
   ignore_public_acls      = var.ignore_public_acls
   restrict_public_buckets = var.restrict_public_buckets
+}
+
+# Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html
+resource "aws_s3_bucket_ownership_controls" "default" {
+  count  = local.enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  rule {
+    object_ownership = var.s3_object_ownership
+  }
+  depends_on = [time_sleep.wait_for_aws_s3_bucket_settings]
+}
+
+# Workaround S3 eventual consistency for settings objects
+resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
+  count            = local.enabled ? 1 : 0
+  depends_on       = [aws_s3_bucket_public_access_block.default, aws_s3_bucket_policy.default]
+  create_duration  = "30s"
+  destroy_duration = "30s"
 }

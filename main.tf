@@ -9,6 +9,9 @@ locals {
   s3_replication_rules = var.replication_rules == null ? var.s3_replication_rules : var.replication_rules
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
+
+  # Try to return the first element, if that doesn't work, try the tostring approach
+  policy = try(var.policy[0], tostring(var.policy), "{}")
 }
 
 resource "aws_s3_bucket" "default" {
@@ -368,12 +371,12 @@ data "aws_iam_policy_document" "bucket_policy" {
 
 data "aws_iam_policy_document" "aggregated_policy" {
   count         = local.enabled ? 1 : 0
-  source_json   = var.policy
+  source_json   = local.policy
   override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
+  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || length(var.policy) > 0) ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]

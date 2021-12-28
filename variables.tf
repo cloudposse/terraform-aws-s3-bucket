@@ -17,9 +17,19 @@ variable "grants" {
 }
 
 variable "policy" {
-  type        = string
-  default     = ""
-  description = "A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+  type        = any
+  default     = []
+  description = <<-EOT
+  JSON string representation of the bucket policy for this bucket as list of string (0 or 1 items).
+
+  If empty, no custom bucket policy document will be used. If the list contains a single document, a custom IAM policy will
+  be created and attached to the bucket.
+
+  Can also be a plain string, but that use is DEPRECATED because of Terraform issues (see: https://github.com/hashicorp/terraform/issues/26755#issuecomment-719103775).
+
+  Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly
+  changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy.
+  EOT
 }
 
 variable "force_destroy" {

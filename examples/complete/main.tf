@@ -7,6 +7,7 @@ module "s3_bucket" {
 
   user_enabled                  = var.user_enabled
   acl                           = var.acl
+  policy                        = var.policy
   force_destroy                 = var.force_destroy
   grants                        = var.grants
   lifecycle_rules               = var.lifecycle_rules

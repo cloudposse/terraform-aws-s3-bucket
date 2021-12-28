@@ -28,3 +28,22 @@ allowed_bucket_actions = [
   "s3:GetBucketLocation",
   "s3:AbortMultipartUpload"
 ]
+
+policy = [
+  <<-EOT
+  {
+    "Version": "2012-10-17",
+    "Id": "123",
+    "Statement": [
+      {
+        "Sid": "",
+        "Effect": "Deny",
+        "Principal": "*",
+        "Action": "s3:*",
+        "Resource": "*",
+        "Condition": { "Null": { "aws:MultiFactorAuthAge": true }}
+      }
+    ]
+  }
+  EOT
+]

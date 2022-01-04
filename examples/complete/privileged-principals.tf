@@ -45,7 +45,8 @@ resource "aws_iam_policy" "deployment_iam_policy" {
 
 module "deployment_principal_label" {
   source  = "cloudposse/label/null"
-  version = "0.24.1"
+  version = "0.25.0"
+
   enabled = var.privileged_principal_enabled
 
   attributes = ["deployment"]

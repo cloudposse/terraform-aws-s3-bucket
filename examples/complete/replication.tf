@@ -1,5 +1,6 @@
 locals {
   replication_enabled = length(var.s3_replication_rules) > 0
+
   extra_rule = local.replication_enabled ? {
     id                 = "replication-test-explicit-bucket"
     status             = "Enabled"
@@ -7,6 +8,7 @@ locals {
     priority           = 5
     destination_bucket = module.s3_bucket_replication_target_extra[0].bucket_arn
   } : null
+
   s3_replication_rules = local.replication_enabled ? concat(var.s3_replication_rules, [local.extra_rule]) : null
 }
 

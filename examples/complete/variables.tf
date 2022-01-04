@@ -18,8 +18,8 @@ variable "grants" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    prefix  = string
     enabled = bool
+    prefix  = string
     tags    = map(string)
 
     enable_glacier_transition            = bool

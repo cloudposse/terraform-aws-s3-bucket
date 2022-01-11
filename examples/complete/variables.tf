@@ -16,6 +16,58 @@ variable "grants" {
   description = "A list of ACL policy grants. Conflicts with `acl`. Set `acl` to `null` to use this."
 }
 
+variable "lifecycle_rules" {
+  type = list(object({
+    enabled = bool
+    prefix  = string
+    tags    = map(string)
+
+    enable_glacier_transition            = bool
+    enable_deeparchive_transition        = bool
+    enable_standard_ia_transition        = bool
+    enable_current_object_expiration     = bool
+    enable_noncurrent_version_expiration = bool
+
+    abort_incomplete_multipart_upload_days         = number
+    noncurrent_version_glacier_transition_days     = number
+    noncurrent_version_deeparchive_transition_days = number
+    noncurrent_version_expiration_days             = number
+
+    standard_transition_days    = number
+    glacier_transition_days     = number
+    deeparchive_transition_days = number
+    expiration_days             = number
+  }))
+  default = [{
+    enabled = false
+    prefix  = ""
+    tags    = {}
+
+    enable_glacier_transition            = true
+    enable_deeparchive_transition        = false
+    enable_standard_ia_transition        = false
+    enable_current_object_expiration     = true
+    enable_noncurrent_version_expiration = true
+
+    abort_incomplete_multipart_upload_days         = 90
+    noncurrent_version_glacier_transition_days     = 30
+    noncurrent_version_deeparchive_transition_days = 60
+    noncurrent_version_expiration_days             = 90
+
+    standard_transition_days    = 30
+    glacier_transition_days     = 60
+    deeparchive_transition_days = 90
+    expiration_days             = 90
+  }]
+
+  description = "A list of lifecycle rules."
+}
+
+variable "s3_replication_rules" {
+  default     = []
+  description = "S3 replication rules"
+}
+
 variable "policy" {
   type        = string
   default     = ""
@@ -171,4 +223,32 @@ variable "restrict_public_buckets" {
   type        = bool
   default     = true
   description = "Set to `false` to disable the restricting of making the bucket public"
+}
+
+variable "bucket_name" {
+  type        = string
+  default     = null
+  description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
+}
+
+variable "object_lock_configuration" {
+  type = object({
+    mode  = string # Valid values are GOVERNANCE and COMPLIANCE.
+    days  = number
+    years = number
+  })
+  default     = null
+  description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+}
+
+variable "privileged_principal_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether or not to allow Privileged Principals to perform actions on the bucket"
+}
+
+variable "privileged_principal_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
 }

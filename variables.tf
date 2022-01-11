@@ -30,12 +30,6 @@ variable "acl" {
   description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
 }
 
-variable "bucket_name" {
-  type        = string
-  default     = ""
-  description = "The name of the bucket. If omitted, Terraform will assign a random, unique name. Must be less than or equal to 63 characters in length."
-}
-
 variable "grants" {
   type = list(object({
     id          = string
@@ -105,34 +99,56 @@ variable "allow_encrypted_uploads_only" {
   description = "Set to `true` to prevent uploads of unencrypted objects to S3 bucket"
 }
 
-variable "lifecycle_rule_enabled" {
+variable "allow_ssl_requests_only" {
   type        = bool
   default     = false
-  description = "Enable or disable lifecycle rule"
+  description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
 }
 
-variable "prefix" {
-  type        = string
-  default     = ""
-  description = "Prefix identifying one or more objects to which the rule applies"
-}
+variable "lifecycle_rules" {
+  type = list(object({
+    prefix  = string
+    enabled = bool
+    tags    = map(string)
 
-variable "noncurrent_version_glacier_transition_days" {
-  type        = number
-  default     = 30
-  description = "Number of days to persist in the standard storage tier before moving to the glacier infrequent access tier"
-}
+    enable_glacier_transition            = bool
+    enable_deeparchive_transition        = bool
+    enable_standard_ia_transition        = bool
+    enable_current_object_expiration     = bool
+    enable_noncurrent_version_expiration = bool
 
-variable "noncurrent_version_deeparchive_transition_days" {
-  type        = number
-  default     = 60
-  description = "Number of days to persist in the standard storage tier before moving to the glacier deeparchive access tier"
-}
+    abort_incomplete_multipart_upload_days         = number
+    noncurrent_version_glacier_transition_days     = number
+    noncurrent_version_deeparchive_transition_days = number
+    noncurrent_version_expiration_days             = number
 
-variable "noncurrent_version_expiration_days" {
-  type        = number
-  default     = 90
-  description = "Specifies when noncurrent object versions expire"
+    standard_transition_days    = number
+    glacier_transition_days     = number
+    deeparchive_transition_days = number
+    expiration_days             = number
+  }))
+  default = [{
+    enabled = false
+    prefix  = ""
+    tags    = {}
+
+    enable_glacier_transition            = true
+    enable_deeparchive_transition        = false
+    enable_standard_ia_transition        = false
+    enable_current_object_expiration     = true
+    enable_noncurrent_version_expiration = true
+
+    abort_incomplete_multipart_upload_days         = 90
+    noncurrent_version_glacier_transition_days     = 30
+    noncurrent_version_deeparchive_transition_days = 60
+    noncurrent_version_expiration_days             = 90
+
+    standard_transition_days    = 30
+    glacier_transition_days     = 60
+    deeparchive_transition_days = 90
+    expiration_days             = 90
+  }]
+  description = "A list of lifecycle rules"
 }
 
 variable "cors_rule_inputs" {
@@ -148,81 +164,10 @@ variable "cors_rule_inputs" {
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }
 
-variable "standard_transition_days" {
-  type        = number
-  default     = 30
-  description = "Number of days to persist in the standard storage tier before moving to the infrequent access tier"
-}
-
-variable "intelligent_tiering_transition_days" {
-  type        = number
-  default     = 30
-  description = "Number of days to persist in the intelligent tiering storage tier"
-}
-
-variable "glacier_transition_days" {
-  type        = number
-  default     = 1095
-  description = "Number of days after which to move the data to the glacier storage tier"
-}
-
-variable "deeparchive_transition_days" {
-  type        = number
-  default     = 90
-  description = "Number of days after which to move the data to the glacier deep archive storage tier"
-}
-
-variable "enable_glacier_transition" {
-  type        = bool
-  default     = false
-  description = "Enables the transition to AWS Glacier which can cause unnecessary costs for huge amount of small files"
-}
-
-variable "enable_intelligent_tiering_transition" {
-  type        = bool
-  default     = false
-  description = "Enables the transition to AWS Intelligent Tiering"
-}
-
-variable "enable_deeparchive_transition" {
-  type        = bool
-  default     = false
-  description = "Enables the transition to AWS Glacier Deep Archive which can cause unnecessary costs for huge amount of small files"
-}
-variable "enable_standard_ia_transition" {
-  type        = bool
-  default     = false
-  description = "Enables the transition to STANDARD_IA"
-}
-
-variable "enable_current_object_expiration" {
-  type        = bool
-  default     = false
-  description = "Enables the expiration of current objects"
-}
-
-variable "enable_non_current_object_expiration" {
-  type        = bool
-  default     = false
-  description = "Enables the expiration of current objects"
-}
-
-variable "expiration_days" {
-  type        = number
-  default     = 90
-  description = "Number of days after which to expunge the objects"
-}
-
 variable "abort_incomplete_multipart_upload_days" {
   type        = number
   default     = 5
   description = "Maximum time (in days) that you want to allow multipart uploads to remain in progress"
-}
-
-variable "lifecycle_tags" {
-  type        = map(string)
-  description = "Tags filter. Used to manage object lifecycle events"
-  default     = {}
 }
 
 variable "block_public_acls" {
@@ -252,21 +197,30 @@ variable "restrict_public_buckets" {
 variable "s3_replication_enabled" {
   type        = bool
   default     = false
-  description = "Set this to true and specify `s3_replica_bucket_arn` to enable replication. `versioning_enabled` must also be `true`."
+  description = "Set this to true and specify `s3_replication_rules` to enable replication. `versioning_enabled` must also be `true`."
 }
 
 variable "s3_replica_bucket_arn" {
   type        = string
   default     = ""
-  description = "The ARN of the S3 replica bucket (destination)"
+  description = <<-EOT
+    A single S3 bucket ARN to use for all replication rules.
+    Note: The destination bucket can be specified in the replication rule itself
+    (which allows for multiple destinations), in which case it will take precedence over this variable.
+    EOT
 }
 
-variable "replication_rules" {
+variable "s3_replication_rules" {
   # type = list(object({
   #   id          = string
   #   priority    = number
   #   prefix      = string
   #   status      = string
+  #   delete_marker_replication_status = string
+  #   # destination_bucket is specified here rather than inside the destination object
+  #   # to make it easier to work with the Terraform type system and create a list of consistent type.
+  #   destination_bucket = string # destination bucket ARN, overrides s3_replica_bucket_arn
+  #
   #   destination = object({
   #     storage_class              = string
   #     replica_kms_key_id         = string
@@ -280,6 +234,7 @@ variable "replication_rules" {
   #       enabled = bool
   #     })
   #   })
+  #   # filter.prefix overrides top level prefix
   #   filter = object({
   #     prefix = string
   #     tags = map(string)
@@ -288,5 +243,73 @@ variable "replication_rules" {
 
   type        = list(any)
   default     = null
-  description = "Specifies the replication rules if S3 bucket replication is enabled"
+  description = "Specifies the replication rules for S3 bucket replication if enabled. You must also set s3_replication_enabled to true."
+}
+
+variable "replication_rules" {
+  type        = list(any)
+  default     = null
+  description = "DEPRECATED: Use s3_replication_rules instead."
+}
+
+variable "s3_replication_source_roles" {
+  type        = list(string)
+  default     = []
+  description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy)."
+}
+
+variable "bucket_name" {
+  type        = string
+  default     = null
+  description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
+}
+
+variable "object_lock_configuration" {
+  type = object({
+    mode  = string # Valid values are GOVERNANCE and COMPLIANCE.
+    days  = number
+    years = number
+  })
+  default     = null
+  description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+}
+
+variable "website_inputs" {
+
+  type = list(object({
+    index_document           = string
+    error_document           = string
+    redirect_all_requests_to = string
+    routing_rules            = string
+  }))
+  default = null
+
+  description = "Specifies the static website hosting configuration object."
+}
+
+variable "privileged_principal_arns" {
+  type        = map(list(string))
+  default     = {}
+  description = <<-EOT
+    (Optional) Map of IAM Principal ARNs to lists of S3 path prefixes to grant `privileged_principal_actions` permissions.
+    Resource list will include the bucket itself along with all the prefixes. Prefixes should not begin with '/'.
+    EOT
+}
+
+variable "privileged_principal_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
+}
+
+variable "transfer_acceleration_enabled" {
+  type        = bool
+  default     = false
+  description = "Set this to true to enable S3 Transfer Acceleration for the bucket."
+}
+
+variable "s3_object_ownership" {
+  type        = string
+  default     = "ObjectWriter"
+  description = "Specifies the S3 object ownership control. Valid values are `ObjectWriter` and `BucketOwnerPreferred`"
 }

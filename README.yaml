@@ -66,15 +66,19 @@ related:
 
 # Short description of this project
 description: |-
-  This module creates an S3 bucket with support of versioning, encryption, ACL and bucket object policy.
+  This module creates an S3 bucket with support of versioning, replication, encryption, ACL, and bucket object policy.
   If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
 
-  This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html).
+  This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage
+  [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) and
+  do not already have IAM credentials. Users or systems that have IAM credentials should either be granted access directly based on
+  their IAM identity or be allowed to assume an IAM role with access.
 
   We do not recommend creating IAM users this way for any other purpose.
 
-  It blocks public access to the bucket by default.
-  https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html
+  This module blocks public access to the bucket by default. See `block_public_acls`, `block_public_policy`,
+  and `ignore_public_acls` to change the settings. See [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html)
+  for more details.
 
 # How to use this project
 usage: |-
@@ -84,7 +88,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = "private"
     enabled                  = true
     user_enabled             = true
@@ -102,7 +106,7 @@ usage: |-
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
-    # version     = "x.x.x"
+    # version = "x.x.x"
     acl                      = ""
     enabled                  = true
     user_enabled             = true
@@ -129,6 +133,39 @@ usage: |-
   }
   ```
 
+  Allowing specific principal ARNs to perform actions on the bucket:
+
+  ```hcl
+  module "s3_bucket" {
+    source = "cloudposse/s3-bucket/aws"
+    # Cloud Posse recommends pinning every module to a specific version
+    # version = "x.x.x"
+    acl                      = "private"
+    enabled                  = true
+    user_enabled             = true
+    versioning_enabled       = false
+    allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+    name                     = "app"
+    stage                    = "test"
+    namespace                = "eg"
+
+    privileged_principal_arns = {
+      "arn:aws:iam::123456789012:role/principal1" = ["prefix1/", "prefix2/"]
+      "arn:aws:iam::123456789012:role/principal2" = [""]
+    }
+    privileged_principal_actions = [
+      "s3:PutObject", 
+      "s3:PutObjectAcl", 
+      "s3:GetObject", 
+      "s3:DeleteObject", 
+      "s3:ListBucket", 
+      "s3:ListBucketMultipartUploads", 
+      "s3:GetBucketLocation", 
+      "s3:AbortMultipartUpload"
+    ]
+  }
+  ```
+
 include:
   - "docs/targets.md"
   - "docs/terraform.md"
@@ -143,3 +180,5 @@ contributors:
     github: "maximmi"
   - name: "Josh Myers"
     github: "joshmyers"
+  - name: "Yonatan Koren"
+    github: "korenyoni"

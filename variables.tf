@@ -190,6 +190,7 @@ variable "s3_replication_rules" {
   #   priority    = number
   #   prefix      = string
   #   status      = string
+  #   delete_marker_replication_status = string
   #   # destination_bucket is specified here rather than inside the destination object
   #   # to make it easier to work with the Terraform type system and create a list of consistent type.
   #   destination_bucket = string # destination bucket ARN, overrides s3_replica_bucket_arn

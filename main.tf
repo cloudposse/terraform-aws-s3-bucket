@@ -176,6 +176,7 @@ resource "aws_s3_bucket" "default" {
           # is required even if it empty, so we always implement `prefix` as a filter.
           # OBSOLETE: prefix   = try(rules.value.prefix, null)
           status = try(rules.value.status, null)
+          delete_marker_replication_status = try(rules.value.delete_marker_replication_status, null)
 
           destination {
             # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with

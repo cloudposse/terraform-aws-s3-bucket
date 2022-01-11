@@ -30,12 +30,6 @@ variable "acl" {
   description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
 }
 
-variable "bucket_name" {
-  type        = string
-  default     = ""
-  description = "The name of the bucket. If omitted, Terraform will assign a random, unique name. Must be less than or equal to 63 characters in length."
-}
-
 variable "grants" {
   type = list(object({
     id          = string
@@ -222,6 +216,7 @@ variable "s3_replication_rules" {
   #   priority    = number
   #   prefix      = string
   #   status      = string
+  #   delete_marker_replication_status = string
   #   # destination_bucket is specified here rather than inside the destination object
   #   # to make it easier to work with the Terraform type system and create a list of consistent type.
   #   destination_bucket = string # destination bucket ARN, overrides s3_replica_bucket_arn

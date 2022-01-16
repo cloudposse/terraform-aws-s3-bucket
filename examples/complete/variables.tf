@@ -250,5 +250,9 @@ variable "privileged_principal_actions" {
 variable "bucket_key_enabled" {
   type        = bool
   default     = false
-  description = "Set this to true to use Amazon S3 Bucket Keys for SSE-KMS that reduces the cost of SSE-KMS with Amazon S3 Bucket Keys. Refer https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html"
+  description = <<-EOT
+  Set this to true to use Amazon S3 Bucket Keys for SSE-KMS, which reduce the cost of AWS KMS requests.
+
+  For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
+  EOT
 }

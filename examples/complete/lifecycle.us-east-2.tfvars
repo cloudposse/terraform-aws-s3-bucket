@@ -69,5 +69,3 @@ allowed_bucket_actions = [
   "s3:GetBucketLocation",
   "s3:AbortMultipartUpload"
 ]
-
-bucket_key_enabled = true

@@ -5,12 +5,27 @@ output "bucket_domain_name" {
 
 output "bucket_id" {
   value       = module.s3_bucket.bucket_id
-  description = "Bucket Name (aka ID)"
+  description = "Bucket ID"
 }
 
 output "bucket_arn" {
   value       = module.s3_bucket.bucket_arn
   description = "Bucket ARN"
+}
+
+output "replication_bucket_id" {
+  value       = local.replication_enabled ? join("", module.s3_bucket_replication_target.*.bucket_id) : null
+  description = "Replication bucket ID"
+}
+
+output "replication_bucket_arn" {
+  value       = local.replication_enabled ? join("", module.s3_bucket_replication_target.*.bucket_arn) : null
+  description = "Replication bucket bucket ARN"
+}
+
+output "replication_role_arn" {
+  value       = module.s3_bucket.replication_role_arn
+  description = "The ARN of the replication IAM Role"
 }
 
 output "bucket_region" {

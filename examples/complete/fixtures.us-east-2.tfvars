@@ -1,16 +1,22 @@
-region = "us-west-1"
+enabled = true
+
+region = "us-east-2"
 
 namespace = "eg"
 
 stage = "test"
 
-name = "s3-object-lock-test"
+name = "s3-test"
 
 acl = "private"
 
-force_destroy = false
+force_destroy = true
 
-versioning_enabled = true
+user_enabled = true
+
+versioning_enabled = false
+
+allow_encrypted_uploads_only = true
 
 allowed_bucket_actions = [
   "s3:PutObject",
@@ -22,9 +28,3 @@ allowed_bucket_actions = [
   "s3:GetBucketLocation",
   "s3:AbortMultipartUpload"
 ]
-
-object_lock_configuration = {
-  mode  = "GOVERNANCE"
-  days  = 366
-  years = null
-}

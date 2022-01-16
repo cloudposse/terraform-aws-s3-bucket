@@ -18,14 +18,15 @@ variable "grants" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    prefix  = string
     enabled = bool
+    prefix  = string
     tags    = map(string)
 
-    enable_glacier_transition        = bool
-    enable_deeparchive_transition    = bool
-    enable_standard_ia_transition    = bool
-    enable_current_object_expiration = bool
+    enable_glacier_transition            = bool
+    enable_deeparchive_transition        = bool
+    enable_standard_ia_transition        = bool
+    enable_current_object_expiration     = bool
+    enable_noncurrent_version_expiration = bool
 
     abort_incomplete_multipart_upload_days         = number
     noncurrent_version_glacier_transition_days     = number
@@ -42,10 +43,11 @@ variable "lifecycle_rules" {
     prefix  = ""
     tags    = {}
 
-    enable_glacier_transition        = true
-    enable_deeparchive_transition    = false
-    enable_standard_ia_transition    = false
-    enable_current_object_expiration = true
+    enable_glacier_transition            = true
+    enable_deeparchive_transition        = false
+    enable_standard_ia_transition        = false
+    enable_current_object_expiration     = true
+    enable_noncurrent_version_expiration = true
 
     abort_incomplete_multipart_upload_days         = 90
     noncurrent_version_glacier_transition_days     = 30
@@ -59,6 +61,11 @@ variable "lifecycle_rules" {
   }]
 
   description = "A list of lifecycle rules."
+}
+
+variable "s3_replication_rules" {
+  default     = []
+  description = "S3 replication rules"
 }
 
 variable "policy" {
@@ -226,4 +233,16 @@ variable "object_lock_configuration" {
   })
   default     = null
   description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+}
+
+variable "privileged_principal_enabled" {
+  type        = bool
+  default     = false
+  description = "Whether or not to allow Privileged Principals to perform actions on the bucket"
+}
+
+variable "privileged_principal_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
 }

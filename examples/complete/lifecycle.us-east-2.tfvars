@@ -1,4 +1,4 @@
-region = "us-west-1"
+region = "us-east-2"
 
 namespace = "eg"
 
@@ -14,10 +14,11 @@ lifecycle_rules = [
     enabled = true
     tags    = { "temp" : "true" }
 
-    enable_glacier_transition        = false
-    enable_deeparchive_transition    = false
-    enable_standard_ia_transition    = false
-    enable_current_object_expiration = true
+    enable_glacier_transition            = false
+    enable_deeparchive_transition        = false
+    enable_standard_ia_transition        = false
+    enable_current_object_expiration     = true
+    enable_noncurrent_version_expiration = true
 
     abort_incomplete_multipart_upload_days         = null
     noncurrent_version_glacier_transition_days     = 0
@@ -34,10 +35,11 @@ lifecycle_rules = [
     enabled = true
     tags    = {}
 
-    enable_glacier_transition        = false
-    enable_deeparchive_transition    = false
-    enable_standard_ia_transition    = false
-    enable_current_object_expiration = true
+    enable_glacier_transition            = false
+    enable_deeparchive_transition        = false
+    enable_standard_ia_transition        = false
+    enable_current_object_expiration     = true
+    enable_noncurrent_version_expiration = true
 
     abort_incomplete_multipart_upload_days         = 1
     noncurrent_version_glacier_transition_days     = 0
@@ -57,4 +59,13 @@ versioning_enabled = false
 
 allow_encrypted_uploads_only = true
 
-allowed_bucket_actions = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject", "s3:DeleteObject", "s3:ListBucket", "s3:ListBucketMultipartUploads", "s3:GetBucketLocation", "s3:AbortMultipartUpload"]
+allowed_bucket_actions = [
+  "s3:PutObject",
+  "s3:PutObjectAcl",
+  "s3:GetObject",
+  "s3:DeleteObject",
+  "s3:ListBucket",
+  "s3:ListBucketMultipartUploads",
+  "s3:GetBucketLocation",
+  "s3:AbortMultipartUpload"
+]

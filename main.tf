@@ -24,8 +24,11 @@ resource "aws_s3_bucket" "default" {
   tags                = module.this.tags
   acceleration_status = var.transfer_acceleration_enabled ? "Enabled" : null
 
-  versioning {
-    enabled = var.versioning_enabled
+  dynamic "versioning" {
+    for_each = var.versioning_enabled ? [true] : []
+    content {
+      enabled = true
+    }
   }
 
   dynamic "lifecycle_rule" {
@@ -172,6 +175,8 @@ resource "aws_s3_bucket" "default" {
           # is required even if it empty, so we always implement `prefix` as a filter.
           # OBSOLETE: prefix   = try(rules.value.prefix, null)
           status = try(rules.value.status, null)
+          # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
+          delete_marker_replication_status = try(rules.value.delete_marker_replication_status, null)
 
           destination {
             # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with

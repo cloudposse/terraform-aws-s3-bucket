@@ -138,12 +138,6 @@ variable "cors_rule_inputs" {
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
 }
 
-variable "abort_incomplete_multipart_upload_days" {
-  type        = number
-  default     = 5
-  description = "Maximum time (in days) that you want to allow multipart uploads to remain in progress"
-}
-
 variable "block_public_acls" {
   type        = bool
   default     = true
@@ -190,6 +184,7 @@ variable "s3_replication_rules" {
   #   priority    = number
   #   prefix      = string
   #   status      = string
+  #   delete_marker_replication_status = string
   #   # destination_bucket is specified here rather than inside the destination object
   #   # to make it easier to work with the Terraform type system and create a list of consistent type.
   #   destination_bucket = string # destination bucket ARN, overrides s3_replica_bucket_arn
@@ -284,7 +279,7 @@ variable "transfer_acceleration_enabled" {
 variable "s3_object_ownership" {
   type        = string
   default     = "ObjectWriter"
-  description = "Specifies the S3 object ownership control. Valid values are `ObjectWriter` and `BucketOwnerPreferred`"
+  description = "Specifies the S3 object ownership control. Valid values are `ObjectWriter`, `BucketOwnerPreferred`, and 'BucketOwnerEnforced'."
 }
 
 variable "bucket_key_enabled" {

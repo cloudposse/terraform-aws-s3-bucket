@@ -18,8 +18,8 @@ variable "grants" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    prefix  = string
     enabled = bool
+    prefix  = string
     tags    = map(string)
 
     enable_glacier_transition            = bool
@@ -187,12 +187,6 @@ variable "expiration_days" {
   type        = number
   default     = 90
   description = "Number of days after which to expunge the objects"
-}
-
-variable "abort_incomplete_multipart_upload_days" {
-  type        = number
-  default     = 5
-  description = "Maximum time (in days) that you want to allow multipart uploads to remain in progress"
 }
 
 variable "lifecycle_tags" {

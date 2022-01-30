@@ -191,7 +191,7 @@ resource "aws_s3_bucket" "default" {
               for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
               content {
-                status  = "Enabled"
+                status = "Enabled"
               }
             }
 

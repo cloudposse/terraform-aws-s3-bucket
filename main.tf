@@ -186,6 +186,23 @@ resource "aws_s3_bucket" "default" {
             replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
             account_id         = try(rules.value.destination.account_id, null)
 
+            # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
+            dynamic "metrics" {
+              for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
+
+              content {
+                status  = "Enabled"
+              }
+            }
+
+            dynamic "replication_time" {
+              for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
+
+              content {
+                minutes = 15
+              }
+            }
+
             dynamic "access_control_translation" {
               for_each = try(rules.value.destination.access_control_translation.owner, null) == null ? [] : [rules.value.destination.access_control_translation.owner]
 

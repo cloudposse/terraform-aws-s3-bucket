@@ -196,6 +196,9 @@ variable "s3_replication_rules" {
   #       owner = string
   #     })
   #     account_id                 = string
+  #     metrics                    = object({
+  #       status = Enabled
+  #     })
   #   })
   #   source_selection_criteria = object({
   #     sse_kms_encrypted_objects = object({

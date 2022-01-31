@@ -197,7 +197,7 @@ variable "s3_replication_rules" {
   #     })
   #     account_id                 = string
   #     metrics                    = object({
-  #       status = Enabled
+  #       status = string
   #     })
   #   })
   #   source_selection_criteria = object({

@@ -195,10 +195,12 @@ resource "aws_s3_bucket" "default" {
               }
             }
 
+            # This block is required when replication metrics are enabled.
             dynamic "replication_time" {
               for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
               content {
+                # ReplicationTime:Time:Minutes can only have 15 as a valid value.
                 minutes = 15
               }
             }

@@ -63,9 +63,10 @@ variable "lifecycle_rules" {
   description = "A list of lifecycle rules."
 }
 
-variable "s3_replication_rules" {
-  default     = []
-  description = "S3 replication rules"
+variable "s3_replication_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable or disable S3 replication."
 }
 
 variable "policy" {

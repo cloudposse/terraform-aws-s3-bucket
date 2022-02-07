@@ -14,12 +14,12 @@ output "bucket_arn" {
 }
 
 output "replication_bucket_id" {
-  value       = local.replication_enabled ? join("", module.s3_bucket_replication_target.*.bucket_id) : null
+  value       = local.s3_replication_enabled ? join("", module.s3_bucket_replication_target.*.bucket_id) : null
   description = "Replication bucket ID"
 }
 
 output "replication_bucket_arn" {
-  value       = local.replication_enabled ? join("", module.s3_bucket_replication_target.*.bucket_arn) : null
+  value       = local.s3_replication_enabled ? join("", module.s3_bucket_replication_target.*.bucket_arn) : null
   description = "Replication bucket bucket ARN"
 }
 

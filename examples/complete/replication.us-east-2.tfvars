@@ -28,11 +28,4 @@ allowed_bucket_actions = [
   "s3:AbortMultipartUpload",
 ]
 
-# Rules will be augmented with an additional bucket rule, so prefix cannot be "/"
-s3_replication_rules = [
-  {
-    id     = "replication-test"
-    status = "Enabled"
-    prefix = "/main"
-  }
-]
+s3_replication_enabled = true

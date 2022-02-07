@@ -192,6 +192,8 @@ resource "aws_s3_bucket" "default" {
 
               content {
                 status = "Enabled"
+                # Minutes can only have 15 as a valid value.
+                minutes = 15
               }
             }
 
@@ -200,7 +202,8 @@ resource "aws_s3_bucket" "default" {
               for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
               content {
-                # ReplicationTime:Time:Minutes can only have 15 as a valid value.
+                status = "Enabled"
+                # Minutes can only have 15 as a valid value.
                 minutes = 15
               }
             }

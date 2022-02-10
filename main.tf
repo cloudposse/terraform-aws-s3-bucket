@@ -1,9 +1,12 @@
 locals {
-  enabled             = module.this.enabled
-  bucket_name         = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  replication_enabled = local.enabled && var.s3_replication_enabled
-  versioning_enabled  = local.enabled && var.versioning_enabled
-  bucket_arn          = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
+  enabled = module.this.enabled
+
+  replication_enabled           = local.enabled && var.s3_replication_enabled
+  versioning_enabled            = local.enabled && var.versioning_enabled
+  transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
+
+  bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
+  bucket_arn  = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
 
   # Deprecate `replication_rules` in favor of `s3_replication_rules` to keep all the replication related
   # inputs grouped under s3_replica[tion]
@@ -46,63 +49,36 @@ resource "aws_s3_bucket_logging" "default" {
   target_prefix = var.logging["prefix"]
 }
 
-resource "aws_s3_bucket_website_configuration" "default" {
-  count  = local.enabled && var.website_inputs != null ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
-
-  index_document {
-    suffix = lookup(var.website_inputs, "index_document")
-  }
-
-  error_document {
-    key = lookup(var.website_inputs, "error_document")
-  }
-
-  redirect_all_requests_to {
-    host_name = lookup(var.website_inputs, "redirect_all_requests_to")
-    protocol  = lookup(var.website_inputs, "protocol")
-  }
-
-  dynamic "routing_rule" {
-    for_each = length(jsondecode(lookup(var.website_inputs, "routing_rules"))) > 0 ? jsondecode(lookup(var.website_inputs, "routing_rules")) : []
-    content {
-      dynamic "condition" {
-        for_each = routing_rule.value["Condition"]
-
-        content {
-          condition {
-            key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
-          }
-        }
-      }
-
-      dynamic "redirect" {
-        for_each = routing_rule.value["Redirect"]
-        content {
-          replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
-        }
-      }
-    }
-  }
+data "aws_canonical_user_id" "default" {
+  count = local.enabled ? 1 : 0
 }
 
 resource "aws_s3_bucket_acl" "default" {
   count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
+  # Conflicts with access_control_policy so this is enabled if no grants
   acl = try(length(var.grants), 0) == 0 ? var.acl : null
 
-  access_control_policy {
-    dynamic "grant" {
-      for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : var.grants
+  dynamic "access_control_policy" {
+    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : [1]
 
-      content {
-        grantee {
-          id   = grant.value.id
-          type = grant.value.type
-          uri  = grant.value.uri
+    content {
+      dynamic "grant" {
+        for_each = var.grants
+
+        content {
+          grantee {
+            id   = grant.value.id
+            type = grant.value.type
+            uri  = grant.value.uri
+          }
+          permission = grant.value.permission
         }
-        permissions = grant.value.permissions
+      }
+
+      owner {
+        id = join("", data.aws_canonical_user_id.default.*.id)
       }
     }
   }
@@ -125,12 +101,12 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 }
 
 resource "aws_s3_bucket_cors_configuration" "default" {
-  count = local.enabled ? 1 : 0
+  count = local.enabled && var.cors_rule_inputs != null ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 
   dynamic "cors_rule" {
-    for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
+    for_each = var.cors_rule_inputs
 
     content {
       allowed_headers = cors_rule.value.allowed_headers
@@ -142,83 +118,122 @@ resource "aws_s3_bucket_cors_configuration" "default" {
   }
 }
 
-resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
-  count  = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
+# resource "aws_s3_bucket_website_configuration" "default" {
+#   for_each = local.enabled && var.website_inputs != null ? var.website_inputs : []
+#   bucket = join("", aws_s3_bucket.default.*.id)
 
-  dynamic "rule" {
-    for_each = var.lifecycle_rules
-    content {
-      enabled                                = lifecycle_rule.value.enabled
-      prefix                                 = lifecycle_rule.value.prefix
-      tags                                   = lifecycle_rule.value.tags
-      abort_incomplete_multipart_upload_days = lifecycle_rule.value.abort_incomplete_multipart_upload_days
+#   index_document {
+#     suffix = each.value.index_document
+#   }
 
-      dynamic "noncurrent_version_expiration" {
-        for_each = lifecycle_rule.value.enable_noncurrent_version_expiration ? [1] : []
+#   error_document {
+#     key = each.value.error_document
+#   }
 
-        content {
-          days = lifecycle_rule.value.noncurrent_version_expiration_days
-        }
-      }
+#   redirect_all_requests_to {
+#     host_name = each.value.redirect_all_requests_to
+#     protocol  = each.value.protocol
+#   }
 
-      dynamic "noncurrent_version_transition" {
-        for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+#   dynamic "routing_rule" {
+#     for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
+#     content {
+#       dynamic "condition" {
+#         for_each = routing_rule.value["Condition"]
 
-        content {
-          days          = lifecycle_rule.value.noncurrent_version_glacier_transition_days
-          storage_class = "GLACIER"
-        }
-      }
+#         content {
+#           key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
+#         }
+#       }
 
-      dynamic "noncurrent_version_transition" {
-        for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+#       dynamic "redirect" {
+#         for_each = routing_rule.value["Redirect"]
+#         content {
+#           replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
+#         }
+#       }
+#     }
+#   }
+# }
 
-        content {
-          days          = lifecycle_rule.value.noncurrent_version_deeparchive_transition_days
-          storage_class = "DEEP_ARCHIVE"
-        }
-      }
+# resource "aws_s3_bucket_lifecycle_configuration" "default" {
+#   count = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+#   bucket = join("", aws_s3_bucket.default.*.id)
 
-      dynamic "transition" {
-        for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+#   dynamic "rule" {
+#     for_each = var.lifecycle_rules
 
-        content {
-          days          = lifecycle_rule.value.glacier_transition_days
-          storage_class = "GLACIER"
-        }
-      }
+#     content {
+#       enabled                                = lifecycle_rule.value.enabled
+#       prefix                                 = lifecycle_rule.value.prefix
+#       tags                                   = lifecycle_rule.value.tags
+#       abort_incomplete_multipart_upload_days = lifecycle_rule.value.abort_incomplete_multipart_upload_days
 
-      dynamic "transition" {
-        for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+#       dynamic "noncurrent_version_expiration" {
+#         for_each = lifecycle_rule.value.enable_noncurrent_version_expiration ? [1] : []
 
-        content {
-          days          = lifecycle_rule.value.deeparchive_transition_days
-          storage_class = "DEEP_ARCHIVE"
-        }
-      }
+#         content {
+#           days = lifecycle_rule.value.noncurrent_version_expiration_days
+#         }
+#       }
+
+#       dynamic "noncurrent_version_transition" {
+#         for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+
+#         content {
+#           days          = lifecycle_rule.value.noncurrent_version_glacier_transition_days
+#           storage_class = "GLACIER"
+#         }
+#       }
+
+#       dynamic "noncurrent_version_transition" {
+#         for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+
+#         content {
+#           days          = lifecycle_rule.value.noncurrent_version_deeparchive_transition_days
+#           storage_class = "DEEP_ARCHIVE"
+#         }
+#       }
+
+#       dynamic "transition" {
+#         for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+
+#         content {
+#           days          = lifecycle_rule.value.glacier_transition_days
+#           storage_class = "GLACIER"
+#         }
+#       }
+
+#       dynamic "transition" {
+#         for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+
+#         content {
+#           days          = lifecycle_rule.value.deeparchive_transition_days
+#           storage_class = "DEEP_ARCHIVE"
+#         }
+#       }
 
 
 
-      dynamic "transition" {
-        for_each = lifecycle_rule.value.enable_standard_ia_transition ? [1] : []
+#       dynamic "transition" {
+#         for_each = lifecycle_rule.value.enable_standard_ia_transition ? [1] : []
 
-        content {
-          days          = lifecycle_rule.value.standard_transition_days
-          storage_class = "STANDARD_IA"
-        }
-      }
+#         content {
+#           days          = lifecycle_rule.value.standard_transition_days
+#           storage_class = "STANDARD_IA"
+#         }
+#       }
 
-      dynamic "expiration" {
-        for_each = lifecycle_rule.value.enable_current_object_expiration ? [1] : []
+#       dynamic "expiration" {
+#         for_each = lifecycle_rule.value.enable_current_object_expiration ? [1] : []
 
-        content {
-          days = lifecycle_rule.value.expiration_days
-        }
-      }
-    }
-  }
-}
+#         content {
+#           days = lifecycle_rule.value.expiration_days
+#         }
+#       }
+#     }
+#   }
+# }
 
 resource "aws_s3_bucket_accelerate_configuration" "default" {
   count  = local.transfer_acceleration_enabled ? 1 : 0
@@ -254,15 +269,21 @@ resource "aws_s3_bucket_replication_configuration" "default" {
       # OBSOLETE: prefix   = try(rule.value.prefix, null)
       status = try(rule.value.status, null)
       # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
-      delete_marker_replication_status = try(rule.value.delete_marker_replication_status, null)
+      delete_marker_replication {
+        status = try(rule.value.delete_marker_replication_status, null)
+      }
 
       destination {
         # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
         # s3_replica_bucket_arn to specify single destination for all rules
-        bucket             = try(length(rule.value.destination_bucket), 0) > 0 ? rule.value.destination_bucket : var.s3_replica_bucket_arn
-        storage_class      = try(rule.value.destination.storage_class, "STANDARD")
-        replica_kms_key_id = try(rule.value.destination.replica_kms_key_id, null)
-        account_id         = try(rule.value.destination.account_id, null)
+        bucket        = try(length(rule.value.destination_bucket), 0) > 0 ? rule.value.destination_bucket : var.s3_replica_bucket_arn
+        storage_class = try(rule.value.destination.storage_class, "STANDARD")
+
+        encryption_configuration {
+          replica_kms_key_id = try(rule.value.destination.replica_kms_key_id, null)
+        }
+
+        account = try(rule.value.destination.account_id, null)
 
         # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
         dynamic "metrics" {
@@ -270,8 +291,10 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 
           content {
             status = "Enabled"
-            # Minutes can only have 15 as a valid value.
-            minutes = 15
+            event_threshold {
+              # Minutes can only have 15 as a valid value.
+              minutes = 15
+            }
           }
         }
 
@@ -281,8 +304,10 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 
           content {
             status = "Enabled"
-            # Minutes can only have 15 as a valid value.
-            minutes = 15
+            time {
+              # Minutes can only have 15 as a valid value.
+              minutes = 15
+            }
           }
         }
 
@@ -300,7 +325,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 
         content {
           sse_kms_encrypted_objects {
-            enabled = source_selection_criteria.value
+            status = source_selection_criteria.value
           }
         }
       }
@@ -313,7 +338,14 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 
         content {
           prefix = try(filter.value.prefix, try(rule.value.prefix, null))
-          tags   = try(filter.value.tags, {})
+          dynamic "tag" {
+            for_each = try(filter.value.tags, {})
+
+            content {
+              key   = tag.key
+              value = tag.value
+            }
+          }
         }
       }
     }

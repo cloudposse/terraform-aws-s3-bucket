@@ -24,7 +24,6 @@ resource "aws_s3_bucket" "default" {
   count         = local.enabled ? 1 : 0
   bucket        = local.bucket_name
   force_destroy = var.force_destroy
-  tags          = module.this.tags
 
   dynamic "object_lock_configuration" {
     for_each = var.object_lock_configuration != null ? [1] : []
@@ -39,120 +38,23 @@ resource "aws_s3_bucket" "default" {
       }
     }
   }
+
+  tags = module.this.tags
 }
 
-resource "aws_s3_bucket_logging" "default" {
-  count  = local.enabled && var.logging != null ? 1 : 0
+resource "aws_s3_bucket_accelerate_configuration" "default" {
+  count  = local.transfer_acceleration_enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
-
-  target_bucket = var.logging["bucket_name"]
-  target_prefix = var.logging["prefix"]
+  status = "Enabled"
 }
 
-data "aws_canonical_user_id" "default" {
-  count = local.enabled ? 1 : 0
-}
-
-resource "aws_s3_bucket_acl" "default" {
-  count  = local.enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
-
-  # Conflicts with access_control_policy so this is enabled if no grants
-  acl = try(length(var.grants), 0) == 0 ? var.acl : null
-
-  dynamic "access_control_policy" {
-    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : [1]
-
-    content {
-      dynamic "grant" {
-        for_each = var.grants
-
-        content {
-          grantee {
-            id   = grant.value.id
-            type = grant.value.type
-            uri  = grant.value.uri
-          }
-          permission = grant.value.permission
-        }
-      }
-
-      owner {
-        id = join("", data.aws_canonical_user_id.default.*.id)
-      }
-    }
-  }
-}
-
-# https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
-# https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
-resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
-  count  = local.enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
-
-  rule {
-    bucket_key_enabled = var.bucket_key_enabled
-
-    apply_server_side_encryption_by_default {
-      sse_algorithm     = var.sse_algorithm
-      kms_master_key_id = var.kms_master_key_arn
-    }
-  }
-}
-
-resource "aws_s3_bucket_cors_configuration" "default" {
-  count = local.enabled && var.cors_rule_inputs != null ? 1 : 0
+resource "aws_s3_bucket_versioning" "default" {
+  count = local.versioning_enabled ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 
-  dynamic "cors_rule" {
-    for_each = var.cors_rule_inputs
-
-    content {
-      allowed_headers = cors_rule.value.allowed_headers
-      allowed_methods = cors_rule.value.allowed_methods
-      allowed_origins = cors_rule.value.allowed_origins
-      expose_headers  = cors_rule.value.expose_headers
-      max_age_seconds = cors_rule.value.max_age_seconds
-    }
-  }
-}
-
-resource "aws_s3_bucket_website_configuration" "default" {
-  for_each = local.enabled && var.website_inputs != null ? toset(var.website_inputs) : toset([])
-  bucket   = join("", aws_s3_bucket.default.*.id)
-
-  index_document {
-    suffix = each.value.index_document
-  }
-
-  error_document {
-    key = each.value.error_document
-  }
-
-  redirect_all_requests_to {
-    host_name = each.value.redirect_all_requests_to
-    protocol  = each.value.protocol
-  }
-
-  dynamic "routing_rule" {
-    for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
-    content {
-      dynamic "condition" {
-        for_each = routing_rule.value["Condition"]
-
-        content {
-          key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
-        }
-      }
-
-      dynamic "redirect" {
-        for_each = routing_rule.value["Redirect"]
-        content {
-          replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
-        }
-      }
-    }
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
@@ -244,19 +146,118 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
   }
 }
 
-resource "aws_s3_bucket_accelerate_configuration" "default" {
-  count  = local.transfer_acceleration_enabled ? 1 : 0
+resource "aws_s3_bucket_logging" "default" {
+  count  = local.enabled && var.logging != null ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
-  status = "Enabled"
+
+  target_bucket = var.logging["bucket_name"]
+  target_prefix = var.logging["prefix"]
 }
 
-resource "aws_s3_bucket_versioning" "default" {
-  count = local.versioning_enabled ? 1 : 0
+# https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
+# https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  count  = local.enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  rule {
+    bucket_key_enabled = var.bucket_key_enabled
+
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = var.sse_algorithm
+      kms_master_key_id = var.kms_master_key_arn
+    }
+  }
+}
+
+resource "aws_s3_bucket_website_configuration" "default" {
+  for_each = local.enabled && var.website_inputs != null ? toset(var.website_inputs) : toset([])
+  bucket   = join("", aws_s3_bucket.default.*.id)
+
+  index_document {
+    suffix = each.value.index_document
+  }
+
+  error_document {
+    key = each.value.error_document
+  }
+
+  redirect_all_requests_to {
+    host_name = each.value.redirect_all_requests_to
+    protocol  = each.value.protocol
+  }
+
+  dynamic "routing_rule" {
+    for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
+    content {
+      dynamic "condition" {
+        for_each = routing_rule.value["Condition"]
+
+        content {
+          key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
+        }
+      }
+
+      dynamic "redirect" {
+        for_each = routing_rule.value["Redirect"]
+        content {
+          replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
+        }
+      }
+    }
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "default" {
+  count = local.enabled && var.cors_rule_inputs != null ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 
-  versioning_configuration {
-    status = "Enabled"
+  dynamic "cors_rule" {
+    for_each = var.cors_rule_inputs
+
+    content {
+      allowed_headers = cors_rule.value.allowed_headers
+      allowed_methods = cors_rule.value.allowed_methods
+      allowed_origins = cors_rule.value.allowed_origins
+      expose_headers  = cors_rule.value.expose_headers
+      max_age_seconds = cors_rule.value.max_age_seconds
+    }
+  }
+}
+
+data "aws_canonical_user_id" "default" {
+  count = local.enabled ? 1 : 0
+}
+
+resource "aws_s3_bucket_acl" "default" {
+  count  = local.enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  # Conflicts with access_control_policy so this is enabled if no grants
+  acl = try(length(var.grants), 0) == 0 ? var.acl : null
+
+  dynamic "access_control_policy" {
+    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : [1]
+
+    content {
+      dynamic "grant" {
+        for_each = var.grants
+
+        content {
+          grantee {
+            id   = grant.value.id
+            type = grant.value.type
+            uri  = grant.value.uri
+          }
+          permission = grant.value.permission
+        }
+      }
+
+      owner {
+        id = join("", data.aws_canonical_user_id.default.*.id)
+      }
+    }
   }
 }
 

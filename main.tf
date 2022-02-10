@@ -120,7 +120,7 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 
 resource "aws_s3_bucket_website_configuration" "default" {
   for_each = local.enabled && var.website_inputs != null ? toset(var.website_inputs) : toset([])
-  bucket = join("", aws_s3_bucket.default.*.id)
+  bucket   = join("", aws_s3_bucket.default.*.id)
 
   index_document {
     suffix = each.value.index_document

@@ -2,6 +2,7 @@ locals {
   enabled             = module.this.enabled
   bucket_name         = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
   replication_enabled = local.enabled && var.s3_replication_enabled
+  versioning_enabled  = local.enabled && var.versioning_enabled
   bucket_arn          = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
 
   # Deprecate `replication_rules` in favor of `s3_replication_rules` to keep all the replication related
@@ -19,19 +20,133 @@ resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not have good defaults
   count               = local.enabled ? 1 : 0
   bucket              = local.bucket_name
-  acl                 = try(length(var.grants), 0) == 0 ? var.acl : null
   force_destroy       = var.force_destroy
   tags                = module.this.tags
-  acceleration_status = var.transfer_acceleration_enabled ? "Enabled" : null
 
-  dynamic "versioning" {
-    for_each = var.versioning_enabled ? [true] : []
+  dynamic "object_lock_configuration" {
+    for_each = var.object_lock_configuration != null ? [1] : []
     content {
-      enabled = true
+      object_lock_enabled = "Enabled"
+      rule {
+        default_retention {
+          mode  = var.object_lock_configuration.mode
+          days  = var.object_lock_configuration.days
+          years = var.object_lock_configuration.years
+        }
+      }
     }
   }
+}
 
-  dynamic "lifecycle_rule" {
+resource "aws_s3_bucket_logging" "default" {
+  count = local.enabled && var.logging != null ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  target_bucket = var.logging["bucket_name"]
+  target_prefix = var.logging["prefix"]
+}
+
+resource "aws_s3_bucket_website_configuration" "default" {
+  count = local.enabled && var.website_inputs != null ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  index_document {
+    suffix = lookup(var.website_inputs, "index_document")
+  }
+
+  error_document {
+    key = lookup(var.website_inputs, "error_document")
+  }
+
+  redirect_all_requests_to {
+    host_name = lookup(var.website_inputs, "redirect_all_requests_to")
+    protocol  = lookup(var.website_inputs, "protocol")
+  }
+
+  dynamic "routing_rule" {
+    for_each = length(jsondecode(lookup(var.website_inputs, "routing_rules"))) > 0 ? jsondecode(lookup(var.website_inputs, "routing_rules")) : []
+    content {
+      dynamic "condition" {
+        for_each = routing_rule.value["Condition"]
+
+        content {
+          condition {
+            key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
+          }
+        }
+      }
+
+      dynamic "redirect" {
+        for_each = routing_rule.value["Redirect"]
+        content {
+          replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
+        }
+      }
+    }
+  }
+}
+
+resource "aws_s3_bucket_acl" "default" {
+  count = local.enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  acl = try(length(var.grants), 0) == 0 ? var.acl : null
+
+  access_control_policy {
+    dynamic "grant" {
+      for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : var.grants
+
+      content {
+        grantee {
+          id          = grant.value.id
+          type        = grant.value.type
+          uri         = grant.value.uri
+        }
+        permissions = grant.value.permissions
+      }
+    }
+  }
+}
+
+# https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
+# https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
+resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
+  count = local.enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  rule {
+    bucket_key_enabled = var.bucket_key_enabled
+
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = var.sse_algorithm
+      kms_master_key_id = var.kms_master_key_arn
+    }
+  }
+}
+
+resource "aws_s3_bucket_cors_configuration" "default" {
+  count = local.enabled ? 1 : 0
+
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  dynamic "cors_rule" {
+    for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
+
+    content {
+      allowed_headers = cors_rule.value.allowed_headers
+      allowed_methods = cors_rule.value.allowed_methods
+      allowed_origins = cors_rule.value.allowed_origins
+      expose_headers  = cors_rule.value.expose_headers
+      max_age_seconds = cors_rule.value.max_age_seconds
+    }
+  }
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
+  count = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  dynamic "rule" {
     for_each = var.lifecycle_rules
     content {
       enabled                                = lifecycle_rule.value.enabled
@@ -103,155 +218,102 @@ resource "aws_s3_bucket" "default" {
       }
     }
   }
+}
 
-  dynamic "logging" {
-    for_each = var.logging == null ? [] : [1]
-    content {
-      target_bucket = var.logging["bucket_name"]
-      target_prefix = var.logging["prefix"]
-    }
+resource "aws_s3_bucket_accelerate_configuration" "default" {
+  count = local.transfer_acceleration_enabled ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+  status = "Enabled"
+}
+
+resource "aws_s3_bucket_versioning" "default" {
+  count = local.versioning_enabled ? 1 : 0
+  
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  versioning_configuration {
+    status = "Enabled"
   }
+}
 
-  # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
-  # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
-  server_side_encryption_configuration {
-    rule {
-      bucket_key_enabled = var.bucket_key_enabled
+resource "aws_s3_bucket_replication_configuration" "default" {
+  count = local.replication_enabled ? 1 : 0
 
-      apply_server_side_encryption_by_default {
-        sse_algorithm     = var.sse_algorithm
-        kms_master_key_id = var.kms_master_key_arn
-      }
-    }
-  }
+  bucket = join("", aws_s3_bucket.default.*.id)
+  role = aws_iam_role.replication[0].arn
 
-  dynamic "website" {
-    for_each = var.website_inputs == null ? [] : var.website_inputs
-    content {
-      index_document           = website.value.index_document
-      error_document           = website.value.error_document
-      redirect_all_requests_to = website.value.redirect_all_requests_to
-      routing_rules            = website.value.routing_rules
-    }
-  }
-
-  dynamic "cors_rule" {
-    for_each = var.cors_rule_inputs == null ? [] : var.cors_rule_inputs
+  dynamic "rule" {
+    for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules
 
     content {
-      allowed_headers = cors_rule.value.allowed_headers
-      allowed_methods = cors_rule.value.allowed_methods
-      allowed_origins = cors_rule.value.allowed_origins
-      expose_headers  = cors_rule.value.expose_headers
-      max_age_seconds = cors_rule.value.max_age_seconds
-    }
-  }
+      id       = rule.value.id
+      priority = try(rule.value.priority, 0)
+      # `prefix` at this level is a V1 feature, replaced in V2 with the filter block.
+      # `prefix` conflicts with `filter`, and for multiple destinations, a filter block
+      # is required even if it empty, so we always implement `prefix` as a filter.
+      # OBSOLETE: prefix   = try(rule.value.prefix, null)
+      status = try(rule.value.status, null)
+      # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
+      delete_marker_replication_status = try(rule.value.delete_marker_replication_status, null)
 
-  dynamic "grant" {
-    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : var.grants
+      destination {
+        # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
+        # s3_replica_bucket_arn to specify single destination for all rules
+        bucket             = try(length(rule.value.destination_bucket), 0) > 0 ? rule.value.destination_bucket : var.s3_replica_bucket_arn
+        storage_class      = try(rule.value.destination.storage_class, "STANDARD")
+        replica_kms_key_id = try(rule.value.destination.replica_kms_key_id, null)
+        account_id         = try(rule.value.destination.account_id, null)
 
-    content {
-      id          = grant.value.id
-      type        = grant.value.type
-      permissions = grant.value.permissions
-      uri         = grant.value.uri
-    }
-  }
+        # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
+        dynamic "metrics" {
+          for_each = try(rule.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
-  dynamic "replication_configuration" {
-    for_each = local.replication_enabled ? [1] : []
-
-    content {
-      role = aws_iam_role.replication[0].arn
-
-      dynamic "rules" {
-        for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules
-
-        content {
-          id       = rules.value.id
-          priority = try(rules.value.priority, 0)
-          # `prefix` at this level is a V1 feature, replaced in V2 with the filter block.
-          # `prefix` conflicts with `filter`, and for multiple destinations, a filter block
-          # is required even if it empty, so we always implement `prefix` as a filter.
-          # OBSOLETE: prefix   = try(rules.value.prefix, null)
-          status = try(rules.value.status, null)
-          # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
-          delete_marker_replication_status = try(rules.value.delete_marker_replication_status, null)
-
-          destination {
-            # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
-            # s3_replica_bucket_arn to specify single destination for all rules
-            bucket             = try(length(rules.value.destination_bucket), 0) > 0 ? rules.value.destination_bucket : var.s3_replica_bucket_arn
-            storage_class      = try(rules.value.destination.storage_class, "STANDARD")
-            replica_kms_key_id = try(rules.value.destination.replica_kms_key_id, null)
-            account_id         = try(rules.value.destination.account_id, null)
-
-            # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
-            dynamic "metrics" {
-              for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
-
-              content {
-                status = "Enabled"
-                # Minutes can only have 15 as a valid value.
-                minutes = 15
-              }
-            }
-
-            # This block is required when replication metrics are enabled.
-            dynamic "replication_time" {
-              for_each = try(rules.value.destination.metrics.status, "") == "Enabled" ? [1] : []
-
-              content {
-                status = "Enabled"
-                # Minutes can only have 15 as a valid value.
-                minutes = 15
-              }
-            }
-
-            dynamic "access_control_translation" {
-              for_each = try(rules.value.destination.access_control_translation.owner, null) == null ? [] : [rules.value.destination.access_control_translation.owner]
-
-              content {
-                owner = access_control_translation.value
-              }
-            }
+          content {
+            status = "Enabled"
+            # Minutes can only have 15 as a valid value.
+            minutes = 15
           }
+        }
 
-          dynamic "source_selection_criteria" {
-            for_each = try(rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rules.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
+        # This block is required when replication metrics are enabled.
+        dynamic "replication_time" {
+          for_each = try(rule.value.destination.metrics.status, "") == "Enabled" ? [1] : []
 
-            content {
-              sse_kms_encrypted_objects {
-                enabled = source_selection_criteria.value
-              }
-            }
+          content {
+            status = "Enabled"
+            # Minutes can only have 15 as a valid value.
+            minutes = 15
           }
+        }
 
-          # Replication to multiple destination buckets requires that priority is specified in the rules object.
-          # If the corresponding rule requires no filter, an empty configuration block filter {} must be specified.
-          # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
-          dynamic "filter" {
-            for_each = try(rules.value.filter, null) == null ? [{ prefix = null, tags = {} }] : [rules.value.filter]
+        dynamic "access_control_translation" {
+          for_each = try(rule.value.destination.access_control_translation.owner, null) == null ? [] : [rule.value.destination.access_control_translation.owner]
 
-            content {
-              prefix = try(filter.value.prefix, try(rules.value.prefix, null))
-              tags   = try(filter.value.tags, {})
-            }
+          content {
+            owner = access_control_translation.value
           }
         }
       }
-    }
-  }
 
-  dynamic "object_lock_configuration" {
-    for_each = var.object_lock_configuration != null ? [1] : []
-    content {
-      object_lock_enabled = "Enabled"
-      rule {
-        default_retention {
-          mode  = var.object_lock_configuration.mode
-          days  = var.object_lock_configuration.days
-          years = var.object_lock_configuration.years
+      dynamic "source_selection_criteria" {
+        for_each = try(rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
+
+        content {
+          sse_kms_encrypted_objects {
+            enabled = source_selection_criteria.value
+          }
+        }
+      }
+
+      # Replication to multiple destination buckets requires that priority is specified in the rules object.
+      # If the corresponding rule requires no filter, an empty configuration block filter {} must be specified.
+      # See https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
+      dynamic "filter" {
+        for_each = try(rule.value.filter, null) == null ? [{ prefix = null, tags = {} }] : [rule.value.filter]
+
+        content {
+          prefix = try(filter.value.prefix, try(rule.value.prefix, null))
+          tags   = try(filter.value.tags, {})
         }
       }
     }

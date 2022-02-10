@@ -156,84 +156,93 @@ resource "aws_s3_bucket_website_configuration" "default" {
   }
 }
 
-# resource "aws_s3_bucket_lifecycle_configuration" "default" {
-#   count = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
-#   bucket = join("", aws_s3_bucket.default.*.id)
+resource "aws_s3_bucket_lifecycle_configuration" "default" {
+  count  = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
 
-#   dynamic "rule" {
-#     for_each = var.lifecycle_rules
+  dynamic "rule" {
+    for_each = var.lifecycle_rules
 
-#     content {
-#       enabled                                = lifecycle_rule.value.enabled
-#       prefix                                 = lifecycle_rule.value.prefix
-#       tags                                   = lifecycle_rule.value.tags
-#       abort_incomplete_multipart_upload_days = lifecycle_rule.value.abort_incomplete_multipart_upload_days
+    content {
+      id     = rule.value.id
+      status = try(rule.value.enabled == true ? "Enabled" : "Disabled", rule.value.status)
+      prefix = rule.value.prefix
 
-#       dynamic "noncurrent_version_expiration" {
-#         for_each = lifecycle_rule.value.enable_noncurrent_version_expiration ? [1] : []
+      filter {
+        and {
+          tags = rule.value.tags
+        }
+      }
 
-#         content {
-#           days = lifecycle_rule.value.noncurrent_version_expiration_days
-#         }
-#       }
+      abort_incomplete_multipart_upload {
+        days_after_initiation = rule.value.abort_incomplete_multipart_upload_days
+      }
 
-#       dynamic "noncurrent_version_transition" {
-#         for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+      dynamic "noncurrent_version_expiration" {
+        for_each = rule.value.enable_noncurrent_version_expiration ? [1] : []
 
-#         content {
-#           days          = lifecycle_rule.value.noncurrent_version_glacier_transition_days
-#           storage_class = "GLACIER"
-#         }
-#       }
+        content {
+          noncurrent_days = rule.value.noncurrent_version_expiration_days
+        }
+      }
 
-#       dynamic "noncurrent_version_transition" {
-#         for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+      dynamic "noncurrent_version_transition" {
+        for_each = rule.value.enable_glacier_transition ? [1] : []
 
-#         content {
-#           days          = lifecycle_rule.value.noncurrent_version_deeparchive_transition_days
-#           storage_class = "DEEP_ARCHIVE"
-#         }
-#       }
+        content {
+          noncurrent_days = rule.value.noncurrent_version_glacier_transition_days
+          storage_class   = "GLACIER"
+        }
+      }
 
-#       dynamic "transition" {
-#         for_each = lifecycle_rule.value.enable_glacier_transition ? [1] : []
+      dynamic "noncurrent_version_transition" {
+        for_each = rule.value.enable_deeparchive_transition ? [1] : []
 
-#         content {
-#           days          = lifecycle_rule.value.glacier_transition_days
-#           storage_class = "GLACIER"
-#         }
-#       }
+        content {
+          noncurrent_days = rule.value.noncurrent_version_deeparchive_transition_days
+          storage_class   = "DEEP_ARCHIVE"
+        }
+      }
 
-#       dynamic "transition" {
-#         for_each = lifecycle_rule.value.enable_deeparchive_transition ? [1] : []
+      dynamic "transition" {
+        for_each = rule.value.enable_glacier_transition ? [1] : []
 
-#         content {
-#           days          = lifecycle_rule.value.deeparchive_transition_days
-#           storage_class = "DEEP_ARCHIVE"
-#         }
-#       }
+        content {
+          days          = rule.value.glacier_transition_days
+          storage_class = "GLACIER"
+        }
+      }
+
+      dynamic "transition" {
+        for_each = rule.value.enable_deeparchive_transition ? [1] : []
+
+        content {
+          days          = rule.value.deeparchive_transition_days
+          storage_class = "DEEP_ARCHIVE"
+        }
+      }
 
 
 
-#       dynamic "transition" {
-#         for_each = lifecycle_rule.value.enable_standard_ia_transition ? [1] : []
+      dynamic "transition" {
+        for_each = rule.value.enable_standard_ia_transition ? [1] : []
 
-#         content {
-#           days          = lifecycle_rule.value.standard_transition_days
-#           storage_class = "STANDARD_IA"
-#         }
-#       }
+        content {
+          days          = rule.value.standard_transition_days
+          storage_class = "STANDARD_IA"
+        }
+      }
 
-#       dynamic "expiration" {
-#         for_each = lifecycle_rule.value.enable_current_object_expiration ? [1] : []
+      dynamic "expiration" {
+        for_each = rule.value.enable_current_object_expiration ? [1] : []
 
-#         content {
-#           days = lifecycle_rule.value.expiration_days
-#         }
-#       }
-#     }
-#   }
-# }
+        content {
+          days = rule.value.expiration_days
+        }
+      }
+    }
+  }
+}
 
 resource "aws_s3_bucket_accelerate_configuration" "default" {
   count  = local.transfer_acceleration_enabled ? 1 : 0
@@ -487,7 +496,10 @@ data "aws_iam_policy_document" "bucket_policy" {
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {
-  count         = local.enabled ? 1 : 0
+  count = local.enabled ? 1 : 0
+
+  # TODO: use source_policy_documents over var.policy
+  # source_policy_documents = var.source_policy_documents
   source_json   = var.policy
   override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
 }

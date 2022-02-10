@@ -10,10 +10,16 @@ acl = ""
 
 grants = [
   {
-    id          = null
-    type        = "Group"
-    permissions = ["READ", "WRITE"]
-    uri         = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+    id         = null
+    type       = "Group"
+    permission = "READ"
+    uri        = "http://acs.amazonaws.com/groups/s3/LogDelivery"
+  },
+  {
+    id         = null
+    type       = "Group"
+    permission = "WRITE"
+    uri        = "http://acs.amazonaws.com/groups/s3/LogDelivery"
   },
 ]
 

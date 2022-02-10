@@ -25,20 +25,6 @@ resource "aws_s3_bucket" "default" {
   bucket        = local.bucket_name
   force_destroy = var.force_destroy
 
-  dynamic "object_lock_configuration" {
-    for_each = var.object_lock_configuration != null ? [1] : []
-    content {
-      object_lock_enabled = "Enabled"
-      rule {
-        default_retention {
-          mode  = var.object_lock_configuration.mode
-          days  = var.object_lock_configuration.days
-          years = var.object_lock_configuration.years
-        }
-      }
-    }
-  }
-
   tags = module.this.tags
 }
 
@@ -362,6 +348,22 @@ resource "aws_s3_bucket_replication_configuration" "default" {
   }
 }
 
+resource "aws_s3_bucket_object_lock_configuration" "default" {
+  count = local.enabled && var.object_lock_configuration != null ? 1 : 0
+
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  object_lock_enabled = "Enabled"
+
+  rule {
+    default_retention {
+      mode  = var.object_lock_configuration.mode
+      days  = var.object_lock_configuration.days
+      years = var.object_lock_configuration.years
+    }
+  }
+}
+
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
   version = "0.15.7"
@@ -499,8 +501,9 @@ data "aws_iam_policy_document" "bucket_policy" {
 data "aws_iam_policy_document" "aggregated_policy" {
   count = local.enabled ? 1 : 0
 
-  # TODO: use source_policy_documents over var.policy
-  # source_policy_documents = var.source_policy_documents
+  source_policy_documents = var.source_policy_documents
+
+  # TODO: use source_policy_documents and deprecate var.policy
   source_json   = var.policy
   override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
 }

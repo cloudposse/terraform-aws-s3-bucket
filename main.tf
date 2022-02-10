@@ -118,43 +118,43 @@ resource "aws_s3_bucket_cors_configuration" "default" {
   }
 }
 
-# resource "aws_s3_bucket_website_configuration" "default" {
-#   for_each = local.enabled && var.website_inputs != null ? var.website_inputs : []
-#   bucket = join("", aws_s3_bucket.default.*.id)
+resource "aws_s3_bucket_website_configuration" "default" {
+  for_each = local.enabled && var.website_inputs != null ? toset(var.website_inputs) : toset([])
+  bucket = join("", aws_s3_bucket.default.*.id)
 
-#   index_document {
-#     suffix = each.value.index_document
-#   }
+  index_document {
+    suffix = each.value.index_document
+  }
 
-#   error_document {
-#     key = each.value.error_document
-#   }
+  error_document {
+    key = each.value.error_document
+  }
 
-#   redirect_all_requests_to {
-#     host_name = each.value.redirect_all_requests_to
-#     protocol  = each.value.protocol
-#   }
+  redirect_all_requests_to {
+    host_name = each.value.redirect_all_requests_to
+    protocol  = each.value.protocol
+  }
 
-#   dynamic "routing_rule" {
-#     for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
-#     content {
-#       dynamic "condition" {
-#         for_each = routing_rule.value["Condition"]
+  dynamic "routing_rule" {
+    for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
+    content {
+      dynamic "condition" {
+        for_each = routing_rule.value["Condition"]
 
-#         content {
-#           key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
-#         }
-#       }
+        content {
+          key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
+        }
+      }
 
-#       dynamic "redirect" {
-#         for_each = routing_rule.value["Redirect"]
-#         content {
-#           replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
-#         }
-#       }
-#     }
-#   }
-# }
+      dynamic "redirect" {
+        for_each = routing_rule.value["Redirect"]
+        content {
+          replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
+        }
+      }
+    }
+  }
+}
 
 # resource "aws_s3_bucket_lifecycle_configuration" "default" {
 #   count = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0

@@ -18,10 +18,10 @@ resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=BC_AWS_S3_16:Skipping `Ensure S3 bucket versioning is enabled` because dynamic blocks are not supported by checkov
   #bridgecrew:skip=BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because variables are not understood
   #bridgecrew:skip=BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not have good defaults
-  count               = local.enabled ? 1 : 0
-  bucket              = local.bucket_name
-  force_destroy       = var.force_destroy
-  tags                = module.this.tags
+  count         = local.enabled ? 1 : 0
+  bucket        = local.bucket_name
+  force_destroy = var.force_destroy
+  tags          = module.this.tags
 
   dynamic "object_lock_configuration" {
     for_each = var.object_lock_configuration != null ? [1] : []
@@ -39,7 +39,7 @@ resource "aws_s3_bucket" "default" {
 }
 
 resource "aws_s3_bucket_logging" "default" {
-  count = local.enabled && var.logging != null ? 1 : 0
+  count  = local.enabled && var.logging != null ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   target_bucket = var.logging["bucket_name"]
@@ -47,7 +47,7 @@ resource "aws_s3_bucket_logging" "default" {
 }
 
 resource "aws_s3_bucket_website_configuration" "default" {
-  count = local.enabled && var.website_inputs != null ? 1 : 0
+  count  = local.enabled && var.website_inputs != null ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   index_document {
@@ -87,7 +87,7 @@ resource "aws_s3_bucket_website_configuration" "default" {
 }
 
 resource "aws_s3_bucket_acl" "default" {
-  count = local.enabled ? 1 : 0
+  count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   acl = try(length(var.grants), 0) == 0 ? var.acl : null
@@ -98,9 +98,9 @@ resource "aws_s3_bucket_acl" "default" {
 
       content {
         grantee {
-          id          = grant.value.id
-          type        = grant.value.type
-          uri         = grant.value.uri
+          id   = grant.value.id
+          type = grant.value.type
+          uri  = grant.value.uri
         }
         permissions = grant.value.permissions
       }
@@ -111,7 +111,7 @@ resource "aws_s3_bucket_acl" "default" {
 # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
-  count = local.enabled ? 1 : 0
+  count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   rule {
@@ -143,7 +143,7 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
-  count = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+  count  = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   dynamic "rule" {
@@ -221,14 +221,14 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
 }
 
 resource "aws_s3_bucket_accelerate_configuration" "default" {
-  count = local.transfer_acceleration_enabled ? 1 : 0
+  count  = local.transfer_acceleration_enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
   status = "Enabled"
 }
 
 resource "aws_s3_bucket_versioning" "default" {
   count = local.versioning_enabled ? 1 : 0
-  
+
   bucket = join("", aws_s3_bucket.default.*.id)
 
   versioning_configuration {
@@ -240,7 +240,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
   count = local.replication_enabled ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
-  role = aws_iam_role.replication[0].arn
+  role   = aws_iam_role.replication[0].arn
 
   dynamic "rule" {
     for_each = local.s3_replication_rules == null ? [] : local.s3_replication_rules

@@ -73,7 +73,7 @@ variable "s3_replication_enabled" {
 
 variable "policy" {
   type        = string
-  default     = null
+  default     = ""
   description = "DEPRECATED: Use source_policy_documents instead. A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
 }
 

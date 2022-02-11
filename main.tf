@@ -29,7 +29,7 @@ resource "aws_s3_bucket" "default" {
     for_each = var.object_lock_configuration != null ? [1] : []
 
     content {
-      object_lock_enabled = true
+      object_lock_enabled = "Enabled"
     }
   }
 
@@ -360,6 +360,11 @@ resource "aws_s3_bucket_replication_configuration" "default" {
       }
     }
   }
+
+  depends_on = [
+    # replication must be set before versioning
+    aws_s3_bucket_versioning.default
+  ]
 }
 
 resource "aws_s3_bucket_object_lock_configuration" "default" {

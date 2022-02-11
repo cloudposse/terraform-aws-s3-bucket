@@ -274,16 +274,11 @@ resource "aws_s3_bucket_replication_configuration" "default" {
       # OBSOLETE: prefix   = try(rule.value.prefix, null)
       status = try(rule.value.status, null)
 
-      # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
-      dynamic "delete_marker_replication" {
-        for_each = try(rule.value.delete_marker_replication_status, null) != null ? [1] : []
-
-        content {
-          status = try(rule.value.delete_marker_replication_status, null)
-        }
+      # This is only relevant when "filter" is used
+      delete_marker_replication {
+        status = try(rule.value.delete_marker_replication_status, "Disabled")
       }
 
-      # "rule.0.destination.0.encryption_configuration.0.replica_kms_key_id" is
       destination {
         # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
         # s3_replica_bucket_arn to specify single destination for all rules

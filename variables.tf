@@ -6,10 +6,10 @@ variable "acl" {
 
 variable "grants" {
   type = list(object({
-    id          = string
-    type        = string
-    permission  = string
-    uri         = string
+    id         = string
+    type       = string
+    permission = string
+    uri        = string
   }))
   default = null
 

@@ -259,24 +259,35 @@ resource "aws_s3_bucket_replication_configuration" "default" {
     content {
       id       = rule.value.id
       priority = try(rule.value.priority, 0)
+
       # `prefix` at this level is a V1 feature, replaced in V2 with the filter block.
       # `prefix` conflicts with `filter`, and for multiple destinations, a filter block
       # is required even if it empty, so we always implement `prefix` as a filter.
       # OBSOLETE: prefix   = try(rule.value.prefix, null)
       status = try(rule.value.status, null)
+
       # The `Delete marker replication` was disabled by default since empty filter created in Line 210, this needed to be "Enabled" to turn it on
-      delete_marker_replication {
-        status = try(rule.value.delete_marker_replication_status, null)
+      dynamic "delete_marker_replication" {
+        for_each = try(rule.value.delete_marker_replication_status, null) != null ? [1] : []
+
+        content {
+          status = try(rule.value.delete_marker_replication_status, null)
+        }
       }
 
+      # "rule.0.destination.0.encryption_configuration.0.replica_kms_key_id" is
       destination {
         # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
         # s3_replica_bucket_arn to specify single destination for all rules
         bucket        = try(length(rule.value.destination_bucket), 0) > 0 ? rule.value.destination_bucket : var.s3_replica_bucket_arn
         storage_class = try(rule.value.destination.storage_class, "STANDARD")
 
-        encryption_configuration {
-          replica_kms_key_id = try(rule.value.destination.replica_kms_key_id, null)
+        dynamic "encryption_configuration" {
+          for_each = try(rule.value.destination.replica_kms_key_id, null) != null ? [1] : []
+
+          content {
+            replica_kms_key_id = try(rule.value.destination.replica_kms_key_id, null)
+          }
         }
 
         account = try(rule.value.destination.account_id, null)

@@ -6,10 +6,10 @@ variable "acl" {
 
 variable "grants" {
   type = list(object({
-    id         = string
-    type       = string
-    permission = string
-    uri        = string
+    id          = string
+    type        = string
+    permissions = list(string)
+    uri         = string
   }))
   default = null
 
@@ -18,9 +18,8 @@ variable "grants" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    id      = string
-    enabled = bool
     prefix  = string
+    enabled = bool
     tags    = map(string)
 
     enable_glacier_transition            = bool
@@ -40,9 +39,8 @@ variable "lifecycle_rules" {
     expiration_days             = number
   }))
   default = [{
-    id      = "noop"
-    enabled = false
     prefix  = ""
+    enabled = false
     tags    = {}
 
     enable_glacier_transition            = true

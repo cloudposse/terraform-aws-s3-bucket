@@ -10,7 +10,6 @@ acl = "private"
 
 lifecycle_rules = [
   {
-    id      = "temp1"
     prefix  = null
     enabled = true
     tags    = { "temp" : "true" }
@@ -32,7 +31,6 @@ lifecycle_rules = [
     expiration_days             = 1
   },
   {
-    id      = "temp2"
     prefix  = null
     enabled = true
     tags    = {}

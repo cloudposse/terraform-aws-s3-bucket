@@ -53,23 +53,28 @@ resource "aws_s3_bucket_versioning" "default" {
 }
 
 resource "aws_s3_bucket_lifecycle_configuration" "default" {
-  count  = local.enabled && length(var.lifecycle_rules) > 0 ? 1 : 0
+  count  = local.enabled && length(local.lifecycle_configuration_rules) > 0 ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   dynamic "rule" {
-    for_each = var.lifecycle_rules
+    for_each = local.lifecycle_configuration_rules
 
     content {
       id     = rule.value.id
       status = try(rule.value.enabled == true ? "Enabled" : "Disabled", rule.value.status)
-      prefix = rule.value.prefix
 
-      filter {
-        and {
-          tags = rule.value.tags
+      dynamic "filter" {
+        for_each = (try(length(rule.value.prefix), 0) + try(length(rule.value.tags), 0)) > 0 ? [1] : []
+        content {
+          prefix = rule.value.prefix
+          dynamic "and" {
+            for_each = try(length(rule.value.tags), 0) > 0 ? [1] : []
+            content {
+              tags = rule.value.tags
+            }
+          }
         }
       }
-
       abort_incomplete_multipart_upload {
         days_after_initiation = rule.value.abort_incomplete_multipart_upload_days
       }
@@ -229,14 +234,14 @@ resource "aws_s3_bucket_acl" "default" {
   bucket = join("", aws_s3_bucket.default.*.id)
 
   # Conflicts with access_control_policy so this is enabled if no grants
-  acl = try(length(var.grants), 0) == 0 ? var.acl : null
+  acl = try(length(local.acl_grants), 0) == 0 ? var.acl : null
 
   dynamic "access_control_policy" {
-    for_each = try(length(var.grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : [1]
+    for_each = try(length(local.acl_grants), 0) == 0 || try(length(var.acl), 0) > 0 ? [] : [1]
 
     content {
       dynamic "grant" {
-        for_each = var.grants
+        for_each = local.acl_grants
 
         content {
           grantee {
@@ -520,11 +525,8 @@ data "aws_iam_policy_document" "bucket_policy" {
 data "aws_iam_policy_document" "aggregated_policy" {
   count = local.enabled ? 1 : 0
 
-  source_policy_documents = var.source_policy_documents
-
-  # TODO: use source_policy_documents and deprecate var.policy
-  source_json   = var.policy
-  override_json = join("", data.aws_iam_policy_document.bucket_policy.*.json)
+  source_policy_documents   = compact(concat([var.policy], var.source_policy_documents))
+  override_policy_documents = data.aws_iam_policy_document.bucket_policy.*.json
 }
 
 resource "aws_s3_bucket_policy" "default" {

@@ -4,7 +4,7 @@ variable "acl" {
   description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
 }
 
-variable "grants" {
+variable "acl_grants" {
   type = list(object({
     id         = string
     type       = string
@@ -13,7 +13,7 @@ variable "grants" {
   }))
   default = null
 
-  description = "An ACL policy grant. Conflicts with `acl`. Set `acl` to `null` to use this."
+  description = "A list of policy grants for the bucket. Conflicts with `acl`. Set `acl` to `null` to use this."
 }
 
 variable "policy" {
@@ -24,7 +24,7 @@ variable "policy" {
 
 variable "source_policy_documents" {
   type        = list(string)
-  default     = null
+  default     = []
   description = "List of IAM policy documents that are merged together into the exported document. Statements defined in source_policy_documents or source_json must have unique sids. Statements with the same sid from documents assigned to the override_json and override_policy_documents arguments will override source statements."
 }
 
@@ -85,7 +85,7 @@ variable "allow_ssl_requests_only" {
   description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
 }
 
-variable "lifecycle_rules" {
+variable "lifecycle_configuration_rules" {
   type = list(object({
     id      = string
     prefix  = string

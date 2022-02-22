@@ -63,20 +63,22 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
       id     = rule.value.id
       status = try(rule.value.enabled == true ? "Enabled" : "Disabled", rule.value.status)
 
-      dynamic "filter" {
-        for_each = (try(length(rule.value.prefix), 0) + try(length(rule.value.tags), 0)) > 0 ? [1] : []
-        content {
-          prefix = rule.value.prefix
-          dynamic "and" {
-            for_each = try(length(rule.value.tags), 0) > 0 ? [1] : []
-            content {
-              tags = rule.value.tags
-            }
+      # Filter is always required due to https://github.com/hashicorp/terraform-provider-aws/issues/23299
+      filter {
+        dynamic "and" {
+          for_each = (try(length(rule.value.prefix), 0) + try(length(rule.value.tags), 0)) > 0 ? [1] : []
+          content {
+            prefix = rule.value.prefix == null ? "" : rule.value.prefix
+            tags   = try(length(rule.value.tags), 0) > 0 ? rule.value.tags : {}
           }
         }
       }
-      abort_incomplete_multipart_upload {
-        days_after_initiation = rule.value.abort_incomplete_multipart_upload_days
+
+      dynamic "abort_incomplete_multipart_upload" {
+        for_each = try(tonumber(rule.value.abort_incomplete_multipart_upload_days), null) != null ? [1] : []
+        content {
+          days_after_initiation = rule.value.abort_incomplete_multipart_upload_days
+        }
       }
 
       dynamic "noncurrent_version_expiration" {
@@ -123,8 +125,6 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
         }
       }
 
-
-
       dynamic "transition" {
         for_each = rule.value.enable_standard_ia_transition ? [1] : []
 
@@ -143,6 +143,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
       }
     }
   }
+
+  depends_on = [
+    # versioning must be set before lifecycle configuration
+    aws_s3_bucket_versioning.default
+  ]
 }
 
 resource "aws_s3_bucket_logging" "default" {
@@ -367,7 +372,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
   }
 
   depends_on = [
-    # replication must be set before versioning
+    # versioning must be set before replication
     aws_s3_bucket_versioning.default
   ]
 }

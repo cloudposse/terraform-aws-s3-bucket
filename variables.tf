@@ -4,22 +4,28 @@ variable "acl" {
   description = "The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply. We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`."
 }
 
-variable "grants" {
+variable "acl_grants" {
   type = list(object({
-    id          = string
-    type        = string
-    permissions = list(string)
-    uri         = string
+    id         = string
+    type       = string
+    permission = string
+    uri        = string
   }))
   default = null
 
-  description = "An ACL policy grant. Conflicts with `acl`. Set `acl` to `null` to use this."
+  description = "A list of policy grants for the bucket. Conflicts with `acl`. Set `acl` to `null` to use this."
 }
 
 variable "policy" {
   type        = string
   default     = ""
-  description = "A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+  description = "DEPRECATED: A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+}
+
+variable "source_policy_documents" {
+  type        = list(string)
+  default     = []
+  description = "List of IAM policy documents that are merged together into the exported document. Statements defined in source_policy_documents or source_json must have unique sids. Statements with the same sid from documents assigned to the override_json and override_policy_documents arguments will override source statements."
 }
 
 variable "force_destroy" {
@@ -79,8 +85,9 @@ variable "allow_ssl_requests_only" {
   description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
 }
 
-variable "lifecycle_rules" {
+variable "lifecycle_configuration_rules" {
   type = list(object({
+    id      = string
     prefix  = string
     enabled = bool
     tags    = map(string)
@@ -102,6 +109,7 @@ variable "lifecycle_rules" {
     expiration_days             = number
   }))
   default = [{
+    id      = "noop"
     enabled = false
     prefix  = ""
     tags    = {}

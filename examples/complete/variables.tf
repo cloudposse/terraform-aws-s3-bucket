@@ -18,8 +18,8 @@ variable "grants" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    enabled = bool
     prefix  = string
+    enabled = bool
     tags    = map(string)
 
     enable_glacier_transition            = bool
@@ -39,8 +39,8 @@ variable "lifecycle_rules" {
     expiration_days             = number
   }))
   default = [{
-    enabled = false
     prefix  = ""
+    enabled = false
     tags    = {}
 
     enable_glacier_transition            = true
@@ -72,7 +72,13 @@ variable "s3_replication_enabled" {
 variable "policy" {
   type        = string
   default     = ""
-  description = "A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+  description = "DEPRECATED: Use source_policy_documents instead. A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+}
+
+variable "source_policy_documents" {
+  type        = list(string)
+  default     = null
+  description = "List of IAM policy documents that are merged together into the exported document. Statements defined in source_policy_documents or source_json must have unique sids. Statements with the same sid from documents assigned to the override_json and override_policy_documents arguments will override source statements."
 }
 
 variable "region" {

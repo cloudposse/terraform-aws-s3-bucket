@@ -13,3 +13,8 @@
 # Build harness files
 .build-harness
 build-harness
+
+# Editor and merge files
+*.orig
+*.draft
+*~

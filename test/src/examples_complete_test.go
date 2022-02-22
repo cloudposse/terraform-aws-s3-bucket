@@ -3,24 +3,21 @@ package test
 import (
 	"bytes"
 	"encoding/json"
-	"math/rand"
-	"strconv"
-	"strings"
-	"testing"
-	"time"
-
 	"github.com/gruntwork-io/terratest/modules/aws"
+	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
 )
 
 // Test the Terraform module in examples/complete using Terratest.
 func TestExamplesComplete(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano())
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"fixtures.us-east-2.tfvars"}
@@ -62,9 +59,9 @@ func TestExamplesComplete(t *testing.T) {
 // Test the Terraform module in examples/complete using Terratest for grants.
 func TestExamplesCompleteWithGrants(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 1)
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"grants.us-east-2.tfvars"}
@@ -99,9 +96,9 @@ func TestExamplesCompleteWithGrants(t *testing.T) {
 // Test the Terraform module in examples/complete using Terratest for grants.
 func TestExamplesCompleteWithObjectLock(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 2)
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"object-lock.us-east-2.tfvars"}
@@ -134,9 +131,9 @@ func TestExamplesCompleteWithObjectLock(t *testing.T) {
 
 func TestExamplesCompleteWithLifecycleRules(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 3)
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"lifecycle.us-east-2.tfvars"}
@@ -170,9 +167,9 @@ func TestExamplesCompleteWithLifecycleRules(t *testing.T) {
 
 func TestExamplesCompleteWithReplication(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 4)
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"replication.us-east-2.tfvars"}
@@ -220,10 +217,10 @@ func TestExamplesCompleteWithReplication(t *testing.T) {
 
 func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 5)
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
 	awsRegion := "us-east-2"
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"privileged-principals.us-east-2.tfvars"}
@@ -328,9 +325,9 @@ func TestExamplesCompleteWithPrivilegedPrincipals(t *testing.T) {
 
 func TestExamplesCompleteDisabled(t *testing.T) {
 	t.Parallel()
-	rand.Seed(time.Now().UnixNano() + 6)
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
 
-	attributes := []string{strconv.Itoa(rand.Intn(100000))}
 	rootFolder := "../../"
 	terraformFolderRelativeToRoot := "examples/complete"
 	varFiles := []string{"replication.us-east-2.tfvars"}

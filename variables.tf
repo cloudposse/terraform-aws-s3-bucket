@@ -79,6 +79,12 @@ variable "allow_ssl_requests_only" {
   description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
 }
 
+variable "lifecycle_rule_ids" {
+  type        = list(string)
+  default     = []
+  description = "A list of IDs to assign to corresponding `lifecycle_rules`"
+}
+
 variable "lifecycle_rules" {
   type = list(object({
     prefix  = string

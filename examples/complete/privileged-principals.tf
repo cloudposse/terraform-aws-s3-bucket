@@ -1,15 +1,16 @@
 locals {
   account_id = data.aws_caller_identity.current.account_id
 
-  principal_names = [
-    "arn:aws:iam::${local.account_id}:role/${join("", module.deployment_principal_label.*.id)}",
-    "arn:aws:iam::${local.account_id}:role/${join("", module.additional_deployment_principal_label.*.id)}"
+  # Must use derived values in order to validate `count` clauses
+  privileged_principal_arns = var.privileged_principal_enabled == false ? [] : [
+    {
+      (aws_iam_role.deployment_iam_role[0].arn) = [""]
+    },
+    {
+      (aws_iam_role.additional_deployment_iam_role[0].arn) = ["prefix1/", "prefix2/"]
+    }
   ]
 
-  privileged_principal_arns = var.privileged_principal_enabled ? {
-    (local.principal_names[0]) = [""]
-    (local.principal_names[1]) = ["prefix1/", "prefix2/"]
-  } : {}
 }
 
 data "aws_caller_identity" "current" {}

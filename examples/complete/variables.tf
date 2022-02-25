@@ -63,6 +63,26 @@ variable "lifecycle_rules" {
   description = "A list of lifecycle rules."
 }
 
+variable "lifecycle_configuration_rules" {
+  type = list(object({
+    enabled = bool
+    id      = string
+
+    abort_incomplete_multipart_upload_days = number
+
+    # `filter_and` is the `and` configuration block inside the `filter` configuration.
+    # This is the only place you should specify a prefix.
+    filter_and = any
+    expiration = any
+    transition = list(any)
+
+    noncurrent_version_expiration = any
+    noncurrent_version_transition = list(any)
+  }))
+  default     = []
+  description = "A list of lifecycle V2 rules"
+}
+
 variable "s3_replication_enabled" {
   type        = bool
   default     = false

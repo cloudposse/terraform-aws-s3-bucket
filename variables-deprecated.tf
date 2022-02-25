@@ -1,27 +1,7 @@
-variable "grants" {
-  type = list(object({
-    id          = string
-    type        = string
-    permissions = list(string)
-    uri         = string
-  }))
-  default = null
-
-  description = "DEPRECATED (replaced by `acl_grants`): A list of policy grants for the bucket. Conflicts with `acl`. Set `acl` to `null` to use this."
-}
-
-locals {
-  acl_grants = var.grants == null ? var.acl_grants : flatten(
-    [
-      for g in var.grants : [
-        for p in g.permissions : {
-          id         = g.id
-          type       = g.type
-          permission = p
-          uri        = g.uri
-        }
-      ]
-  ])
+variable "lifecycle_rule_ids" {
+  type        = list(string)
+  default     = []
+  description = "DEPRECATED (use `lifecycle_configuration_rules`): A list of IDs to assign to corresponding `lifecycle_rules`"
 }
 
 variable "lifecycle_rules" {
@@ -47,32 +27,17 @@ variable "lifecycle_rules" {
     expiration_days             = number
   }))
   default     = null
-  description = "DEPRECATED: A list of lifecycle rules"
+  description = "DEPRECATED (`use lifecycle_configuration_rules`): A list of lifecycle rules"
 }
 
-locals {
-  lifecycle_configuration_rules = var.lifecycle_rules == null ? var.lifecycle_configuration_rules : (
-    [for i, v in var.lifecycle_rules : {
-      id      = "rule-${i + 1}"
-      prefix  = v.prefix
-      enabled = v.enabled
-      tags    = v.tags
+variable "policy" {
+  type        = string
+  default     = ""
+  description = "DEPRECATED (use `source_policy_documents`): A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+}
 
-      enable_glacier_transition            = v.enable_glacier_transition
-      enable_deeparchive_transition        = v.enable_deeparchive_transition
-      enable_standard_ia_transition        = v.enable_standard_ia_transition
-      enable_current_object_expiration     = v.enable_current_object_expiration
-      enable_noncurrent_version_expiration = v.enable_noncurrent_version_expiration
-
-      abort_incomplete_multipart_upload_days         = v.abort_incomplete_multipart_upload_days
-      noncurrent_version_glacier_transition_days     = v.noncurrent_version_glacier_transition_days
-      noncurrent_version_deeparchive_transition_days = v.noncurrent_version_deeparchive_transition_days
-      noncurrent_version_expiration_days             = v.noncurrent_version_expiration_days
-
-      standard_transition_days    = v.standard_transition_days
-      glacier_transition_days     = v.glacier_transition_days
-      deeparchive_transition_days = v.deeparchive_transition_days
-      expiration_days             = v.expiration_days
-    }]
-  )
+variable "replication_rules" {
+  type        = list(any)
+  default     = null
+  description = "DEPRECATED (use `s3_replication_rules`): Specifies the replication rules for S3 bucket replication if enabled. You must also set s3_replication_enabled to true."
 }

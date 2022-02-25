@@ -1,19 +1,31 @@
 locals {
-  enabled = module.this.enabled
+  enabled   = module.this.enabled
+  partition = join("", data.aws_partition.current.*.partition)
 
   replication_enabled           = local.enabled && var.s3_replication_enabled
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
   bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  bucket_arn  = "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
-
-  # Deprecate `replication_rules` in favor of `s3_replication_rules` to keep all the replication related
-  # inputs grouped under s3_replica[tion]
-  s3_replication_rules = var.replication_rules == null ? var.s3_replication_rules : var.replication_rules
+  bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
+
+  acl_grants = var.grants == null ? [] : flatten(
+    [
+      for g in var.grants : [
+        for p in g.permissions : {
+          id         = g.id
+          type       = g.type
+          permission = p
+          uri        = g.uri
+        }
+      ]
+  ])
 }
+
+data "aws_partition" "current" { count = local.enabled ? 1 : 0 }
+data "aws_canonical_user_id" "default" { count = local.enabled ? 1 : 0 }
 
 resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` because we do not have good defaults
@@ -51,104 +63,6 @@ resource "aws_s3_bucket_versioning" "default" {
   versioning_configuration {
     status = "Enabled"
   }
-}
-
-resource "aws_s3_bucket_lifecycle_configuration" "default" {
-  count  = local.enabled && length(local.lifecycle_configuration_rules) > 0 ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
-
-  dynamic "rule" {
-    for_each = local.lifecycle_configuration_rules
-
-    content {
-      id     = rule.value.id
-      status = rule.value.enabled == true ? "Enabled" : "Disabled"
-
-      # Filter is always required due to https://github.com/hashicorp/terraform-provider-aws/issues/23299
-      filter {
-        dynamic "and" {
-          for_each = (try(length(rule.value.prefix), 0) + try(length(rule.value.tags), 0)) > 0 ? [1] : []
-          content {
-            prefix = rule.value.prefix == null ? "" : rule.value.prefix
-            tags   = try(length(rule.value.tags), 0) > 0 ? rule.value.tags : {}
-          }
-        }
-      }
-
-      dynamic "abort_incomplete_multipart_upload" {
-        for_each = try(tonumber(rule.value.abort_incomplete_multipart_upload_days), null) != null ? [1] : []
-        content {
-          days_after_initiation = rule.value.abort_incomplete_multipart_upload_days
-        }
-      }
-
-      dynamic "noncurrent_version_expiration" {
-        for_each = rule.value.enable_noncurrent_version_expiration ? [1] : []
-
-        content {
-          noncurrent_days = rule.value.noncurrent_version_expiration_days
-        }
-      }
-
-      dynamic "noncurrent_version_transition" {
-        for_each = rule.value.enable_glacier_transition ? [1] : []
-
-        content {
-          noncurrent_days = rule.value.noncurrent_version_glacier_transition_days
-          storage_class   = "GLACIER"
-        }
-      }
-
-      dynamic "noncurrent_version_transition" {
-        for_each = rule.value.enable_deeparchive_transition ? [1] : []
-
-        content {
-          noncurrent_days = rule.value.noncurrent_version_deeparchive_transition_days
-          storage_class   = "DEEP_ARCHIVE"
-        }
-      }
-
-      dynamic "transition" {
-        for_each = rule.value.enable_glacier_transition ? [1] : []
-
-        content {
-          days          = rule.value.glacier_transition_days
-          storage_class = "GLACIER"
-        }
-      }
-
-      dynamic "transition" {
-        for_each = rule.value.enable_deeparchive_transition ? [1] : []
-
-        content {
-          days          = rule.value.deeparchive_transition_days
-          storage_class = "DEEP_ARCHIVE"
-        }
-      }
-
-      dynamic "transition" {
-        for_each = rule.value.enable_standard_ia_transition ? [1] : []
-
-        content {
-          days          = rule.value.standard_transition_days
-          storage_class = "STANDARD_IA"
-        }
-      }
-
-      dynamic "expiration" {
-        for_each = rule.value.enable_current_object_expiration ? [1] : []
-
-        content {
-          days = rule.value.expiration_days
-        }
-      }
-    }
-  }
-
-  depends_on = [
-    # versioning must be set before lifecycle configuration
-    aws_s3_bucket_versioning.default
-  ]
 }
 
 resource "aws_s3_bucket_logging" "default" {
@@ -229,10 +143,6 @@ resource "aws_s3_bucket_cors_configuration" "default" {
       max_age_seconds = cors_rule.value.max_age_seconds
     }
   }
-}
-
-data "aws_canonical_user_id" "default" {
-  count = local.enabled ? 1 : 0
 }
 
 resource "aws_s3_bucket_acl" "default" {
@@ -405,8 +315,6 @@ module "s3_user" {
   context = module.this.context
 }
 
-data "aws_partition" "current" {}
-
 data "aws_iam_policy_document" "bucket_policy" {
   count = local.enabled ? 1 : 0
 
@@ -511,18 +419,18 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = keys(var.privileged_principal_arns)
+    for_each = var.privileged_principal_arns
 
     content {
       sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
-        "arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
-        formatlist("arn:${data.aws_partition.current.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", var.privileged_principal_arns[statement.value]),
+        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
+        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", values(statement.value)[0]),
       ]))
       principals {
         type        = "AWS"
-        identifiers = [statement.value]
+        identifiers = [keys(statement.value)[0]]
       }
     }
   }
@@ -531,8 +439,8 @@ data "aws_iam_policy_document" "bucket_policy" {
 data "aws_iam_policy_document" "aggregated_policy" {
   count = local.enabled ? 1 : 0
 
-  source_policy_documents   = compact(concat([var.policy], var.source_policy_documents))
-  override_policy_documents = data.aws_iam_policy_document.bucket_policy.*.json
+  source_policy_documents   = data.aws_iam_policy_document.bucket_policy.*.json
+  override_policy_documents = local.source_policy_documents
 }
 
 resource "aws_s3_bucket_policy" "default" {

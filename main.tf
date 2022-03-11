@@ -6,8 +6,8 @@ locals {
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
-  bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
+  bucket_name                      = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
+  bucket_arn                       = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
   enable_cloud_trail_bucket_policy = var.enable_cloud_trail_bucket_policy
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
@@ -460,7 +460,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         ]
       }
     }
-  } 
+  }
   dynamic "statement" {
     for_each = var.privileged_principal_arns
 

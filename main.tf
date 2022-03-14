@@ -110,7 +110,7 @@ resource "aws_s3_bucket_website_configuration" "default" {
   }
 
   dynamic "redirect_all_requests_to" {
-    for_each  = length(each.value.redirect_all_requests_to) > 0 ? each.value.redirect_all_requests_to : []
+    for_each = length(each.value.redirect_all_requests_to) > 0 ? each.value.redirect_all_requests_to : []
 
     content {
       host_name = redirect_all_requests_to.value.hostname

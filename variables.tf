@@ -276,7 +276,7 @@ variable "object_lock_configuration" {
 
 variable "website_inputs" {
 
-  type = map
+  type    = map(any)
   default = null
 
   description = "Specifies the static website hosting configuration object."

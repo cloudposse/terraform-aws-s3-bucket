@@ -276,12 +276,7 @@ variable "object_lock_configuration" {
 
 variable "website_inputs" {
 
-  type = list(object({
-    index_document           = string
-    error_document           = string
-    redirect_all_requests_to = string
-    routing_rules            = string
-  }))
+  type = map
   default = null
 
   description = "Specifies the static website hosting configuration object."

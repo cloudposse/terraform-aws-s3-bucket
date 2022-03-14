@@ -90,24 +90,36 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 }
 
 resource "aws_s3_bucket_website_configuration" "default" {
-  for_each = local.enabled && var.website_inputs != null ? toset(var.website_inputs) : toset([])
+  for_each = local.enabled && var.website_inputs != null ? var.website_inputs : {}
   bucket   = join("", aws_s3_bucket.default.*.id)
 
-  index_document {
-    suffix = each.value.index_document
+  dynamic "index_document" {
+    for_each = each.value.index_document == null ? [] : [1]
+
+    content {
+      suffix = each.value.index_document
+    }
   }
 
-  error_document {
-    key = each.value.error_document
+  dynamic "error_document" {
+    for_each = each.value.error_document == null ? [] : [1]
+
+    content {
+      key = each.value.error_document
+    }
   }
 
-  redirect_all_requests_to {
-    host_name = each.value.redirect_all_requests_to
-    protocol  = each.value.protocol
+  dynamic "redirect_all_requests_to" {
+    for_each  = length(each.value.redirect_all_requests_to) > 0 ? each.value.redirect_all_requests_to : []
+
+    content {
+      host_name = redirect_all_requests_to.value.hostname
+      protocol  = try(redirect_all_requests_to.value.protocol, "https")
+    }
   }
 
   dynamic "routing_rule" {
-    for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
+    for_each = length(each.value.routing_rules) > 0 ? each.value.routing_rules : []
     content {
       dynamic "condition" {
         for_each = routing_rule.value["Condition"]

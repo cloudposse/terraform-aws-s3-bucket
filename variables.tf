@@ -329,10 +329,8 @@ variable "bucket_key_enabled" {
   EOT
 }
 
-variable "enable_cloud_trail_bucket_policy" {
+variable "cloudtrail_bucket_policy_enabled" {
   type        = bool
   default     = false
-  description = <<-EOT
-  Setting this to true allows cloud trail service to write to the log by applying the appropriate bucket policy
-  EOT
+  description = "Setting this to true allows cloud trail service to write to the log by applying the appropriate bucket policy"
 }

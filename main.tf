@@ -8,7 +8,7 @@ locals {
 
   bucket_name                      = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
   bucket_arn                       = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
-  enable_cloud_trail_bucket_policy = var.enable_cloud_trail_bucket_policy
+  cloudtrail_bucket_policy_enabled = var.cloudtrail_bucket_policy_enabled
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
 
@@ -420,24 +420,20 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = local.enable_cloud_trail_bucket_policy ? [1] : []
+    for_each = local.cloudtrail_bucket_policy_enabled ? [1] : []
     content {
       sid = "AWSCloudTrailAclCheck"
       principals {
         type        = "Service"
         identifiers = ["cloudtrail.amazonaws.com"]
       }
-      actions = [
-        "s3:GetBucketAcl",
-      ]
-      resources = [
-        "arn:aws:s3:::${local.bucket_name}",
-      ]
+      actions   = ["s3:GetBucketAcl"]
+      resources = ["arn:aws:s3:::${local.bucket_name}"]
     }
   }
 
   dynamic "statement" {
-    for_each = local.enable_cloud_trail_bucket_policy ? [1] : []
+    for_each = local.cloudtrail_bucket_policy_enabled ? [1] : []
 
     content {
       sid = "AWSCloudTrailWrite"
@@ -445,12 +441,8 @@ data "aws_iam_policy_document" "bucket_policy" {
         type        = "Service"
         identifiers = ["cloudtrail.amazonaws.com", "config.amazonaws.com"]
       }
-      actions = [
-        "s3:PutObject",
-      ]
-      resources = [
-        "arn:aws:s3:::${local.bucket_name}/*",
-      ]
+      actions   = ["s3:PutObject"]
+      resources = ["arn:aws:s3:::${local.bucket_name}/*"]
       condition {
         test     = "StringEquals"
         variable = "s3:x-amz-acl"
@@ -461,6 +453,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       }
     }
   }
+
   dynamic "statement" {
     for_each = var.privileged_principal_arns
 
@@ -487,7 +480,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && (var.enable_cloud_trail_bucket_policy || var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
+  count      = local.enabled && (var.cloudtrail_bucket_policy_enabled || var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || var.policy != "") ? 1 : 0
   bucket     = join("", aws_s3_bucket.default.*.id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy.*.json)
   depends_on = [aws_s3_bucket_public_access_block.default]

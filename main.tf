@@ -425,7 +425,8 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid = "AWSCloudTrailAclCheck"
       principals {
         type        = "Service"
-        identifiers = ["cloudtrail.amazonaws.com"]
+        
+        identifiers = ["cloudtrail.${local.partition.dns_suffix}"]
       }
       actions   = ["s3:GetBucketAcl"]
       resources = ["arn:aws:s3:::${local.bucket_name}"]

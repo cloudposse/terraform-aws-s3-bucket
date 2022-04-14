@@ -37,7 +37,7 @@ resource "aws_s3_bucket" "default" {
   count         = local.enabled ? 1 : 0
   bucket        = local.bucket_name
   force_destroy = var.force_destroy
-
+  
   tags = module.this.tags
 }
 

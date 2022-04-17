@@ -427,7 +427,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         identifiers = ["cloudtrail.${local.partition.dns_suffix}"]
       }
       actions   = ["s3:GetBucketAcl"]
-      resources = ["arn:aws:s3:::${local.bucket_name}"]
+      resources = ["arn:${local.partition}:s3:::${local.bucket_name}"]
     }
   }
 
@@ -441,7 +441,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         identifiers = ["cloudtrail.amazonaws.com", "config.amazonaws.com"]
       }
       actions   = ["s3:PutObject"]
-      resources = ["arn:aws:s3:::${local.bucket_name}/*"]
+      resources = ["arn:${local.partition}:s3:::${local.bucket_name}/*"]
       condition {
         test     = "StringEquals"
         variable = "s3:x-amz-acl"

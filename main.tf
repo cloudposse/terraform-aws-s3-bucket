@@ -6,8 +6,8 @@ locals {
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
-  bucket_name                      = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  bucket_arn                       = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
+  bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
+  bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
 

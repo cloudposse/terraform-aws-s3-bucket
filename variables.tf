@@ -332,5 +332,5 @@ variable "bucket_key_enabled" {
 variable "cloudtrail_bucket_policy_enabled" {
   type        = bool
   default     = false
-  description = "Setting this to true allows cloud trail service to write to the log by applying the appropriate bucket policy"
+  description = "Whether or not to allow writing Cloudtrail logs to the S3 bucket by applying the appropriate bucket policy"
 }

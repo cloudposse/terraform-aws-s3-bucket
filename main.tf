@@ -8,7 +8,6 @@ locals {
 
   bucket_name                      = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
   bucket_arn                       = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}"
-  cloudtrail_bucket_policy_enabled = var.cloudtrail_bucket_policy_enabled
 
   public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
 
@@ -420,7 +419,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = local.cloudtrail_bucket_policy_enabled ? [1] : []
+    for_each = var.cloudtrail_bucket_policy_enabled ? [1] : []
     content {
       sid = "AWSCloudTrailAclCheck"
       principals {
@@ -433,7 +432,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = local.cloudtrail_bucket_policy_enabled ? [1] : []
+    for_each = var.cloudtrail_bucket_policy_enabled ? [1] : []
 
     content {
       sid = "AWSCloudTrailWrite"

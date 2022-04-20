@@ -5,6 +5,7 @@ locals {
     id      = null # string, must be specified and unique
 
     abort_incomplete_multipart_upload_days = null # number
+    filter_prefix_only                     = null # string See https://github.com/hashicorp/terraform-provider-aws/issues/23882
     filter_and = {
       object_size_greater_than = null # integer >= 0
       object_size_less_than    = null # integer >= 1
@@ -39,9 +40,16 @@ locals {
     id      = rule.id
 
     abort_incomplete_multipart_upload_days = rule.abort_incomplete_multipart_upload_days # number
+
+    # Due to https://github.com/hashicorp/terraform-provider-aws/issues/23882
+    # we have to treat having only the `prefix` set differently than having any other setting.
+    filter_prefix_only = (try(rule.filter_and.object_size_greater_than, null) == null &&
+      try(rule.filter_and.object_size_less_than, null) == null &&
+      try(length(rule.filter_and.tags), 0) == 0 &&
+    try(length(rule.filter_and.prefix), 0) > 0) ? rule.filter_and.prefix : null
+
     filter_and = (try(rule.filter_and.object_size_greater_than, null) == null &&
       try(rule.filter_and.object_size_less_than, null) == null &&
-      try(length(rule.filter_and.prefix), 0) == 0 &&
       try(length(rule.filter_and.tags), 0) == 0) ? null : {
       object_size_greater_than = try(rule.filter_and.object_size_greater_than, null)
       object_size_less_than    = try(rule.filter_and.object_size_less_than, null)
@@ -84,7 +92,9 @@ locals {
     id      = try(var.lifecycle_rule_ids[i], "rule-${i + 1}")
 
     abort_incomplete_multipart_upload_days = rule.abort_incomplete_multipart_upload_days # number
-    filter_and = try(length(rule.prefix), 0) == 0 && try(length(rule.tags), 0) == 0 ? null : {
+
+    filter_prefix_only = try(length(rule.prefix), 0) > 0 && try(length(rule.tags), 0) == 0 ? rule.prefix : null
+    filter_and = try(length(rule.tags), 0) == 0 ? null : {
       object_size_greater_than = null                                   # integer >= 0
       object_size_less_than    = null                                   # integer >= 1
       prefix                   = rule.prefix == "" ? null : rule.prefix # string
@@ -133,7 +143,7 @@ locals {
       # enabled the transition for both current and non-current version.
       rule.enable_deeparchive_transition != true ? [] :
       [{
-        newer_noncurrent_versions = null                                                # string
+        newer_noncurrent_versions = null                                                # integer >= 0
         noncurrent_days           = rule.noncurrent_version_deeparchive_transition_days # integer >= 0
         storage_class             = "DEEP_ARCHIVE"
       }],
@@ -156,14 +166,28 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
       status = rule.value.enabled == true ? "Enabled" : "Disabled"
 
       # Filter is always required due to https://github.com/hashicorp/terraform-provider-aws/issues/23299
-      filter {
-        dynamic "and" {
-          for_each = rule.value.filter_and == null ? [] : [rule.value.filter_and]
-          content {
-            object_size_greater_than = and.value.object_size_greater_than
-            object_size_less_than    = and.value.object_size_less_than
-            prefix                   = and.value.prefix
-            tags                     = and.value.tags
+      dynamic "filter" {
+        for_each = rule.value.filter_prefix_only == null && rule.value.filter_and == null ? ["empty"] : []
+        content {}
+      }
+
+      # When only specifying `prefix`, do not use `and` due to https://github.com/hashicorp/terraform-provider-aws/issues/23882
+      dynamic "filter" {
+        for_each = rule.value.filter_prefix_only == null ? [] : ["prefix"]
+        content {
+          prefix = rule.value.filter_prefix_only
+        }
+      }
+
+      # When specifying more than 1 filter criterion, use `and`
+      dynamic "filter" {
+        for_each = rule.value.filter_and == null ? [] : ["and"]
+        content {
+          and {
+            object_size_greater_than = rule.value.filter_and.object_size_greater_than
+            object_size_less_than    = rule.value.filter_and.object_size_less_than
+            prefix                   = rule.value.filter_and.prefix
+            tags                     = rule.value.filter_and.tags
           }
         }
       }

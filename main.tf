@@ -427,7 +427,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         identifiers = ["cloudtrail.${local.partition.dns_suffix}"]
       }
       actions   = ["s3:GetBucketAcl"]
-      resources = ["arn:${local.partition}:s3:::${local.bucket_name}"]
+      resources = [local.bucket_arn]
     }
   }
 
@@ -441,7 +441,7 @@ data "aws_iam_policy_document" "bucket_policy" {
         identifiers = ["cloudtrail.amazonaws.com", "config.amazonaws.com"]
       }
       actions   = ["s3:PutObject"]
-      resources = ["arn:${local.partition}:s3:::${local.bucket_name}/*"]
+      resources = ["${local.bucket_arn}/*"]
       condition {
         test     = "StringEquals"
         variable = "s3:x-amz-acl"
@@ -460,8 +460,8 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
-        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
-        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", values(statement.value)[0]),
+        "${local.bucket_arn}",
+        formatlist("${local.bucket_arn}/%s*", values(statement.value)[0]),
       ]))
       principals {
         type        = "AWS"

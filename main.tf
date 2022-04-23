@@ -479,7 +479,8 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count = local.enabled && var.cloudtrail_bucket_policy_enabled && (var.allow_ssl_requests_only ||
+  count = local.enabled && (var.cloudtrail_bucket_policy_enabled ||
+    var.allow_ssl_requests_only ||
     var.allow_encrypted_uploads_only ||
     length(var.s3_replication_source_roles) > 0 ||
     length(var.privileged_principal_arns) > 0 ||

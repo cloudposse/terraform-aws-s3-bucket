@@ -9,33 +9,105 @@ name = "s3-lifecycle-test"
 acl = "private"
 
 lifecycle_configuration_rules = [
+  # Be sure to cover https://github.com/cloudposse/terraform-aws-s3-bucket/issues/137
   {
-    enabled = true # bool
-    id      = "v2rule"
-
-    abort_incomplete_multipart_upload_days = 1 # number
-
-    filter_and = null
+    abort_incomplete_multipart_upload_days = 1
+    enabled                                = true
     expiration = {
-      days = 120 # integer > 0
+      days                         = null
+      expired_object_delete_marker = null
     }
+
+    # test no filter
+    filter_and = {}
+    id         = "nofilter"
     noncurrent_version_expiration = {
-      newer_noncurrent_versions = 3  # integer > 0
-      noncurrent_days           = 60 # integer >= 0
+      newer_noncurrent_versions = 2
+      noncurrent_days           = 30
     }
-    transition = [{
-      days          = 30            # integer >= 0
-      storage_class = "STANDARD_IA" # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
-      },
+    noncurrent_version_transition = []
+    transition = [
       {
-        days          = 60           # integer >= 0
-        storage_class = "ONEZONE_IA" # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
-    }]
-    noncurrent_version_transition = [{
-      newer_noncurrent_versions = 3            # integer >= 0
-      noncurrent_days           = 30           # integer >= 0
-      storage_class             = "ONEZONE_IA" # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
-    }]
+        days          = 7
+        storage_class = "GLACIER"
+      },
+    ]
+
+  },
+  {
+    abort_incomplete_multipart_upload_days = 1
+    enabled                                = true
+    expiration = {
+      days                         = null
+      expired_object_delete_marker = null
+    }
+
+    # test prefix only
+    filter_and = {
+      prefix = "prefix1"
+    }
+    id = "prefix1"
+    noncurrent_version_expiration = {
+      newer_noncurrent_versions = 2
+      noncurrent_days           = 30
+    }
+    noncurrent_version_transition = []
+    transition = [
+      {
+        days          = 7
+        storage_class = "GLACIER"
+      },
+    ]
+
+  },
+  {
+    abort_incomplete_multipart_upload_days = null
+    enabled                                = true
+    expiration = {
+      days                         = 1461
+      expired_object_delete_marker = false
+    }
+    # test prefix with other filter
+    filter_and = {
+      prefix                   = "prefix2"
+      object_size_greater_than = 128 * 1024
+    }
+    id = "prefix2"
+    noncurrent_version_expiration = {
+      newer_noncurrent_versions = 2
+      noncurrent_days           = 14
+    }
+    noncurrent_version_transition = []
+    transition = [
+      {
+        days          = 366
+        storage_class = "GLACIER"
+      },
+    ]
+  },
+  {
+    abort_incomplete_multipart_upload_days = null
+    enabled                                = true
+    expiration = {
+      days                         = 93
+      expired_object_delete_marker = false
+    }
+    # test filter without prefix
+    filter_and = {
+      object_size_greater_than = 256 * 1024
+    }
+    id = "big"
+    noncurrent_version_expiration = {
+      newer_noncurrent_versions = 2
+      noncurrent_days           = 14
+    }
+    noncurrent_version_transition = []
+    transition = [
+      {
+        days          = 90
+        storage_class = "GLACIER"
+      },
+    ]
   }
 ]
 
@@ -83,6 +155,7 @@ lifecycle_rules = [
     expiration_days             = 366 * 4
   }
 ]
+
 
 force_destroy = true
 

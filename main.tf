@@ -2,6 +2,7 @@ locals {
   enabled   = module.this.enabled
   partition = join("", data.aws_partition.current.*.partition)
 
+  object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
@@ -38,13 +39,7 @@ resource "aws_s3_bucket" "default" {
   bucket        = local.bucket_name
   force_destroy = var.force_destroy
 
-  dynamic "object_lock_configuration" {
-    for_each = var.object_lock_configuration != null ? [1] : []
-
-    content {
-      object_lock_enabled = "Enabled"
-    }
-  }
+  object_lock_enabled = local.object_lock_enabled
 
   tags = module.this.tags
 }
@@ -301,7 +296,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 }
 
 resource "aws_s3_bucket_object_lock_configuration" "default" {
-  count = local.enabled && var.object_lock_configuration != null ? 1 : 0
+  count = local.object_lock_enabled ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 

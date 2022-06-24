@@ -108,6 +108,18 @@ The table below correctly indicates which inputs are required.
 
 Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html).
 
+NOTE: As of 2.0.2, this module will now require the `awsutils` provider to be defined with a region. This can be the same region as the `aws` provider.
+
+```hcl
+provider "awsutils" {
+  region = var.region
+}
+
+provider "awsutils" {
+  region = var.region
+}
+```
+
 ```hcl
 module "s3_bucket" {
   source = "cloudposse/s3-bucket/aws"
@@ -526,8 +538,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 ### Contributors
 
 <!-- markdownlint-disable -->
-|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] | [![Yonatan Koren][korenyoni_avatar]][korenyoni_homepage]<br/>[Yonatan Koren][korenyoni_homepage] |
-|---|---|---|---|---|
+|  [![Erik Osterman][osterman_avatar]][osterman_homepage]<br/>[Erik Osterman][osterman_homepage] | [![Andriy Knysh][aknysh_avatar]][aknysh_homepage]<br/>[Andriy Knysh][aknysh_homepage] | [![Maxim Mironenko][maximmi_avatar]][maximmi_homepage]<br/>[Maxim Mironenko][maximmi_homepage] | [![Josh Myers][joshmyers_avatar]][joshmyers_homepage]<br/>[Josh Myers][joshmyers_homepage] | [![Yonatan Koren][korenyoni_avatar]][korenyoni_homepage]<br/>[Yonatan Koren][korenyoni_homepage] | [![RB][nitrocode_avatar]][nitrocode_homepage]<br/>[RB][nitrocode_homepage] |
+|---|---|---|---|---|---|
 <!-- markdownlint-restore -->
 
   [osterman_homepage]: https://github.com/osterman
@@ -540,6 +552,8 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [joshmyers_avatar]: https://img.cloudposse.com/150x150/https://github.com/joshmyers.png
   [korenyoni_homepage]: https://github.com/korenyoni
   [korenyoni_avatar]: https://img.cloudposse.com/150x150/https://github.com/korenyoni.png
+  [nitrocode_homepage]: https://github.com/nitrocode
+  [nitrocode_avatar]: https://img.cloudposse.com/150x150/https://github.com/nitrocode.png
 
 [![README Footer][readme_footer_img]][readme_footer_link]
 [![Beacon][beacon]][website]

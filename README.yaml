@@ -85,6 +85,18 @@ description: |-
 usage: |-
   Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html).
 
+  NOTE: As of 2.0.2, this module will now require the `awsutils` provider to be defined with a region. This can be the same region as the `aws` provider.
+
+  ```hcl
+  provider "awsutils" {
+    region = var.region
+  }
+
+  provider "awsutils" {
+    region = var.region
+  }
+  ```
+
   ```hcl
   module "s3_bucket" {
     source = "cloudposse/s3-bucket/aws"
@@ -223,3 +235,5 @@ contributors:
     github: "joshmyers"
   - name: "Yonatan Koren"
     github: "korenyoni"
+  - name: "RB"
+    github: "nitrocode"

@@ -111,7 +111,7 @@ Using a [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overvie
 NOTE: As of 2.0.2, this module will now require the `awsutils` provider to be defined with a region. This can be the same region as the `aws` provider.
 
 ```hcl
-provider "awsutils" {
+provider "aws" {
   region = var.region
 }
 

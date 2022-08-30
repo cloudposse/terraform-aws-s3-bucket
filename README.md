@@ -268,7 +268,7 @@ Available targets:
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_s3_user"></a> [s3\_user](#module\_s3\_user) | cloudposse/iam-s3-user/aws | 0.15.10 |
+| <a name="module_s3_user"></a> [s3\_user](#module\_s3\_user) | cloudposse/iam-s3-user/aws | 0.15.11 |
 | <a name="module_this"></a> [this](#module\_this) | cloudposse/label/null | 0.25.0 |
 
 ## Resources
@@ -322,6 +322,7 @@ Available targets:
 | <a name="input_environment"></a> [environment](#input\_environment) | ID element. Usually used for region e.g. 'uw2', 'us-west-2', OR role 'prod', 'staging', 'dev', 'UAT' | `string` | `null` | no |
 | <a name="input_force_destroy"></a> [force\_destroy](#input\_force\_destroy) | When `true`, permits a non-empty S3 bucket to be deleted by first deleting all objects in the bucket.<br>THESE OBJECTS ARE NOT RECOVERABLE even if they were versioned and stored in Glacier. | `bool` | `false` | no |
 | <a name="input_grants"></a> [grants](#input\_grants) | A list of policy grants for the bucket, taking a list of permissions.<br>Conflicts with `acl`. Set `acl` to `null` to use this. | <pre>list(object({<br>    id          = string<br>    type        = string<br>    permissions = list(string)<br>    uri         = string<br>  }))</pre> | `[]` | no |
+| <a name="input_iam_access_key_max_age"></a> [iam\_access\_key\_max\_age](#input\_iam\_access\_key\_max\_age) | Maximum age of IAM access key (seconds). Defaults to 30 days. Set to 0 to disable expiration. | `number` | `2592000` | no |
 | <a name="input_id_length_limit"></a> [id\_length\_limit](#input\_id\_length\_limit) | Limit `id` to this many characters (minimum 6).<br>Set to `0` for unlimited length.<br>Set to `null` for keep the existing setting, which defaults to `0`.<br>Does not affect `id_full`. | `number` | `null` | no |
 | <a name="input_ignore_public_acls"></a> [ignore\_public\_acls](#input\_ignore\_public\_acls) | Set to `false` to disable the ignoring of public access lists on the bucket | `bool` | `true` | no |
 | <a name="input_kms_master_key_arn"></a> [kms\_master\_key\_arn](#input\_kms\_master\_key\_arn) | The AWS KMS master key ARN used for the `SSE-KMS` encryption. This can only be used when you set the value of `sse_algorithm` as `aws:kms`. The default aws/s3 AWS KMS master key is used if this element is absent while the `sse_algorithm` is `aws:kms` | `string` | `""` | no |
@@ -543,7 +544,7 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
 
 [![README Footer][readme_footer_img]][readme_footer_link]
 [![Beacon][beacon]][website]
-
+<!-- markdownlint-disable -->
   [logo]: https://cloudposse.com/logo-300x69.svg
   [docs]: https://cpco.io/docs?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-s3-bucket&utm_content=docs
   [website]: https://cpco.io/homepage?utm_source=github&utm_medium=readme&utm_campaign=cloudposse/terraform-aws-s3-bucket&utm_content=website
@@ -574,3 +575,4 @@ Check out [our other projects][github], [follow us on twitter][twitter], [apply 
   [share_googleplus]: https://plus.google.com/share?url=https://github.com/cloudposse/terraform-aws-s3-bucket
   [share_email]: mailto:?subject=terraform-aws-s3-bucket&body=https://github.com/cloudposse/terraform-aws-s3-bucket
   [beacon]: https://ga-beacon.cloudposse.com/UA-76589703-4/cloudposse/terraform-aws-s3-bucket?pixel&cs=github&cm=readme&an=terraform-aws-s3-bucket
+<!-- markdownlint-restore -->

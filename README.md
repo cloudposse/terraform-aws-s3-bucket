@@ -159,7 +159,7 @@ locals {
 }
 ```
 
-Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access
+Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access 
 to another account and for logging, and incorporating the above lifecycle configuration.
 
 ```hcl
@@ -218,13 +218,13 @@ module "s3_bucket" {
     "arn:aws:iam::123456789012:role/principal2" = [""]
   }]
   privileged_principal_actions = [
-    "s3:PutObject",
-    "s3:PutObjectAcl",
-    "s3:GetObject",
-    "s3:DeleteObject",
-    "s3:ListBucket",
-    "s3:ListBucketMultipartUploads",
-    "s3:GetBucketLocation",
+    "s3:PutObject", 
+    "s3:PutObjectAcl", 
+    "s3:GetObject", 
+    "s3:DeleteObject", 
+    "s3:ListBucket", 
+    "s3:ListBucketMultipartUploads", 
+    "s3:GetBucketLocation", 
     "s3:AbortMultipartUpload"
   ]
 }

@@ -328,3 +328,14 @@ variable "bucket_key_enabled" {
   For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
   EOT
 }
+
+variable "iam_access_key_max_age" {
+  type        = number
+  description = "Maximum age of IAM access key (seconds). Defaults to 30 days. Set to 0 to disable expiration."
+  default     = 2592000
+
+  validation {
+    condition     = var.iam_access_key_max_age >= 0
+    error_message = "The iam_access_key_max_age must be 0 (disabled) or greater."
+  }
+}

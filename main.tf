@@ -301,11 +301,12 @@ resource "aws_s3_bucket_object_lock_configuration" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "0.15.10"
+  version = "0.15.11"
 
-  enabled      = local.enabled && var.user_enabled
-  s3_actions   = var.allowed_bucket_actions
-  s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
+  enabled                = local.enabled && var.user_enabled
+  s3_actions             = var.allowed_bucket_actions
+  s3_resources           = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
+  iam_access_key_max_age = var.iam_access_key_max_age
 
   context = module.this.context
 }

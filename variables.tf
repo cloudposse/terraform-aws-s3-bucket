@@ -77,6 +77,29 @@ variable "user_enabled" {
   description = "Set to `true` to create an IAM user with permission to access the bucket"
 }
 
+variable "access_key_enabled" {
+  type        = bool
+  default     = true
+  description = "Set to `true` to create an IAM Access Key for the created IAM user"
+}
+
+variable "store_access_key_in_ssm" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Set `true` to store the created IAM user's access key in SSM Parameter Store,
+    `false` to store them in Terraform state as outputs.
+    Since Terraform state would contain the secrets in plaintext,
+    use of SSM Parameter Store is recommended.
+    EOT
+}
+
+variable "ssm_base_path" {
+  type        = string
+  description = "The base path for SSM parameters where created IAM user's access key is stored"
+  default     = "/s3_user/"
+}
+
 variable "allowed_bucket_actions" {
   type        = list(string)
   default     = ["s3:PutObject", "s3:PutObjectAcl", "s3:GetObject", "s3:DeleteObject", "s3:ListBucket", "s3:ListBucketMultipartUploads", "s3:GetBucketLocation", "s3:AbortMultipartUpload"]
@@ -163,9 +186,8 @@ variable "cors_rule_inputs" {
     expose_headers  = list(string)
     max_age_seconds = number
   }))
-  default = null
-
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
+  default     = []
 }
 
 variable "block_public_acls" {
@@ -274,17 +296,45 @@ variable "object_lock_configuration" {
   description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
 }
 
-variable "website_inputs" {
-
+variable "website_redirect_all_requests_to" {
   type = list(object({
-    index_document           = string
-    error_document           = string
-    redirect_all_requests_to = string
-    routing_rules            = string
+    host_name = string
+    protocol  = string
   }))
-  default = null
+  description = "If provided, all website requests will be redirected to the specified host name and protocol"
+  default     = []
 
-  description = "Specifies the static website hosting configuration object."
+  validation {
+    condition     = length(var.website_redirect_all_requests_to) < 2
+    error_message = "Only 1 website_redirect_all_requests_to is allowed."
+  }
+}
+
+variable "website_configuration" {
+  type = list(object({
+    index_document = string
+    error_document = string
+    routing_rules = list(object({
+      condition = object({
+        http_error_code_returned_equals = string
+        key_prefix_equals               = string
+      })
+      redirect = object({
+        host_name               = string
+        http_redirect_code      = string
+        protocol                = string
+        replace_key_prefix_with = string
+        replace_key_with        = string
+      })
+    }))
+  }))
+  description = "Specifies the static website hosting configuration object"
+  default     = []
+
+  validation {
+    condition     = length(var.website_configuration) < 2
+    error_message = "Only one website_configuration is allowed."
+  }
 }
 
 # Need input to be a list to fix https://github.com/cloudposse/terraform-aws-s3-bucket/issues/102

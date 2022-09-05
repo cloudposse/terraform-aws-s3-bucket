@@ -71,15 +71,25 @@ description: |-
   
   If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
   This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage
-  [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) and
+  [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) 
+  or [AWS OIDC](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc.html) to authenticate and
   do not already have IAM credentials. Users or systems that have IAM credentials should either be granted access directly based on
-  their IAM identity or be allowed to assume an IAM role with access.
+  their IAM identity via `privileged_principal_arns` or be allowed to assume an IAM role with access.
 
   We do not recommend creating IAM users this way for any other purpose.
 
   This module blocks public access to the bucket by default. See `block_public_acls`, `block_public_policy`,
   `ignore_public_acls`, and `restrict_public_buckets` to change the settings. See [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html)
   for more details.
+
+  If an IAM user is created, the IAM user name is constructed using [terraform-null-label](https://github.com/cloudposse/terraform-null-label)
+  and some input is required. The simplest input is `name`. By default the name will be converted to lower case
+  and all non-alphanumeric characters except for hyphen will be removed. See the documentation for `terraform-null-label`
+  to learn how to override these defaults if desired.
+  
+  If an AWS Access Key is created, it is stored either in SSM Parameter Store or is provided as a module output,
+  but not both. Using SSM Parameter Store is recommended because module outputs are stored in plaintext in
+  the Terraform state file.
 
 # How to use this project
 usage: |-
@@ -90,14 +100,24 @@ usage: |-
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
     # version = "x.x.x"
-    acl                      = "private"
-    enabled                  = true
-    user_enabled             = true
-    versioning_enabled       = false
-    allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
     name                     = "app"
     stage                    = "test"
     namespace                = "eg"
+
+    acl                      = "private"
+    enabled                  = true
+    user_enabled             = false
+    versioning_enabled       = false
+  
+    privileged_principal_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
+    privileged_principal_arns      = [
+      {
+        (local.deployment_iam_role_arn) = [""]
+      },
+      {
+        (local.additional_deployment_iam_role_arn) = ["prefix1/", "prefix2/"]
+      }
+    ]
   }
   ```
 
@@ -144,14 +164,14 @@ usage: |-
     source = "cloudposse/s3-bucket/aws"
     # Cloud Posse recommends pinning every module to a specific version
     # version = "x.x.x"
-    acl                      = ""
-    enabled                  = true
-    user_enabled             = true
-    versioning_enabled       = true
-    allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
     name                     = "app"
     stage                    = "test"
     namespace                = "eg"
+
+    acl                      = ""
+    enabled                  = true
+    user_enabled             = false
+    versioning_enabled       = true
   
     lifecycle_configuration_rules = local.lifecycle_configuration_rules
 
@@ -223,3 +243,5 @@ contributors:
     github: "joshmyers"
   - name: "Yonatan Koren"
     github: "korenyoni"
+  - name: "Nuru"
+    github: "Nuru"

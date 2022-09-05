@@ -28,5 +28,12 @@ module "s3_bucket" {
   transfer_acceleration_enabled = true
   bucket_key_enabled            = var.bucket_key_enabled
 
+  access_key_enabled      = var.access_key_enabled
+  store_access_key_in_ssm = var.store_access_key_in_ssm
+  ssm_base_path           = "/${module.this.id}"
+
+  website_configuration = var.website_configuration
+  cors_rule_inputs      = var.cors_rule_inputs
+
   context = module.this.context
 }

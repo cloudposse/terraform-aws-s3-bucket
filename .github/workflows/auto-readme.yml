@@ -1,7 +1,5 @@
 name: "auto-readme"
 on:
-  workflow_dispatch:
-
   schedule:
   # Example of job definition:
   # .---------------- minute (0 - 59)
@@ -17,35 +15,21 @@ on:
 
 jobs:
   update:
-    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-
-    - name: Find default branch name
-      id: defaultBranch
-      shell: bash
-      env:
-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-      run: |
-        default_branch=$(gh repo view --json defaultBranchRef --jq .defaultBranchRef.name)
-        printf "::set-output name=defaultBranch::%s\n" "${default_branch}"
-        printf "defaultBranchRef.name=%s\n" "${default_branch}"
 
     - name: Update readme
       shell: bash
       id: update
       env:
         GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        DEF: "${{ steps.defaultBranch.outputs.defaultBranch }}"
       run: |
         make init
         make readme/build
         # Ignore changes if they are only whitespace
-        if ! git diff --quiet README.md && git diff --ignore-all-space --ignore-blank-lines --quiet README.md; then
-          git restore README.md
-          echo Ignoring whitespace-only changes in README
-        fi
+        git diff --ignore-all-space --ignore-blank-lines --quiet README.md && { git restore README.md; echo Ignoring whitespace-only changes in README; }
 
     - name: Create Pull Request
       # This action will not create or change a pull request if there are no changes to make.
@@ -63,7 +47,7 @@ jobs:
           To have most recent changes of README.md and doc from origin templates
 
         branch: auto-update/readme
-        base: ${{ steps.defaultBranch.outputs.defaultBranch }}
+        base: main
         delete-branch: true
         labels: |
           auto-update

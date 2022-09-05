@@ -56,11 +56,27 @@ output "replication_role_arn" {
 output "access_key_id" {
   sensitive   = true
   value       = module.s3_user.access_key_id
-  description = "The access key ID"
+  description = <<-EOT
+    The access key ID, if `var.user_enabled && var.access_key_enabled`.
+    While sensitive, it does not need to be kept secret, so this is output regardless of `var.store_access_key_in_ssm`.
+    EOT
 }
 
 output "secret_access_key" {
   sensitive   = true
   value       = module.s3_user.secret_access_key
-  description = "The secret access key. This will be written to the state file in plain-text"
+  description = <<-EOT
+    The secret access key, if `var.user_enabled && var.access_key_enabled && !var.store_access_key_in_ssm`.
+    This will be written to the state file unencrypted, so using `store_access_key_in_ssm` is recommended"
+    EOT
+}
+
+output "access_key_id_ssm_path" {
+  value       = module.s3_user.access_key_id_ssm_path
+  description = "The SSM Path under which the S3 User's access key ID is stored"
+}
+
+output "secret_access_key_ssm_path" {
+  value       = module.s3_user.secret_access_key_ssm_path
+  description = "The SSM Path under which the S3 User's secret access key is stored"
 }

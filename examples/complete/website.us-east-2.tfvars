@@ -53,7 +53,7 @@ website_configuration = [
   }
 ]
 
-cors_rule_inputs = [
+cors_configuration = [
   {
     allowed_headers = ["*"]
     allowed_methods = ["PUT", "POST"]

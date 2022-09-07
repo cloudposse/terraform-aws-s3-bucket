@@ -178,7 +178,7 @@ variable "lifecycle_configuration_rules" {
 # See lifecycle.tf for conversion of deprecated `lifecyle_rules` to `lifecycle_configuration_rules`
 
 
-variable "cors_rule_inputs" {
+variable "cors_configuration" {
   type = list(object({
     allowed_headers = list(string)
     allowed_methods = list(string)

@@ -214,7 +214,7 @@ variable "website_configuration" {
   }
 }
 
-variable "cors_rule_inputs" {
+variable "cors_configuration" {
   type = list(object({
     allowed_headers = list(string)
     allowed_methods = list(string)

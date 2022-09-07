@@ -139,12 +139,12 @@ resource "aws_s3_bucket_website_configuration" "redirect" {
 
 
 resource "aws_s3_bucket_cors_configuration" "default" {
-  count = local.enabled && try(length(var.cors_rule_inputs), 0) > 0 ? 1 : 0
+  count = local.enabled && try(length(var.cors_configuration), 0) > 0 ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 
   dynamic "cors_rule" {
-    for_each = var.cors_rule_inputs
+    for_each = var.cors_configuration
 
     content {
       allowed_headers = cors_rule.value.allowed_headers

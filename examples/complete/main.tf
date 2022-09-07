@@ -33,7 +33,7 @@ module "s3_bucket" {
   ssm_base_path           = "/${module.this.id}"
 
   website_configuration            = var.website_configuration
-  cors_rule_inputs                 = var.cors_rule_inputs
+  cors_configuration               = var.cors_configuration
   website_redirect_all_requests_to = var.website_redirect_all_requests_to
 
   context = module.this.context

@@ -32,8 +32,9 @@ module "s3_bucket" {
   store_access_key_in_ssm = var.store_access_key_in_ssm
   ssm_base_path           = "/${module.this.id}"
 
-  website_configuration = var.website_configuration
-  cors_rule_inputs      = var.cors_rule_inputs
+  website_configuration            = var.website_configuration
+  cors_rule_inputs                 = var.cors_rule_inputs
+  website_redirect_all_requests_to = var.website_redirect_all_requests_to
 
   context = module.this.context
 }

@@ -22,18 +22,19 @@ website_configuration = [
   {
     index_document = "index.html"
     error_document = null
-    routing_rules = [{
-      condition = {
-        http_error_code_returned_equals = "404"
-        key_prefix_equals               = "docs/"
-      }
-      redirect = {
-        host_name               = null
-        http_redirect_code      = "301"
-        protocol                = "https"
-        replace_key_prefix_with = "documents/"
-        replace_key_with        = null
-      }
+    routing_rules = [
+      {
+        condition = {
+          http_error_code_returned_equals = "404"
+          key_prefix_equals               = "docs/"
+        }
+        redirect = {
+          host_name               = null
+          http_redirect_code      = "301"
+          protocol                = "https"
+          replace_key_prefix_with = "documents/"
+          replace_key_with        = null
+        }
       },
       {
         condition = {
@@ -47,7 +48,8 @@ website_configuration = [
           replace_key_prefix_with = "maintenance/"
           replace_key_with        = null
         }
-    }]
+      }
+    ]
   }
 ]
 

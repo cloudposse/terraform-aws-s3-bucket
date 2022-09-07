@@ -85,7 +85,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 }
 
 resource "aws_s3_bucket_website_configuration" "default" {
-  count  = local.enabled && ((try(length(var.website_configuration), 0) + try(length(var.website_redirect_all_requests_to), 0)) > 0) ? 1 : 0
+  count  = local.enabled && (try(length(var.website_configuration), 0) > 0) ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   dynamic "index_document" {
@@ -102,20 +102,16 @@ resource "aws_s3_bucket_website_configuration" "default" {
     }
   }
 
-  dynamic "redirect_all_requests_to" {
-    for_each = try(length(var.website_redirect_all_requests_to[0]), 0) > 0 ? [true] : []
-    content {
-      host_name = var.website_redirect_all_requests_to[0].host_name
-      protocol  = var.website_redirect_all_requests_to[0].protocol
-    }
-  }
-
   dynamic "routing_rule" {
     for_each = try(length(var.website_configuration[0].routing_rules), 0) > 0 ? var.website_configuration[0].routing_rules : []
     content {
-      condition {
-        http_error_code_returned_equals = routing_rule.value.condition.http_error_code_returned_equals
-        key_prefix_equals               = routing_rule.value.condition.key_prefix_equals
+      dynamic "condition" {
+        // Test for null or empty strings
+        for_each = try(length(routing_rule.value.condition.http_error_code_returned_equals), 0) + try(length(routing_rule.value.condition.key_prefix_equals), 0) > 0 ? [true] : []
+        content {
+          http_error_code_returned_equals = routing_rule.value.condition.http_error_code_returned_equals
+          key_prefix_equals               = routing_rule.value.condition.key_prefix_equals
+        }
       }
 
       redirect {
@@ -129,8 +125,21 @@ resource "aws_s3_bucket_website_configuration" "default" {
   }
 }
 
+// The "redirect_all_requests_to" block is mutually exclusive with all other blocks,
+// any trying to switch from one to the other will cause a conflict.
+resource "aws_s3_bucket_website_configuration" "redirect" {
+  count  = local.enabled && (try(length(var.website_redirect_all_requests_to), 0) > 0) ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  redirect_all_requests_to {
+    host_name = var.website_redirect_all_requests_to[0].host_name
+    protocol  = var.website_redirect_all_requests_to[0].protocol
+  }
+}
+
+
 resource "aws_s3_bucket_cors_configuration" "default" {
-  count = local.enabled && var.cors_rule_inputs != null ? length(var.cors_rule_inputs) : 0
+  count = local.enabled && try(length(var.cors_rule_inputs), 0) > 0 ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 

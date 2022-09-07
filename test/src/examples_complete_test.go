@@ -9,6 +9,7 @@ import (
 	testStructure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 )
@@ -526,12 +527,22 @@ func TestExamplesCompleteWithWebsite(t *testing.T) {
 	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
 	terraform.InitAndApply(t, terraformOptions)
 
-	// Run `terraform output` to get the value of an output variable
-	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
-
+	// Run `terraform outputAll` to get a map of the output variable, avoiding an error if the output is not found
+	output := terraform.OutputAll(t, terraformOptions)
 	expectedS3BucketId := "eg-test-s3-test-website-" + attributes[0]
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedS3BucketId, s3BucketId)
+	assert.Equal(t, expectedS3BucketId, output["bucket_id"])
+	assert.Contains(t, output["bucket_website_endpoint"], "eg-test-s3-test-website-"+attributes[0])
+	assert.NotEmpty(t, output["bucket_website_domain"])
+
+	// Apply the options again and verify no changes are required
+	results := terraform.Apply(t, terraformOptions)
+
+	// Should complete successfully without creating or changing any resources.
+	// Extract the "Resources:" section of the output to make the error message more readable.
+	re := regexp.MustCompile(`Resources: [^.]+\.`)
+	match := re.FindString(results)
+	assert.Equal(t, "Resources: 0 added, 0 changed, 0 destroyed.", match, "Re-applying the same configuration should not change any resources")
 }
 
 // We do not have a good way to test the S3 website, so we just test that the Terraform `apply` succeeded.
@@ -564,12 +575,13 @@ func TestExamplesCompleteWithWebsiteRedirectAll(t *testing.T) {
 	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
 	terraform.InitAndApply(t, terraformOptions)
 
-	// Run `terraform output` to get the value of an output variable
-	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
-
+	// Run `terraform outputAll` to get a map of the output variable, avoiding an error if the output is not found
+	output := terraform.OutputAll(t, terraformOptions)
 	expectedS3BucketId := "eg-test-s3-test-website-" + attributes[0]
 	// Verify we're getting back the outputs we expect
-	assert.Equal(t, expectedS3BucketId, s3BucketId)
+	assert.Equal(t, expectedS3BucketId, output["bucket_id"])
+	assert.Contains(t, output["bucket_website_endpoint"], "eg-test-s3-test-website-"+attributes[0])
+	assert.NotEmpty(t, output["bucket_website_domain"])
 }
 
 func TestExamplesCompleteDisabled(t *testing.T) {

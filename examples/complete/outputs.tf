@@ -3,6 +3,16 @@ output "bucket_domain_name" {
   description = "FQDN of bucket"
 }
 
+output "bucket_website_domain" {
+  value       = module.s3_bucket.bucket_website_domain
+  description = "The bucket website domain, if website is enabled"
+}
+
+output "bucket_website_endpoint" {
+  value       = module.s3_bucket.bucket_website_endpoint
+  description = "The bucket website endpoint, if website is enabled"
+}
+
 output "bucket_id" {
   value       = module.s3_bucket.bucket_id
   description = "Bucket ID"

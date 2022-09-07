@@ -87,7 +87,7 @@ variable "store_access_key_in_ssm" {
   type        = bool
   default     = false
   description = <<-EOT
-    Set `true` to store the created IAM user's access key in SSM Parameter Store,
+    Set to `true` to store the created IAM user's access key in SSM Parameter Store,
     `false` to store them in Terraform state as outputs.
     Since Terraform state would contain the secrets in plaintext,
     use of SSM Parameter Store is recommended.
@@ -333,7 +333,7 @@ variable "website_configuration" {
 
   validation {
     condition     = length(var.website_configuration) < 2
-    error_message = "Only one website_configuration is allowed."
+    error_message = "Only 1 website_configuration is allowed."
   }
 }
 
@@ -345,7 +345,7 @@ variable "privileged_principal_arns" {
   default = []
 
   description = <<-EOT
-    List of maps. Each map has one key, an IAM Principal ARN, whose associated value is
+    List of maps. Each map has a key, an IAM Principal ARN, whose associated value is
     a list of S3 path prefixes to grant `privileged_principal_actions` permissions for that principal,
     in addition to the bucket itself, which is automatically included. Prefixes should not begin with '/'.
     EOT

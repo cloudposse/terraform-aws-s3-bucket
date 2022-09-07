@@ -158,7 +158,7 @@ variable "lifecycle_rule_enabled" {
 variable "prefix" {
   type        = string
   default     = ""
-  description = "Prefix identifying one or more objects to which the rule applies"
+  description = "Prefix identifying 1 or more objects to which the rule applies"
 }
 
 variable "noncurrent_version_transition_days" {
@@ -173,7 +173,48 @@ variable "noncurrent_version_expiration_days" {
   description = "Specifies when noncurrent object versions expire"
 }
 
-variable "cors_rule_inputs" {
+variable "website_redirect_all_requests_to" {
+  type = list(object({
+    host_name = string
+    protocol  = string
+  }))
+  description = "If provided, all website requests will be redirected to the specified host name and protocol"
+  default     = []
+
+  validation {
+    condition     = length(var.website_redirect_all_requests_to) < 2
+    error_message = "Only 1 website_redirect_all_requests_to is allowed."
+  }
+}
+
+variable "website_configuration" {
+  type = list(object({
+    index_document = string
+    error_document = string
+    routing_rules = list(object({
+      condition = object({
+        http_error_code_returned_equals = string
+        key_prefix_equals               = string
+      })
+      redirect = object({
+        host_name               = string
+        http_redirect_code      = string
+        protocol                = string
+        replace_key_prefix_with = string
+        replace_key_with        = string
+      })
+    }))
+  }))
+  description = "Specifies the static website hosting configuration object"
+  default     = []
+
+  validation {
+    condition     = length(var.website_configuration) < 2
+    error_message = "Only 1 website_configuration is allowed."
+  }
+}
+
+variable "cors_configuration" {
   type = list(object({
     allowed_headers = list(string)
     allowed_methods = list(string)
@@ -283,3 +324,21 @@ variable "bucket_key_enabled" {
   For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
   EOT
 }
+
+variable "access_key_enabled" {
+  type        = bool
+  default     = true
+  description = "Set to `true` to create an IAM Access Key for the created IAM user"
+}
+
+variable "store_access_key_in_ssm" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+    Set to `true` to store the created IAM user's access key in SSM Parameter Store,
+    `false` to store them in Terraform state as outputs.
+    Since Terraform state would contain the secrets in plaintext,
+    use of SSM Parameter Store is recommended.
+    EOT
+}
+

@@ -85,50 +85,66 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 }
 
 resource "aws_s3_bucket_website_configuration" "default" {
-  for_each = local.enabled && var.website_inputs != null ? toset(var.website_inputs) : toset([])
-  bucket   = join("", aws_s3_bucket.default.*.id)
+  count  = local.enabled && (try(length(var.website_configuration), 0) > 0) ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
 
-  index_document {
-    suffix = each.value.index_document
+  dynamic "index_document" {
+    for_each = try(length(var.website_configuration[0].index_document), 0) > 0 ? [true] : []
+    content {
+      suffix = var.website_configuration[0].index_document
+    }
   }
 
-  error_document {
-    key = each.value.error_document
-  }
-
-  redirect_all_requests_to {
-    host_name = each.value.redirect_all_requests_to
-    protocol  = each.value.protocol
+  dynamic "error_document" {
+    for_each = try(length(var.website_configuration[0].error_document), 0) > 0 ? [true] : []
+    content {
+      key = var.website_configuration[0].error_document
+    }
   }
 
   dynamic "routing_rule" {
-    for_each = length(jsondecode(each.value.routing_rules)) > 0 ? jsondecode(each.value.routing_rules) : []
+    for_each = try(length(var.website_configuration[0].routing_rules), 0) > 0 ? var.website_configuration[0].routing_rules : []
     content {
       dynamic "condition" {
-        for_each = routing_rule.value["Condition"]
-
+        // Test for null or empty strings
+        for_each = try(length(routing_rule.value.condition.http_error_code_returned_equals), 0) + try(length(routing_rule.value.condition.key_prefix_equals), 0) > 0 ? [true] : []
         content {
-          key_prefix_equals = lookup(condition.value, "KeyPrefixEquals")
+          http_error_code_returned_equals = routing_rule.value.condition.http_error_code_returned_equals
+          key_prefix_equals               = routing_rule.value.condition.key_prefix_equals
         }
       }
 
-      dynamic "redirect" {
-        for_each = routing_rule.value["Redirect"]
-        content {
-          replace_key_prefix_with = lookup(redirect.value, "ReplaceKeyPrefixWith")
-        }
+      redirect {
+        host_name               = routing_rule.value.redirect.host_name
+        http_redirect_code      = routing_rule.value.redirect.http_redirect_code
+        protocol                = routing_rule.value.redirect.protocol
+        replace_key_prefix_with = routing_rule.value.redirect.replace_key_prefix_with
+        replace_key_with        = routing_rule.value.redirect.replace_key_with
       }
     }
   }
 }
 
+// The "redirect_all_requests_to" block is mutually exclusive with all other blocks,
+// any trying to switch from one to the other will cause a conflict.
+resource "aws_s3_bucket_website_configuration" "redirect" {
+  count  = local.enabled && (try(length(var.website_redirect_all_requests_to), 0) > 0) ? 1 : 0
+  bucket = join("", aws_s3_bucket.default.*.id)
+
+  redirect_all_requests_to {
+    host_name = var.website_redirect_all_requests_to[0].host_name
+    protocol  = var.website_redirect_all_requests_to[0].protocol
+  }
+}
+
+
 resource "aws_s3_bucket_cors_configuration" "default" {
-  count = local.enabled && var.cors_rule_inputs != null ? 1 : 0
+  count = local.enabled && try(length(var.cors_configuration), 0) > 0 ? 1 : 0
 
   bucket = join("", aws_s3_bucket.default.*.id)
 
   dynamic "cors_rule" {
-    for_each = var.cors_rule_inputs
+    for_each = var.cors_configuration
 
     content {
       allowed_headers = cors_rule.value.allowed_headers
@@ -301,11 +317,15 @@ resource "aws_s3_bucket_object_lock_configuration" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "0.15.10"
+  version = "1.0.0"
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions
   s3_resources = ["${join("", aws_s3_bucket.default.*.arn)}/*", join("", aws_s3_bucket.default.*.arn)]
+
+  create_iam_access_key = var.access_key_enabled
+  ssm_enabled           = var.store_access_key_in_ssm
+  ssm_base_path         = var.ssm_base_path
 
   context = module.this.context
 }

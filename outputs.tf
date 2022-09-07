@@ -8,6 +8,16 @@ output "bucket_regional_domain_name" {
   description = "The bucket region-specific domain name"
 }
 
+output "bucket_website_domain" {
+  value       = join("", aws_s3_bucket_website_configuration.default.*.website_domain, aws_s3_bucket_website_configuration.redirect.*.website_domain)
+  description = "The bucket website domain, if website is enabled"
+}
+
+output "bucket_website_endpoint" {
+  value       = join("", aws_s3_bucket_website_configuration.default.*.website_endpoint, aws_s3_bucket_website_configuration.redirect.*.website_endpoint)
+  description = "The bucket website endpoint, if website is enabled"
+}
+
 output "bucket_id" {
   value       = local.enabled ? join("", aws_s3_bucket.default.*.id) : ""
   description = "Bucket Name (aka ID)"
@@ -56,11 +66,27 @@ output "replication_role_arn" {
 output "access_key_id" {
   sensitive   = true
   value       = module.s3_user.access_key_id
-  description = "The access key ID"
+  description = <<-EOT
+    The access key ID, if `var.user_enabled && var.access_key_enabled`.
+    While sensitive, it does not need to be kept secret, so this is output regardless of `var.store_access_key_in_ssm`.
+    EOT
 }
 
 output "secret_access_key" {
   sensitive   = true
   value       = module.s3_user.secret_access_key
-  description = "The secret access key. This will be written to the state file in plain-text"
+  description = <<-EOT
+    The secret access key, if `var.user_enabled && var.access_key_enabled && !var.store_access_key_in_ssm`.
+    This will be written to the state file unencrypted, so using `store_access_key_in_ssm` is recommended"
+    EOT
+}
+
+output "access_key_id_ssm_path" {
+  value       = module.s3_user.access_key_id_ssm_path
+  description = "The SSM Path under which the S3 User's access key ID is stored"
+}
+
+output "secret_access_key_ssm_path" {
+  value       = module.s3_user.secret_access_key_ssm_path
+  description = "The SSM Path under which the S3 User's secret access key is stored"
 }

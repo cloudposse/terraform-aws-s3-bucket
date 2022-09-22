@@ -59,6 +59,12 @@ variable "logging" {
   description = "Bucket access logging configuration."
 }
 
+variable "sse_enabled" {
+  type        = bool
+  default     = true
+  description = "Enable default server-side encryption. Default set to `true`"
+}
+
 variable "sse_algorithm" {
   type        = string
   default     = "AES256"

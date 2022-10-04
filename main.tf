@@ -44,9 +44,7 @@ resource "aws_s3_bucket" "default" {
   tags = module.this.tags
   
   lifecycle {   
-  ignore_changes = [
-      "tags"
-    ]
+  ignore_changes = [tags]
   }
 
 }
@@ -453,9 +451,7 @@ resource "aws_s3_bucket_policy" "default" {
   depends_on = [aws_s3_bucket_public_access_block.default]
   
   lifecycle {
-    ignore_changes = [
-      "policy"
-    ]
+    ignore_changes = [policy]
   }
 
 }

@@ -263,11 +263,10 @@ resource "aws_s3_bucket_replication_configuration" "default" {
       }
 
       dynamic "source_selection_criteria" {
-        for_each = try(rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
-
+        for_each = try(rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, "") == "Enabled" ? [1] : []
         content {
           sse_kms_encrypted_objects {
-            status = source_selection_criteria.value
+            status = "Enabled"
           }
         }
       }

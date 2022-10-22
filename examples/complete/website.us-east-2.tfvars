@@ -65,7 +65,5 @@ cors_configuration = [
     allowed_headers = null
     allowed_methods = ["GET"]
     allowed_origins = ["*"]
-    expose_headers  = null
-    max_age_seconds = null
   }
 ]

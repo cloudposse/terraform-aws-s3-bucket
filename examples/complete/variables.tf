@@ -65,19 +65,36 @@ variable "lifecycle_rules" {
 
 variable "lifecycle_configuration_rules" {
   type = list(object({
-    enabled = bool
-    id      = string
+    enabled = optional(bool, true)
+    id      = string # must be unique
 
-    abort_incomplete_multipart_upload_days = number
+    abort_incomplete_multipart_upload_days = optional(number)
 
-    # `filter_and` is the `and` configuration block inside the `filter` configuration.
-    # This is the only place you should specify a prefix.
-    filter_and = any
-    expiration = any
-    transition = list(any)
-
-    noncurrent_version_expiration = any
-    noncurrent_version_transition = list(any)
+    filter_and = optional(object({
+      object_size_greater_than = optional(number) # integer >= 0
+      object_size_less_than    = optional(number) # integer >= 1
+      prefix                   = optional(string)
+      tags                     = optional(map(string), {})
+    }))
+    expiration = optional(object({
+      date                         = optional(string) # RFC3339 time format, GMT
+      days                         = optional(number) # integer > 0
+      expired_object_delete_marker = optional(bool)
+    }))
+    noncurrent_version_expiration = optional(object({
+      newer_noncurrent_versions = optional(number) # integer > 0
+      noncurrent_days           = optional(number) # integer >= 0
+    }))
+    transition = optional(list(object({
+      date          = optional(string) # RFC3339 time format
+      days          = optional(number) # integer > 0
+      storage_class = string           # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+    })))
+    noncurrent_version_transition = optional(list(object({
+      newer_noncurrent_versions = optional(number) # integer >= 0
+      noncurrent_days           = optional(number) # integer >= 0
+      storage_class             = string           # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+    })))
   }))
   default     = []
   description = "A list of lifecycle V2 rules"
@@ -216,15 +233,14 @@ variable "website_configuration" {
 
 variable "cors_configuration" {
   type = list(object({
-    allowed_headers = list(string)
+    allowed_headers = optional(list(string))
     allowed_methods = list(string)
     allowed_origins = list(string)
-    expose_headers  = list(string)
-    max_age_seconds = number
+    expose_headers  = optional(list(string))
+    max_age_seconds = optional(number)
   }))
-  default = null
-
   description = "Specifies the allowed headers, methods, origins and exposed headers when using CORS on this bucket"
+  default     = []
 }
 
 variable "standard_transition_days" {

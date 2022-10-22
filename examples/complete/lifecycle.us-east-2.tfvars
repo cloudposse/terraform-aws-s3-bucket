@@ -6,6 +6,8 @@ stage = "test"
 
 name = "s3-lifecycle-test"
 
+attributes = ["issue-31978"]
+
 acl = "private"
 
 lifecycle_configuration_rules = [
@@ -13,19 +15,12 @@ lifecycle_configuration_rules = [
   {
     abort_incomplete_multipart_upload_days = 1
     enabled                                = true
-    expiration = {
-      days                         = null
-      expired_object_delete_marker = null
-    }
-
     # test no filter
-    filter_and = {}
-    id         = "nofilter"
+    id = "nofilter"
     noncurrent_version_expiration = {
       newer_noncurrent_versions = 2
       noncurrent_days           = 30
     }
-    noncurrent_version_transition = []
     transition = [
       {
         days          = 7
@@ -37,10 +32,6 @@ lifecycle_configuration_rules = [
   {
     abort_incomplete_multipart_upload_days = 1
     enabled                                = true
-    expiration = {
-      days                         = null
-      expired_object_delete_marker = null
-    }
 
     # test prefix only
     filter_and = {
@@ -51,7 +42,6 @@ lifecycle_configuration_rules = [
       newer_noncurrent_versions = 2
       noncurrent_days           = 30
     }
-    noncurrent_version_transition = []
     transition = [
       {
         days          = 7
@@ -61,8 +51,7 @@ lifecycle_configuration_rules = [
 
   },
   {
-    abort_incomplete_multipart_upload_days = null
-    enabled                                = true
+    enabled = true
     expiration = {
       days                         = 1461
       expired_object_delete_marker = false
@@ -77,7 +66,6 @@ lifecycle_configuration_rules = [
       newer_noncurrent_versions = 2
       noncurrent_days           = 14
     }
-    noncurrent_version_transition = []
     transition = [
       {
         days          = 366
@@ -86,8 +74,7 @@ lifecycle_configuration_rules = [
     ]
   },
   {
-    abort_incomplete_multipart_upload_days = null
-    enabled                                = true
+    enabled = true
     expiration = {
       days                         = 93
       expired_object_delete_marker = false
@@ -101,7 +88,6 @@ lifecycle_configuration_rules = [
       newer_noncurrent_versions = 2
       noncurrent_days           = 14
     }
-    noncurrent_version_transition = []
     transition = [
       {
         days          = 90

@@ -119,7 +119,7 @@ variable "allow_ssl_requests_only" {
 }
 
 
-# See lifecycle.tf for conversion of deprecated `lifecyle_rules` to `lifecycle_configuration_rules`
+# See lifecycle.tf for conversion of deprecated `lifecycle_rules` to `lifecycle_configuration_rules`
 variable "lifecycle_configuration_rules" {
   type = list(object({
     enabled = optional(bool, true)

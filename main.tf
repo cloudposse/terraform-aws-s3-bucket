@@ -455,7 +455,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
   count = local.enabled ? 1 : 0
 
   source_policy_documents   = data.aws_iam_policy_document.bucket_policy.*.json
-  override_policy_documents = local.source_policy_documents
+  override_policy_documents = var.source_policy_documents
 }
 
 resource "aws_s3_bucket_policy" "default" {

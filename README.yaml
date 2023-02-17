@@ -66,9 +66,10 @@ related:
 
 # Short description of this project
 description: |-
-  This module creates an S3 bucket with support of versioning, replication, encryption, ACL, and bucket object policy.
+  This module creates an S3 bucket with support for versioning, lifecycles, object locks, replication, encryption, ACL,
+  bucket object policies, and static website hosting.
+  
   If `user_enabled` variable is set to `true`, the module will provision a basic IAM user with permissions to access the bucket.
-
   This basic IAM system user is suitable for CI/CD systems (_e.g._ TravisCI, CircleCI) or systems which are *external* to AWS that cannot leverage
   [AWS IAM Instance Profiles](http://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html) and
   do not already have IAM credentials. Users or systems that have IAM credentials should either be granted access directly based on
@@ -77,7 +78,7 @@ description: |-
   We do not recommend creating IAM users this way for any other purpose.
 
   This module blocks public access to the bucket by default. See `block_public_acls`, `block_public_policy`,
-  and `ignore_public_acls` to change the settings. See [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html)
+  `ignore_public_acls`, and `restrict_public_buckets` to change the settings. See [AWS documentation](https://docs.aws.amazon.com/AmazonS3/latest/dev/access-control-block-public-access.html)
   for more details.
 
 # How to use this project
@@ -100,7 +101,43 @@ usage: |-
   }
   ```
 
-  Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access to another account and for logging.
+  Configuring S3 [storage lifecycle](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html):
+  
+  ```hcl
+  locals {
+    lifecycle_configuration_rules = [{
+      enabled = true # bool
+      id      = "v2rule"
+  
+      abort_incomplete_multipart_upload_days = 1 # number
+  
+      filter_and = null
+      expiration = {
+        days = 120 # integer > 0
+      }
+      noncurrent_version_expiration = {
+        newer_noncurrent_versions = 3  # integer > 0
+        noncurrent_days           = 60 # integer >= 0
+      }
+      transition = [{
+        days          = 30            # integer >= 0
+        storage_class = "STANDARD_IA" # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+        },
+        {
+          days          = 60           # integer >= 0
+          storage_class = "ONEZONE_IA" # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+      }]
+      noncurrent_version_transition = [{
+        newer_noncurrent_versions = 3            # integer >= 0
+        noncurrent_days           = 30           # integer >= 0
+        storage_class             = "ONEZONE_IA" # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
+      }]
+    }]
+  }
+  ```
+  
+  Using [grants](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html) to enable access 
+  to another account and for logging, and incorporating the above lifecycle configuration.
 
   ```hcl
   module "s3_bucket" {
@@ -110,11 +147,13 @@ usage: |-
     acl                      = ""
     enabled                  = true
     user_enabled             = true
-    versioning_enabled       = false
+    versioning_enabled       = true
     allowed_bucket_actions   = ["s3:GetObject", "s3:ListBucket", "s3:GetBucketLocation"]
     name                     = "app"
     stage                    = "test"
     namespace                = "eg"
+  
+    lifecycle_configuration_rules = local.lifecycle_configuration_rules
 
     grants = [
       {
@@ -149,10 +188,12 @@ usage: |-
     stage                    = "test"
     namespace                = "eg"
 
-    privileged_principal_arns = {
+    privileged_principal_arns = [
+    {
       "arn:aws:iam::123456789012:role/principal1" = ["prefix1/", "prefix2/"]
+    }, {
       "arn:aws:iam::123456789012:role/principal2" = [""]
-    }
+    }]
     privileged_principal_actions = [
       "s3:PutObject", 
       "s3:PutObjectAcl", 

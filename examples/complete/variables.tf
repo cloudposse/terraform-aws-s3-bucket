@@ -18,8 +18,8 @@ variable "grants" {
 
 variable "lifecycle_rules" {
   type = list(object({
-    enabled = bool
     prefix  = string
+    enabled = bool
     tags    = map(string)
 
     enable_glacier_transition            = bool
@@ -39,8 +39,8 @@ variable "lifecycle_rules" {
     expiration_days             = number
   }))
   default = [{
-    enabled = false
     prefix  = ""
+    enabled = false
     tags    = {}
 
     enable_glacier_transition            = true
@@ -63,15 +63,42 @@ variable "lifecycle_rules" {
   description = "A list of lifecycle rules."
 }
 
-variable "s3_replication_rules" {
+variable "lifecycle_configuration_rules" {
+  type = list(object({
+    enabled = bool
+    id      = string
+
+    abort_incomplete_multipart_upload_days = number
+
+    # `filter_and` is the `and` configuration block inside the `filter` configuration.
+    # This is the only place you should specify a prefix.
+    filter_and = any
+    expiration = any
+    transition = list(any)
+
+    noncurrent_version_expiration = any
+    noncurrent_version_transition = list(any)
+  }))
   default     = []
-  description = "S3 replication rules"
+  description = "A list of lifecycle V2 rules"
+}
+
+variable "s3_replication_enabled" {
+  type        = bool
+  default     = false
+  description = "Enable or disable S3 replication."
 }
 
 variable "policy" {
   type        = string
   default     = ""
-  description = "A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+  description = "DEPRECATED: Use source_policy_documents instead. A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
+}
+
+variable "source_policy_documents" {
+  type        = list(string)
+  default     = null
+  description = "List of IAM policy documents that are merged together into the exported document. Statements defined in source_policy_documents or source_json must have unique sids. Statements with the same sid from documents assigned to the override_json and override_policy_documents arguments will override source statements."
 }
 
 variable "region" {
@@ -189,12 +216,6 @@ variable "expiration_days" {
   description = "Number of days after which to expunge the objects"
 }
 
-variable "abort_incomplete_multipart_upload_days" {
-  type        = number
-  default     = 5
-  description = "Maximum time (in days) that you want to allow multipart uploads to remain in progress"
-}
-
 variable "lifecycle_tags" {
   type        = map(string)
   description = "Tags filter. Used to manage object lifecycle events"
@@ -251,4 +272,14 @@ variable "privileged_principal_actions" {
   type        = list(string)
   default     = []
   description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
+}
+
+variable "bucket_key_enabled" {
+  type        = bool
+  default     = false
+  description = <<-EOT
+  Set this to true to use Amazon S3 Bucket Keys for SSE-KMS, which reduce the cost of AWS KMS requests.
+
+  For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
+  EOT
 }

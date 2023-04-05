@@ -51,12 +51,11 @@ resource "aws_s3_bucket_accelerate_configuration" "default" {
 }
 
 resource "aws_s3_bucket_versioning" "default" {
-  count = local.versioning_enabled ? 1 : 0
-
+  count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   versioning_configuration {
-    status = "Enabled"
+    status = local.versioning_enabled ? "Enabled" : "Suspended"
   }
 }
 

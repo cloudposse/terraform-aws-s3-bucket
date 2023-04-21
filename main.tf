@@ -185,6 +185,7 @@ resource "aws_s3_bucket_acl" "default" {
       }
     }
   }
+  depends_on = [time_sleep.wait_for_aws_s3_ownership_change]
 }
 
 resource "aws_s3_bucket_replication_configuration" "default" {
@@ -493,6 +494,13 @@ resource "aws_s3_bucket_ownership_controls" "default" {
 resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
   count            = local.enabled ? 1 : 0
   depends_on       = [aws_s3_bucket_public_access_block.default, aws_s3_bucket_policy.default]
+  create_duration  = "30s"
+  destroy_duration = "30s"
+}
+
+resource "time_sleep" "wait_for_aws_s3_ownership_change" {
+  count            = local.enabled ? 1 : 0
+  depends_on       = [aws_s3_bucket_ownership_controls.default]
   create_duration  = "30s"
   destroy_duration = "30s"
 }

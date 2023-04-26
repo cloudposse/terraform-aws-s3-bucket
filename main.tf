@@ -185,6 +185,10 @@ resource "aws_s3_bucket_acl" "default" {
       }
     }
   }
+
+  depends_on = [
+    aws_s3_bucket_ownership_controls.default
+  ]
 }
 
 resource "aws_s3_bucket_replication_configuration" "default" {

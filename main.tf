@@ -185,6 +185,11 @@ resource "aws_s3_bucket_acl" "default" {
       }
     }
   }
+
+  depends_on = [
+    # ACL must be set after Ownership Controls were set
+    aws_s3_bucket_ownership_controls.default
+  ]
 }
 
 resource "aws_s3_bucket_replication_configuration" "default" {

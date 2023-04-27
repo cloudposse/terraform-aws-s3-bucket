@@ -185,6 +185,12 @@ resource "aws_s3_bucket_acl" "default" {
       }
     }
   }
+  
+  # AWS changed default ObjectOwnership = Bucket Owner Preferred.
+  # To add ACL `aws_s3_bucket_ownership_controls` must be set to `ObjectWriter` (or) `BucketOwnerPreferred`
+  # Ref: https://aws.amazon.com/blogs/aws/heads-up-amazon-s3-security-changes-are-coming-in-april-of-2023/ 
+  depends_on = [aws_s3_bucket_ownership_controls.default]
+}
 }
 
 resource "aws_s3_bucket_replication_configuration" "default" {

@@ -191,7 +191,6 @@ resource "aws_s3_bucket_acl" "default" {
   # Ref: https://aws.amazon.com/blogs/aws/heads-up-amazon-s3-security-changes-are-coming-in-april-of-2023/ 
   depends_on = [aws_s3_bucket_ownership_controls.default]
 }
-}
 
 resource "aws_s3_bucket_replication_configuration" "default" {
   count = local.replication_enabled ? 1 : 0

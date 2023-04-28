@@ -157,7 +157,7 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 }
 
 resource "aws_s3_bucket_acl" "default" {
-  count  = local.enabled ? 1 : 0
+  count  = local.enabled && var.s3_object_ownership != "BucketOwnerEnforced" ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   # Conflicts with access_control_policy so this is enabled if no grants

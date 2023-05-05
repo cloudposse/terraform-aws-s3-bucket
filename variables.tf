@@ -280,6 +280,12 @@ variable "s3_replication_source_roles" {
   description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy)."
 }
 
+variable "s3_replication_permission_boundary_arn" {
+  type        = string
+  default     = null
+  description = "Permission boundary ARN of the IAM replication role. Defaults to null."
+}
+
 variable "bucket_name" {
   type        = string
   default     = null

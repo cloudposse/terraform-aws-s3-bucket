@@ -3,7 +3,9 @@ variable "acl" {
   default     = "private"
   description = <<-EOT
     The [canned ACL](https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html#canned-acl) to apply.
-    We recommend `private` to avoid exposing sensitive information. Conflicts with `grants`.
+    Deprecated by AWS in favor of bucket policies.
+    Automatically disabled if `s3_object_ownership` is set to "BucketOwnerEnforced".
+    Defaults to "private" for backwards compatibility, but we recommend setting `s3_object_ownership` to "BucketOwnerEnforced" instead.
     EOT
 }
 
@@ -19,6 +21,8 @@ variable "grants" {
   description = <<-EOT
     A list of policy grants for the bucket, taking a list of permissions.
     Conflicts with `acl`. Set `acl` to `null` to use this.
+    Deprecated by AWS in favor of bucket policies.
+    Automatically disabled if `s3_object_ownership` is set to "BucketOwnerEnforced".
     EOT
 }
 
@@ -75,6 +79,12 @@ variable "user_enabled" {
   type        = bool
   default     = false
   description = "Set to `true` to create an IAM user with permission to access the bucket"
+}
+
+variable "user_permissions_boundary_arn" {
+  type        = string
+  default     = null
+  description = "Permission boundary ARN for the IAM user created to access the bucket."
 }
 
 variable "access_key_enabled" {
@@ -280,10 +290,10 @@ variable "s3_replication_source_roles" {
   description = "Cross-account IAM Role ARNs that will be allowed to perform S3 replication to this bucket (for replication within the same AWS account, it's not necessary to adjust the bucket policy)."
 }
 
-variable "s3_replication_permission_boundary_arn" {
+variable "s3_replication_permissions_boundary_arn" {
   type        = string
   default     = null
-  description = "Permission boundary ARN of the IAM replication role. Defaults to null."
+  description = "Permissions boundary ARN for the created IAM replication role."
 }
 
 variable "bucket_name" {
@@ -372,15 +382,18 @@ variable "transfer_acceleration_enabled" {
 variable "s3_object_ownership" {
   type        = string
   default     = "ObjectWriter"
-  description = "Specifies the S3 object ownership control. Valid values are `ObjectWriter`, `BucketOwnerPreferred`, and 'BucketOwnerEnforced'."
+  description = <<-EOT
+    Specifies the S3 object ownership control.
+    Valid values are `ObjectWriter`, `BucketOwnerPreferred`, and 'BucketOwnerEnforced'.
+    Defaults to "ObjectWriter" for backwards compatibility, but we recommend setting "BucketOwnerEnforced" instead.
+    EOT
 }
 
 variable "bucket_key_enabled" {
   type        = bool
   default     = false
   description = <<-EOT
-  Set this to true to use Amazon S3 Bucket Keys for SSE-KMS, which reduce the cost of AWS KMS requests.
-
+  Set this to true to use Amazon S3 Bucket Keys for SSE-KMS, which may reduce the number of AWS KMS requests.
   For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
   EOT
 }

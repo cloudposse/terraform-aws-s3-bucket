@@ -32,8 +32,8 @@ resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` because we do not have good defaults
   #bridgecrew:skip=CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).
   #bridgecrew:skip=BC_AWS_S3_16:Skipping `Ensure S3 bucket versioning is enabled` because dynamic blocks are not supported by checkov
-  #bridgecrew:skip=BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because variables are not understood
-  #bridgecrew:skip=BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not have good defaults
+  #bridgecrew:skip=BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because that is now enforced automatically by AWS
+  #bridgecrew:skip=BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not agree that this is required
   #bridgecrew:skip=BC_AWS_GENERAL_72:We do not agree that cross-region replication must be enabled
   count         = local.enabled ? 1 : 0
   bucket        = local.bucket_name
@@ -44,12 +44,14 @@ resource "aws_s3_bucket" "default" {
   tags = module.this.tags
 }
 
+# Ensure the resource exists to track drift, even if the feature is disabled
 resource "aws_s3_bucket_accelerate_configuration" "default" {
-  count  = local.transfer_acceleration_enabled ? 1 : 0
+  count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
-  status = "Enabled"
+  status = local.transfer_acceleration_enabled ? "Enabled" : "Suspended"
 }
 
+# Ensure the resource exists to track drift, even if the feature is disabled
 resource "aws_s3_bucket_versioning" "default" {
   count  = local.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
@@ -156,7 +158,7 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 }
 
 resource "aws_s3_bucket_acl" "default" {
-  count  = local.enabled ? 1 : 0
+  count  = local.enabled && var.s3_object_ownership != "BucketOwnerEnforced" ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
 
   # Conflicts with access_control_policy so this is enabled if no grants
@@ -184,6 +186,7 @@ resource "aws_s3_bucket_acl" "default" {
       }
     }
   }
+  depends_on = [aws_s3_bucket_ownership_controls.default]
 }
 
 resource "aws_s3_bucket_replication_configuration" "default" {
@@ -316,7 +319,7 @@ resource "aws_s3_bucket_object_lock_configuration" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "1.0.0"
+  version = "1.1.0"
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions
@@ -325,6 +328,7 @@ module "s3_user" {
   create_iam_access_key = var.access_key_enabled
   ssm_enabled           = var.store_access_key_in_ssm
   ssm_base_path         = var.ssm_base_path
+  permissions_boundary  = var.user_permissions_boundary_arn
 
   context = module.this.context
 }

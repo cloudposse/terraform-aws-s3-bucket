@@ -25,7 +25,7 @@ module "s3_bucket" {
   s3_replication_rules          = local.s3_replication_rules
   privileged_principal_actions  = var.privileged_principal_actions
   privileged_principal_arns     = local.privileged_principal_arns
-  transfer_acceleration_enabled = true
+  transfer_acceleration_enabled = var.transfer_acceleration_enabled
   bucket_key_enabled            = var.bucket_key_enabled
 
   access_key_enabled      = var.access_key_enabled

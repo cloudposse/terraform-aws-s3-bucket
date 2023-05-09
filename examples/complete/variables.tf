@@ -342,3 +342,8 @@ variable "store_access_key_in_ssm" {
     EOT
 }
 
+variable "transfer_acceleration_enabled" {
+  type        = bool
+  default     = true
+  description = "Set true to enable Transfer Acceleration (many regions not supported)"
+}

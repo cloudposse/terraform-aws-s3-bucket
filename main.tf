@@ -44,11 +44,10 @@ resource "aws_s3_bucket" "default" {
   tags = module.this.tags
 }
 
-# Ensure the resource exists to track drift, even if the feature is disabled
 resource "aws_s3_bucket_accelerate_configuration" "default" {
-  count  = local.enabled ? 1 : 0
+  count  = local.transfer_acceleration_enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default.*.id)
-  status = local.transfer_acceleration_enabled ? "Enabled" : "Suspended"
+  status = "Enabled"
 }
 
 # Ensure the resource exists to track drift, even if the feature is disabled

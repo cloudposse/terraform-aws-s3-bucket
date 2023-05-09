@@ -30,3 +30,5 @@ privileged_principal_enabled = true
 versioning_enabled = false
 
 user_enabled = false
+
+transfer_acceleration_enabled = false

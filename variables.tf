@@ -376,7 +376,13 @@ variable "privileged_principal_actions" {
 variable "transfer_acceleration_enabled" {
   type        = bool
   default     = false
-  description = "Set this to true to enable S3 Transfer Acceleration for the bucket."
+  description = <<-EOT
+    Set this to `true` to enable S3 Transfer Acceleration for the bucket.
+    Note: When this is set to `false` Terraform does not perform drift detection
+    and will not disable Transfer Acceleration if it was enabled outside of Terraform.
+    To disable it via Terraform, you must set this to `true` and then to `false`.
+    Note: not all regions support Transfer Acceleration.
+    EOT
 }
 
 variable "s3_object_ownership" {

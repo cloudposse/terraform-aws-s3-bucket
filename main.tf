@@ -458,7 +458,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     content {
       sid       = "AWSLogDeliveryWrite"
       effect    = "Allow"
-      resources = ["${join("", aws_s3_bucket.default.*.arn)}/*"]
+      resources = ["${join("", aws_s3_bucket.default[*].arn)}/*"]
       actions   = ["s3:PutObject"]
 
       condition {
@@ -480,7 +480,7 @@ data "aws_iam_policy_document" "bucket_policy" {
     content {
       sid       = "AWSLogDeliveryAclCheck"
       effect    = "Allow"
-      resources = [join("", aws_s3_bucket.default.*.arn)]
+      resources = [join("", aws_s3_bucket.default[*].arn)]
       actions   = ["s3:GetBucketAcl", "s3:ListBucket"]
 
       principals {

@@ -128,6 +128,12 @@ variable "allow_ssl_requests_only" {
   description = "Set to `true` to require requests to use Secure Socket Layer (HTTPS/SSL). This will explicitly deny access to HTTP requests"
 }
 
+variable "log_delivery_service_principal_enabled" {
+  type        = bool
+  default     = false
+  description = "When set to `true` it will add `delivery.logs.amazonaws.com` service principal to the bucket policy"
+}
+
 /*
 Schema for lifecycle_configuration_rules
 {

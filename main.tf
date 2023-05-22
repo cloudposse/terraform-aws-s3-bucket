@@ -451,6 +451,44 @@ data "aws_iam_policy_document" "bucket_policy" {
       }
     }
   }
+
+  dynamic "statement" {
+    for_each = var.log_delivery_service_principal_enabled ? [1] : []
+
+    content {
+      sid       = "AWSLogDeliveryWrite"
+      effect    = "Allow"
+      resources = ["${join("", aws_s3_bucket.default.*.arn)}/*"]
+      actions   = ["s3:PutObject"]
+
+      condition {
+        test     = "StringEquals"
+        variable = "s3:x-amz-acl"
+        values   = ["bucket-owner-full-control"]
+      }
+
+      principals {
+        type        = "Service"
+        identifiers = ["delivery.logs.amazonaws.com"]
+      }
+    }
+  }
+
+  dynamic "statement" {
+    for_each = var.log_delivery_service_principal_enabled ? [1] : []
+
+    content {
+      sid       = "AWSLogDeliveryAclCheck"
+      effect    = "Allow"
+      resources = [join("", aws_s3_bucket.default.*.arn)]
+      actions   = ["s3:GetBucketAcl", "s3:ListBucket"]
+
+      principals {
+        type        = "Service"
+        identifiers = ["delivery.logs.amazonaws.com"]
+      }
+    }
+  }
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {

@@ -1,0 +1,262 @@
+---
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+name: Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+env:
+  ENABLE_COMMIT_LINTING: 'false'
+  POLICY_SOURCE: ''
+  POLICY_VERSION: main
+
+jobs:
+  code-linting:
+    name: Linting Code
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    outputs:
+      linting: ${{ steps.linting.outcome }}
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Setup Linter
+        uses: terraform-linters/setup-tflint@v3
+      - name: Linter Version
+        run: tflint --version
+      - name: Linter Initialize
+        run: tflint --init
+      - name: Linting Code
+        id: linting
+        run: tflint -f compact
+
+  code-validate:
+    name: Validating Terraform
+    runs-on: ubuntu-latest
+    outputs:
+      validate: ${{ steps.validate.outcome }}
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Initialize
+        run: terraform init
+      - name: Terraform Validate
+        id: validate
+        uses: dflook/terraform-validate@v1
+
+  code-format:
+    name: Checking Format
+    runs-on: ubuntu-latest
+    outputs:
+      format: ${{ steps.format.outcome }}
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Format Check
+        id: format
+        uses: dflook/terraform-fmt-check@v1
+
+  code-docs:
+    name: Terraform Docs
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.docs.outcome }}
+    env:
+      RELEASE: https://github.com/terraform-docs/terraform-docs/releases/download
+      VERSION: v0.16.0
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: Install Terraform Documentation CLI
+        run: |
+          curl -sL ${{ env.RELEASE }}/${{ env.VERSION }}/terraform-docs-${{ env.VERSION }}-$(uname)-amd64.tar.gz -o cli.tar.gz
+          tar -xzf cli.tar.gz
+          chmod +x terraform-docs
+          mv terraform-docs /usr/local/bin/terraform-docs
+      - name: Generate Documentation
+        run: |
+          /usr/local/bin/terraform-docs markdown table \
+            --output-check \
+            --output-mode inject .
+      - name: Ensure Documentation
+        id: docs
+        run: |
+          if ! git status | grep -q README; then
+            echo "Ensure documentation is up to date $ make docs"
+            exit 1
+          fi
+
+  code-security:
+    name: Security Check
+    runs-on: ubuntu-latest
+    outputs:
+      security: ${{ steps.security.outcome }}
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: Security Policy
+        id: security
+        uses: appvia/terranetes-policy-action@v1
+        with:
+          directory: "."
+          policy_ssh_key: "${{ secrets.policy_token }}"
+          policy_url: "${{ env.POLICY_SOURCE }}"
+          policy_version: "${{ env.POLICY_VERSION }}"
+
+  cost-token:
+    name: Check Costs Enabled
+    runs-on: ubuntu-latest
+    outputs:
+      enable_infracost: ${{ steps.infracost.outputs.enable_infracost }}
+    steps:
+      - name: Check whether container scanning should be enabled
+        id: infracost
+        env:
+          INFRACOST_API_KEY: ${{ secrets.ORG_INFRACOST_API_KEY }}
+        run: |
+          echo "Enable costs integration: ${{ env.INFRACOST_API_KEY != '' }}"
+          echo "::set-output name=enable_infracost::${{ env.INFRACOST_API_KEY != '' }}"
+
+  code-costs:
+    name: Cost Review
+    needs: cost-token
+    if: needs.cost-token.outputs.enable_infracost == 'true' && github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      TF_ROOT: .
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v3
+      - name: Setup Infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.ORG_INFRACOST_API_KEY }}
+      - name: Checkout base branch
+        uses: actions/checkout@v3
+        with:
+          ref: '${{ github.event.pull_request.base.ref }}'
+      - name: Checking for baseline files
+        id: baseline
+        run: |
+          if ls *.tf 2>/dev/null; then
+            echo "::set-output name=exists::true"
+          else
+            echo "::set-output name=exists::false"
+          fi
+      - name: Generate cost estimate baseline
+        if: steps.baseline.outputs.exists == 'true'
+        run: |
+          infracost breakdown --path=${TF_ROOT} \
+            --format=json \
+            --out-file=/tmp/infracost-base.json
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+      - name: Generate Infracost diff
+        if: steps.baseline.outputs.exists == 'true'
+        run: |
+          infracost diff --path=${TF_ROOT} \
+            --format=json \
+            --compare-to=/tmp/infracost-base.json \
+            --out-file=/tmp/infracost.json
+      - name: Generate Infracost Cost
+        if: steps.baseline.outputs.exists == 'false'
+        run: |
+          infracost breakdown --path=${TF_ROOT} \
+            --format=json \
+            --out-file=/tmp/infracost.json
+      - name: Post Infracost comment
+        run: |
+          infracost comment github \
+            --behavior=update  \
+            --github-token=${{ github.token }} \
+            --path=/tmp/infracost.json \
+            --pull-request=${{ github.event.pull_request.number }} \
+            --repo=$GITHUB_REPOSITORY
+
+  code-commits:
+    name: Lint Code Commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        if: "${{ env.ENABLE_COMMIT_LINTING == 'true' }}"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Checking Commits
+        if: "${{ env.ENABLE_COMMIT_LINTING == 'true' }}"
+        uses: wagoid/commitlint-github-action@v5
+
+  review:
+    name: Update Review
+    if: github.event_name == 'pull_request' && always()
+    runs-on: ubuntu-latest
+    needs:
+      - code-commits
+      - code-costs
+      - code-docs
+      - code-format
+      - code-linting
+      - code-security
+      - code-validate
+    steps:
+      - name: Update PR
+        uses: actions/github-script@0.9.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            })
+            const botComment = comments.find(comment => {
+              return comment.user.type === 'Bot' && comment.body.includes('Pull Request Review Status')
+            })
+
+            const output = `### Pull Request Review Status
+            * ⚙️ Terraform Format:         \`${{ needs.code-format.outputs.format }}\`
+            * 📖 Terraform Documentation:  \`${{ needs.code-docs.outputs.docs }}\`
+            * 🔍 Terraform Linting:        \`${{ needs.code-linting.outputs.linting }}\`
+            * 🔒 Terraform Security:       \`${{ needs.code-security.outputs.security }}\`
+            * 🤖 Terraform Validation:     \`${{ needs.code-validate.outputs.validate }}\``
+
+            if (botComment) {
+              github.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: output
+              })
+            } else {
+              github.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              })
+            }

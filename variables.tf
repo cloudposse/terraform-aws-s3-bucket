@@ -373,6 +373,21 @@ variable "privileged_principal_actions" {
   description = "List of actions to permit `privileged_principal_arns` to perform on bucket and bucket prefixes (see `privileged_principal_arns`)"
 }
 
+variable "readonly_principal_arns" {
+  type    = list(string)
+  default = []
+
+  description = <<-EOT
+    List of arns to grant `readonly_principal_arns` permissions to `readonly_principal_actions` for the bucket.
+    EOT
+}
+
+variable "readonly_principal_actions" {
+  type        = list(string)
+  default     = []
+  description = "List of actions to permit `readonly_principal_arns` to perform on bucket and bucket prefixes (see `readonly_principal_arns`)"
+}
+
 variable "transfer_acceleration_enabled" {
   type        = bool
   default     = false

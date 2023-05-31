@@ -451,6 +451,23 @@ data "aws_iam_policy_document" "bucket_policy" {
       }
     }
   }
+
+  dynamic "statement" {
+    for_each = var.readonly_principal_arns
+
+    content {
+      sid     = "AllowReadonlyPrincipal[${statement.key}]" # add indices to Sid
+      actions = var.readonly_principal_actions
+      resources = distinct(flatten([
+        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
+        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", statement.value),
+      ]))
+      principals {
+        type        = "AWS"
+        identifiers = [statement.value]
+      }
+    }
+  }
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {

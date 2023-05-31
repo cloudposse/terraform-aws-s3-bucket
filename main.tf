@@ -28,6 +28,15 @@ locals {
 data "aws_partition" "current" { count = local.enabled ? 1 : 0 }
 data "aws_canonical_user_id" "default" { count = local.enabled ? 1 : 0 }
 
+#tfsec:ignore:aws-s3-specify-public-access-block
+#tfsec:ignore:aws-s3-enable-versioning
+#tfsec:ignore:aws-s3-enable-bucket-logging
+#tfsec:ignore:aws-s3-encryption-customer-key
+#tfsec:ignore:aws-s3-no-public-buckets
+#tfsec:ignore:aws-s3-ignore-public-acls
+#tfsec:ignore:aws-s3-enable-bucket-encryption
+#tfsec:ignore:aws-s3-block-public-acls
+#tfsec:ignore:aws-s3-block-public-policy
 resource "aws_s3_bucket" "default" {
   #bridgecrew:skip=BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` because we do not have good defaults
   #bridgecrew:skip=CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).

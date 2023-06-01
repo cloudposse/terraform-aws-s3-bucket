@@ -460,7 +460,7 @@ data "aws_iam_policy_document" "bucket_policy" {
       actions = var.readonly_principal_actions
       resources = distinct(flatten([
         "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}",
-        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/%s*", statement.value),
+        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default.*.id)}/*",
       ]))
       principals {
         type        = "AWS"

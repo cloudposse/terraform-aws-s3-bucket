@@ -21,7 +21,7 @@ module "s3_bucket" {
   bucket_name                   = var.bucket_name
   object_lock_configuration     = var.object_lock_configuration
   s3_replication_enabled        = local.s3_replication_enabled
-  s3_replica_bucket_arn         = join("", module.s3_bucket_replication_target.*.bucket_arn)
+  s3_replica_bucket_arn         = join("", module.s3_bucket_replication_target[*].bucket_arn)
   s3_replication_rules          = local.s3_replication_rules
   privileged_principal_actions  = var.privileged_principal_actions
   privileged_principal_arns     = local.privileged_principal_arns

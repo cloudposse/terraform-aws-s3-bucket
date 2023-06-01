@@ -156,7 +156,7 @@ locals {
 
 resource "aws_s3_bucket_lifecycle_configuration" "default" {
   count  = local.enabled && length(local.lc_rules) > 0 ? 1 : 0
-  bucket = join("", aws_s3_bucket.default.*.id)
+  bucket = join("", aws_s3_bucket.default[*].id)
 
   dynamic "rule" {
     for_each = local.lc_rules

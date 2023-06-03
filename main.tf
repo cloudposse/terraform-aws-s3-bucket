@@ -10,8 +10,6 @@ locals {
   bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
   bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}"
 
-  public_access_block_enabled = var.block_public_acls || var.block_public_policy || var.ignore_public_acls || var.restrict_public_buckets
-
   acl_grants = var.grants == null ? [] : flatten(
     [
       for g in var.grants : [
@@ -473,7 +471,7 @@ resource "aws_s3_bucket_policy" "default" {
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
 # for the nuances of the blocking options
 resource "aws_s3_bucket_public_access_block" "default" {
-  count  = module.this.enabled && local.public_access_block_enabled ? 1 : 0
+  count  = module.this.enabled ? 1 : 0
   bucket = join("", aws_s3_bucket.default[*].id)
 
   block_public_acls       = var.block_public_acls

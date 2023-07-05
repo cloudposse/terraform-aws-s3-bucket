@@ -7,8 +7,9 @@ locals {
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
-  bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}"
+  bucket_name = coalesce(var.bucket_name, module.this.id)
+  bucket_id   = join("", aws_s3_bucket.default[*].id)
+  bucket_arn  = "arn:${local.partition}:s3:::${local.bucket_id}"
 
   acl_grants = var.grants == null ? [] : flatten(
     [
@@ -44,14 +45,14 @@ resource "aws_s3_bucket" "default" {
 
 resource "aws_s3_bucket_accelerate_configuration" "default" {
   count  = local.transfer_acceleration_enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
   status = "Enabled"
 }
 
 # Ensure the resource exists to track drift, even if the feature is disabled
 resource "aws_s3_bucket_versioning" "default" {
   count  = local.enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   versioning_configuration {
     status = local.versioning_enabled ? "Enabled" : "Suspended"
@@ -60,7 +61,7 @@ resource "aws_s3_bucket_versioning" "default" {
 
 resource "aws_s3_bucket_logging" "default" {
   count  = local.enabled && var.logging != null ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   target_bucket = var.logging["bucket_name"]
   target_prefix = var.logging["prefix"]
@@ -70,7 +71,7 @@ resource "aws_s3_bucket_logging" "default" {
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket.html#enable-default-server-side-encryption
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   count  = local.enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   rule {
     bucket_key_enabled = var.bucket_key_enabled
@@ -84,7 +85,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 
 resource "aws_s3_bucket_website_configuration" "default" {
   count  = local.enabled && (try(length(var.website_configuration), 0) > 0) ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   dynamic "index_document" {
     for_each = try(length(var.website_configuration[0].index_document), 0) > 0 ? [true] : []
@@ -127,7 +128,7 @@ resource "aws_s3_bucket_website_configuration" "default" {
 // any trying to switch from one to the other will cause a conflict.
 resource "aws_s3_bucket_website_configuration" "redirect" {
   count  = local.enabled && (try(length(var.website_redirect_all_requests_to), 0) > 0) ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   redirect_all_requests_to {
     host_name = var.website_redirect_all_requests_to[0].host_name
@@ -139,7 +140,7 @@ resource "aws_s3_bucket_website_configuration" "redirect" {
 resource "aws_s3_bucket_cors_configuration" "default" {
   count = local.enabled && try(length(var.cors_configuration), 0) > 0 ? 1 : 0
 
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   dynamic "cors_rule" {
     for_each = var.cors_configuration
@@ -156,7 +157,7 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 
 resource "aws_s3_bucket_acl" "default" {
   count  = local.enabled && var.s3_object_ownership != "BucketOwnerEnforced" ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   # Conflicts with access_control_policy so this is enabled if no grants
   acl = try(length(local.acl_grants), 0) == 0 ? var.acl : null
@@ -189,7 +190,7 @@ resource "aws_s3_bucket_acl" "default" {
 resource "aws_s3_bucket_replication_configuration" "default" {
   count = local.replication_enabled ? 1 : 0
 
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
   role   = aws_iam_role.replication[0].arn
 
   dynamic "rule" {
@@ -301,7 +302,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 resource "aws_s3_bucket_object_lock_configuration" "default" {
   count = local.object_lock_enabled ? 1 : 0
 
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   object_lock_enabled = "Enabled"
 
@@ -440,8 +441,8 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
-        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}",
-        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}/%s*", values(statement.value)[0]),
+        "arn:${local.partition}:s3:::${local.bucket_id}",
+        formatlist("arn:${local.partition}:s3:::${local.bucket_id}/%s*", values(statement.value)[0]),
       ]))
       principals {
         type        = "AWS"
@@ -460,7 +461,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
 
 resource "aws_s3_bucket_policy" "default" {
   count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || length(var.source_policy_documents) > 0) ? 1 : 0
-  bucket     = join("", aws_s3_bucket.default[*].id)
+  bucket     = local.bucket_id
   policy     = join("", data.aws_iam_policy_document.aggregated_policy[*].json)
   depends_on = [aws_s3_bucket_public_access_block.default]
 }
@@ -470,7 +471,7 @@ resource "aws_s3_bucket_policy" "default" {
 # for the nuances of the blocking options
 resource "aws_s3_bucket_public_access_block" "default" {
   count  = module.this.enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   block_public_acls       = var.block_public_acls
   block_public_policy     = var.block_public_policy
@@ -481,7 +482,7 @@ resource "aws_s3_bucket_public_access_block" "default" {
 # Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html
 resource "aws_s3_bucket_ownership_controls" "default" {
   count  = local.enabled ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   rule {
     object_ownership = var.s3_object_ownership

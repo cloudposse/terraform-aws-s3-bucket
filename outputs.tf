@@ -19,7 +19,7 @@ output "bucket_website_endpoint" {
 }
 
 output "bucket_id" {
-  value       = local.enabled ? join("", aws_s3_bucket.default[*].id) : ""
+  value       = local.enabled ? local.bucket_id : ""
   description = "Bucket Name (aka ID)"
 }
 

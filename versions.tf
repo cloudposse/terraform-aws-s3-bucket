@@ -5,6 +5,7 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 4.9.0"
+      tag_names = "x.y.z"
     }
     time = {
       source  = "hashicorp/time"

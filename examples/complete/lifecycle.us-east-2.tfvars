@@ -156,7 +156,6 @@ lifecycle_rules = [
   }
 ]
 
-
 force_destroy = true
 
 versioning_enabled = false

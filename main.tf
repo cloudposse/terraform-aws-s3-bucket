@@ -135,7 +135,6 @@ resource "aws_s3_bucket_website_configuration" "redirect" {
   }
 }
 
-
 resource "aws_s3_bucket_cors_configuration" "default" {
   count = local.enabled && try(length(var.cors_configuration), 0) > 0 ? 1 : 0
 
@@ -459,7 +458,14 @@ data "aws_iam_policy_document" "aggregated_policy" {
 }
 
 resource "aws_s3_bucket_policy" "default" {
-  count      = local.enabled && (var.allow_ssl_requests_only || var.allow_encrypted_uploads_only || length(var.s3_replication_source_roles) > 0 || length(var.privileged_principal_arns) > 0 || length(local.source_policy_documents) > 0) ? 1 : 0
+  count = local.enabled && (
+    var.allow_ssl_requests_only ||
+    var.allow_encrypted_uploads_only ||
+    length(var.s3_replication_source_roles) > 0 ||
+    length(var.privileged_principal_arns) > 0 ||
+    length(local.source_policy_documents) > 0
+  ) ? 1 : 0
+
   bucket     = join("", aws_s3_bucket.default[*].id)
   policy     = join("", data.aws_iam_policy_document.aggregated_policy[*].json)
   depends_on = [aws_s3_bucket_public_access_block.default]
@@ -469,7 +475,8 @@ resource "aws_s3_bucket_policy" "default" {
 # https://www.terraform.io/docs/providers/aws/r/s3_bucket_public_access_block.html
 # for the nuances of the blocking options
 resource "aws_s3_bucket_public_access_block" "default" {
-  count  = module.this.enabled ? 1 : 0
+  count = module.this.enabled ? 1 : 0
+
   bucket = join("", aws_s3_bucket.default[*].id)
 
   block_public_acls       = var.block_public_acls
@@ -480,7 +487,8 @@ resource "aws_s3_bucket_public_access_block" "default" {
 
 # Per https://docs.aws.amazon.com/AmazonS3/latest/userguide/about-object-ownership.html
 resource "aws_s3_bucket_ownership_controls" "default" {
-  count  = local.enabled ? 1 : 0
+  count = local.enabled ? 1 : 0
+
   bucket = join("", aws_s3_bucket.default[*].id)
 
   rule {
@@ -491,7 +499,8 @@ resource "aws_s3_bucket_ownership_controls" "default" {
 
 # Workaround S3 eventual consistency for settings objects
 resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
-  count            = local.enabled ? 1 : 0
+  count = local.enabled ? 1 : 0
+
   depends_on       = [aws_s3_bucket_public_access_block.default, aws_s3_bucket_policy.default]
   create_duration  = "30s"
   destroy_duration = "30s"

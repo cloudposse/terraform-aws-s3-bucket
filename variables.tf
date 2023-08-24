@@ -36,7 +36,7 @@ variable "source_policy_documents" {
     EOT
 }
 locals {
-  source_policy_documents = compact(concat([var.policy], var.source_policy_documents))
+  source_policy_documents = concat([var.policy], var.source_policy_documents)
 }
 
 variable "force_destroy" {

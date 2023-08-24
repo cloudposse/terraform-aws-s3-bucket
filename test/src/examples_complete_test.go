@@ -16,7 +16,7 @@ import (
 
 func cleanup(t *testing.T, terraformOptions *terraform.Options, tempTestFolder string) {
 	terraform.Destroy(t, terraformOptions)
-	os.RemoveAll(tempTestFolder)
+	_ = os.RemoveAll(tempTestFolder)
 }
 
 // Test the Terraform module in examples/complete using Terratest.

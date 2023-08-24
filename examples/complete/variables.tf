@@ -89,12 +89,6 @@ variable "s3_replication_enabled" {
   description = "Enable or disable S3 replication."
 }
 
-variable "policy" {
-  type        = string
-  default     = ""
-  description = "DEPRECATED: Use source_policy_documents instead. A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
-}
-
 variable "source_policy_documents" {
   type        = list(string)
   default     = null
@@ -147,30 +141,6 @@ variable "allow_encrypted_uploads_only" {
   type        = bool
   default     = false
   description = "Set to `true` to prevent uploads of unencrypted objects to S3 bucket"
-}
-
-variable "lifecycle_rule_enabled" {
-  type        = bool
-  default     = false
-  description = "Enable or disable lifecycle rule"
-}
-
-variable "prefix" {
-  type        = string
-  default     = ""
-  description = "Prefix identifying 1 or more objects to which the rule applies"
-}
-
-variable "noncurrent_version_transition_days" {
-  type        = number
-  default     = 30
-  description = "Number of days to persist in the standard storage tier before moving to the glacier tier infrequent access tier"
-}
-
-variable "noncurrent_version_expiration_days" {
-  type        = number
-  default     = 90
-  description = "Specifies when noncurrent object versions expire"
 }
 
 variable "website_redirect_all_requests_to" {
@@ -255,12 +225,6 @@ variable "expiration_days" {
   type        = number
   default     = 90
   description = "Number of days after which to expunge the objects"
-}
-
-variable "lifecycle_tags" {
-  type        = map(string)
-  description = "Tags filter. Used to manage object lifecycle events"
-  default     = {}
 }
 
 variable "block_public_acls" {

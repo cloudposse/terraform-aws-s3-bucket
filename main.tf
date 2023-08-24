@@ -1,6 +1,6 @@
 locals {
   enabled   = module.this.enabled
-  partition = one(data.aws_partition.current[*].partition)
+  partition = join("", data.aws_partition.current[*].partition)
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
@@ -8,7 +8,7 @@ locals {
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
   bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  bucket_arn  = "arn:${local.partition}:s3:::${one(aws_s3_bucket.default[*].id)}"
+  bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}"
 
   acl_grants = var.grants == null ? [] : flatten(
     [
@@ -326,7 +326,7 @@ module "s3_user" {
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions
-  s3_resources = ["${one(aws_s3_bucket.default[*].arn)}/*", one(aws_s3_bucket.default[*].arn)]
+  s3_resources = ["${join("", aws_s3_bucket.default[*].arn)}/*", one(aws_s3_bucket.default[*].arn)]
 
   create_iam_access_key = var.access_key_enabled
   ssm_enabled           = var.store_access_key_in_ssm
@@ -446,8 +446,8 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
-        "arn:${local.partition}:s3:::${one(aws_s3_bucket.default[*].id)}",
-        formatlist("arn:${local.partition}:s3:::${one(aws_s3_bucket.default[*].id)}/%s*", values(statement.value)[0]),
+        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}",
+        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}/%s*", values(statement.value)[0]),
       ]))
       principals {
         type        = "AWS"

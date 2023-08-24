@@ -620,5 +620,4 @@ func TestExamplesCompleteDisabled(t *testing.T) {
 	assert.Empty(t, output["user_name"], "When disabled, module should have no outputs.")
 	assert.Empty(t, output["bucket_id"], "When disabled, module should have no outputs.")
 	assert.Empty(t, output["replication_bucket_id"], "When disabled, module should have no outputs.")
-
 }

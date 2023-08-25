@@ -30,12 +30,6 @@ variable "lifecycle_rules" {
   description = "DEPRECATED (`use lifecycle_configuration_rules`): A list of lifecycle rules"
 }
 
-variable "policy" {
-  type        = string
-  default     = ""
-  description = "DEPRECATED (use `source_policy_documents`): A valid bucket policy JSON document. Note that if the policy document is not specific enough (but still valid), Terraform may view the policy as constantly changing in a terraform plan. In this case, please make sure you use the verbose/specific version of the policy"
-}
-
 variable "replication_rules" {
   type        = list(any)
   default     = null

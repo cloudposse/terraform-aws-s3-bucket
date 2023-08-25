@@ -461,7 +461,7 @@ data "aws_iam_policy_document" "aggregated_policy" {
   count = local.enabled ? 1 : 0
 
   source_policy_documents   = [one(data.aws_iam_policy_document.bucket_policy[*].json)]
-  override_policy_documents = local.source_policy_documents
+  override_policy_documents = var.source_policy_documents
 }
 
 resource "aws_s3_bucket_policy" "default" {
@@ -470,7 +470,7 @@ resource "aws_s3_bucket_policy" "default" {
     var.allow_encrypted_uploads_only ||
     length(var.s3_replication_source_roles) > 0 ||
     length(var.privileged_principal_arns) > 0 ||
-    length(local.source_policy_documents) > 0
+    length(var.source_policy_documents) > 0
   ) ? 1 : 0
 
   bucket     = one(aws_s3_bucket.default[*].id)

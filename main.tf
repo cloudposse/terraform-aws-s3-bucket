@@ -27,12 +27,13 @@ data "aws_partition" "current" { count = local.enabled ? 1 : 0 }
 data "aws_canonical_user_id" "default" { count = local.enabled ? 1 : 0 }
 
 resource "aws_s3_bucket" "default" {
-  #bridgecrew:skip=BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` because we do not have good defaults
-  #bridgecrew:skip=CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).
-  #bridgecrew:skip=BC_AWS_S3_16:Skipping `Ensure S3 bucket versioning is enabled` because dynamic blocks are not supported by checkov
-  #bridgecrew:skip=BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because that is now enforced automatically by AWS
-  #bridgecrew:skip=BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not agree that this is required
-  #bridgecrew:skip=BC_AWS_GENERAL_72:We do not agree that cross-region replication must be enabled
+  # The following Bridgecrew rules are suppressed by Cloud Posse when analyzing this module with default inputs
+  # BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` because some buckets, like buckets receiving logs, do not need logging
+  # CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).
+  # BC_AWS_S3_16:Skipping `Ensure S3 bucket versioning is enabled` because this is often not required or even helpful
+  # BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because that is now enforced automatically by AWS
+  # BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not agree that this is required
+  # BC_AWS_GENERAL_72:We do not agree that cross-region replication must be enabled
   count         = local.enabled ? 1 : 0
   bucket        = local.bucket_name
   force_destroy = var.force_destroy

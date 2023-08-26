@@ -7,8 +7,12 @@ locals {
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
+  # Remember, everything has to work with enabled == false,
+  # so we cannot use coalesce() because it errors if all its arguments are empty,
+  # and we cannot use one() because it returns null, which does not work in templates and lists.
   bucket_name = var.bucket_name != null && var.bucket_name != "" ? var.bucket_name : module.this.id
-  bucket_arn  = "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}"
+  bucket_id   = join("", aws_s3_bucket.default[*].id)
+  bucket_arn  = "arn:${local.partition}:s3:::${local.bucket_id}"
 
   acl_grants = var.grants == null ? [] : flatten(
     [
@@ -27,13 +31,6 @@ data "aws_partition" "current" { count = local.enabled ? 1 : 0 }
 data "aws_canonical_user_id" "default" { count = local.enabled ? 1 : 0 }
 
 resource "aws_s3_bucket" "default" {
-  # The following Bridgecrew rules are suppressed by Cloud Posse when analyzing this module with default inputs
-  # BC_AWS_S3_13:Skipping `Enable S3 Bucket Logging` because some buckets, like buckets receiving logs, do not need logging
-  # CKV_AWS_52:Skipping `Ensure S3 bucket has MFA delete enabled` due to issue in terraform (https://github.com/hashicorp/terraform-provider-aws/issues/629).
-  # BC_AWS_S3_16:Skipping `Ensure S3 bucket versioning is enabled` because this is often not required or even helpful
-  # BC_AWS_S3_14:Skipping `Ensure all data stored in the S3 bucket is securely encrypted at rest` because that is now enforced automatically by AWS
-  # BC_AWS_GENERAL_56:Skipping `Ensure that S3 buckets are encrypted with KMS by default` because we do not agree that this is required
-  # BC_AWS_GENERAL_72:We do not agree that cross-region replication must be enabled
   count         = local.enabled ? 1 : 0
   bucket        = local.bucket_name
   force_destroy = var.force_destroy
@@ -46,7 +43,7 @@ resource "aws_s3_bucket" "default" {
 resource "aws_s3_bucket_accelerate_configuration" "default" {
   count = local.transfer_acceleration_enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
   status = "Enabled"
 }
 
@@ -54,7 +51,7 @@ resource "aws_s3_bucket_accelerate_configuration" "default" {
 resource "aws_s3_bucket_versioning" "default" {
   count = local.enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   versioning_configuration {
     status = local.versioning_enabled ? "Enabled" : "Suspended"
@@ -62,12 +59,12 @@ resource "aws_s3_bucket_versioning" "default" {
 }
 
 resource "aws_s3_bucket_logging" "default" {
-  count = local.enabled && var.logging != null ? 1 : 0
+  count = local.enabled && try(length(var.logging), 0) > 0 ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
-  target_bucket = var.logging["bucket_name"]
-  target_prefix = var.logging["prefix"]
+  target_bucket = var.logging[0]["bucket_name"]
+  target_prefix = var.logging[0]["prefix"]
 }
 
 # https://docs.aws.amazon.com/AmazonS3/latest/dev/bucket-encryption.html
@@ -75,7 +72,7 @@ resource "aws_s3_bucket_logging" "default" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   count = local.enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   rule {
     bucket_key_enabled = var.bucket_key_enabled
@@ -90,7 +87,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
 resource "aws_s3_bucket_website_configuration" "default" {
   count = local.enabled && (try(length(var.website_configuration), 0) > 0) ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   dynamic "index_document" {
     for_each = try(length(var.website_configuration[0].index_document), 0) > 0 ? [true] : []
@@ -134,7 +131,7 @@ resource "aws_s3_bucket_website_configuration" "default" {
 resource "aws_s3_bucket_website_configuration" "redirect" {
   count = local.enabled && (try(length(var.website_redirect_all_requests_to), 0) > 0) ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   redirect_all_requests_to {
     host_name = var.website_redirect_all_requests_to[0].host_name
@@ -145,12 +142,13 @@ resource "aws_s3_bucket_website_configuration" "redirect" {
 resource "aws_s3_bucket_cors_configuration" "default" {
   count = local.enabled && try(length(var.cors_configuration), 0) > 0 ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   dynamic "cors_rule" {
     for_each = var.cors_configuration
 
     content {
+      id              = cors_rule.value.id
       allowed_headers = cors_rule.value.allowed_headers
       allowed_methods = cors_rule.value.allowed_methods
       allowed_origins = cors_rule.value.allowed_origins
@@ -163,7 +161,7 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 resource "aws_s3_bucket_acl" "default" {
   count = local.enabled && var.s3_object_ownership != "BucketOwnerEnforced" ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   # Conflicts with access_control_policy so this is enabled if no grants
   acl = try(length(local.acl_grants), 0) == 0 ? var.acl : null
@@ -196,7 +194,7 @@ resource "aws_s3_bucket_acl" "default" {
 resource "aws_s3_bucket_replication_configuration" "default" {
   count = local.replication_enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
   role   = aws_iam_role.replication[0].arn
 
   dynamic "rule" {
@@ -214,47 +212,58 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 
       # This is only relevant when "filter" is used
       delete_marker_replication {
-        status = try(rule.value.delete_marker_replication_status, "Disabled")
+        status = try(rule.value.delete_marker_replication.status, try(rule.value.delete_marker_replication_status, "Disabled"))
       }
 
       destination {
         # Prefer newer system of specifying bucket in rule, but maintain backward compatibility with
         # s3_replica_bucket_arn to specify single destination for all rules
-        bucket        = try(length(rule.value.destination_bucket), 0) > 0 ? rule.value.destination_bucket : var.s3_replica_bucket_arn
-        storage_class = try(rule.value.destination.storage_class, "STANDARD")
+        bucket        = coalesce(rule.value.destination.bucket, rule.value.destination_bucket, var.s3_replica_bucket_arn)
+        storage_class = rule.value.destination.storage_class
 
         dynamic "encryption_configuration" {
-          for_each = try(rule.value.destination.replica_kms_key_id, null) != null ? [1] : []
+          for_each = try(compact(concat(
+            [try(rule.value.destination.encryption_configuration.replica_kms_key_id, "")],
+            [try(rule.value.destination.replica_kms_key_id, "")]
+          ))[0], [])
 
           content {
-            replica_kms_key_id = try(rule.value.destination.replica_kms_key_id, null)
+            replica_kms_key_id = encryption_configuration
           }
         }
 
-        account = try(rule.value.destination.account_id, null)
+        account = try(coalesce(rule.value.destination.account, rule.value.destination.account_id), null)
 
-        # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
         dynamic "metrics" {
-          for_each = try(rule.value.destination.metrics.status, "") == "Enabled" ? [1] : []
+          # Metrics are required if Replication Time Control is enabled, so automatically enable them
+          for_each = (
+            try(rule.value.destination.metrics.status, "") == "Enabled" ||
+            try(rule.value.destination.replication_time.status, "") == "Enabled"
+          ) ? [1] : []
 
           content {
             status = "Enabled"
             event_threshold {
-              # Minutes can only have 15 as a valid value.
-              minutes = 15
+              # Minutes can only have 15 as a valid value, but we allow it to be configured anyway
+              minutes = coalesce(try(rule.value.destination.metrics.event_threshold.minutes, null), 15)
             }
           }
         }
 
-        # This block is required when replication metrics are enabled.
+        # https://docs.aws.amazon.com/AmazonS3/latest/userguide/replication-walkthrough-5.html
         dynamic "replication_time" {
-          for_each = try(rule.value.destination.metrics.status, "") == "Enabled" ? [1] : []
+          for_each = (
+            # Preserving the old behavior of this module: if metrics are enabled,
+            # replication is automatically enabled unless explicitly disabled.
+            (try(rule.value.destination.metrics.status, "") == "Enabled" && !(try(rule.value.destination.replication_time.status, "") == "Disabled")) ||
+            try(rule.value.destination.replication_time.status, "") == "Enabled"
+          ) ? [1] : []
 
           content {
             status = "Enabled"
             time {
-              # Minutes can only have 15 as a valid value.
-              minutes = 15
+              # Minutes can only have 15 as a valid value, but we allow it to be configured anyway
+              minutes = coalesce(try(rule.value.destination.replication_time.time.minutes, null), 15)
             }
           }
         }
@@ -269,11 +278,14 @@ resource "aws_s3_bucket_replication_configuration" "default" {
       }
 
       dynamic "source_selection_criteria" {
-        for_each = try(rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled, null) == null ? [] : [rule.value.source_selection_criteria.sse_kms_encrypted_objects.enabled]
+        for_each = try(rule.value.source_selection_criteria, null) == null ? [] : [rule.value.source_selection_criteria]
 
         content {
+          replica_modifications {
+            status = try(source_selection_criteria.value.replica_modifications.status, null)
+          }
           sse_kms_encrypted_objects {
-            status = source_selection_criteria.value
+            status = try(source_selection_criteria.value.sse_kms_encrypted_objects.status, null)
           }
         }
       }
@@ -308,7 +320,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 resource "aws_s3_bucket_object_lock_configuration" "default" {
   count = local.object_lock_enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   object_lock_enabled = "Enabled"
 
@@ -447,8 +459,8 @@ data "aws_iam_policy_document" "bucket_policy" {
       sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indices to Sid
       actions = var.privileged_principal_actions
       resources = distinct(flatten([
-        "arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}",
-        formatlist("arn:${local.partition}:s3:::${join("", aws_s3_bucket.default[*].id)}/%s*", values(statement.value)[0]),
+        "arn:${local.partition}:s3:::${local.bucket_id}",
+        formatlist("arn:${local.partition}:s3:::${local.bucket_id}/%s*", values(statement.value)[0]),
       ]))
       principals {
         type        = "AWS"
@@ -474,7 +486,7 @@ resource "aws_s3_bucket_policy" "default" {
     length(var.source_policy_documents) > 0
   ) ? 1 : 0
 
-  bucket     = one(aws_s3_bucket.default[*].id)
+  bucket     = local.bucket_id
   policy     = one(data.aws_iam_policy_document.aggregated_policy[*].json)
   depends_on = [aws_s3_bucket_public_access_block.default]
 }
@@ -485,7 +497,7 @@ resource "aws_s3_bucket_policy" "default" {
 resource "aws_s3_bucket_public_access_block" "default" {
   count = module.this.enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   block_public_acls       = var.block_public_acls
   block_public_policy     = var.block_public_policy
@@ -497,7 +509,7 @@ resource "aws_s3_bucket_public_access_block" "default" {
 resource "aws_s3_bucket_ownership_controls" "default" {
   count = local.enabled ? 1 : 0
 
-  bucket = one(aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   rule {
     object_ownership = var.s3_object_ownership

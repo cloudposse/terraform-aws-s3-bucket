@@ -10,7 +10,6 @@ locals {
       (aws_iam_role.additional_deployment_iam_role[0].arn) = ["prefix1/", "prefix2/"]
     }
   ]
-
 }
 
 data "aws_caller_identity" "current" {}

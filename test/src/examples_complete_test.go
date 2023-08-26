@@ -16,7 +16,7 @@ import (
 
 func cleanup(t *testing.T, terraformOptions *terraform.Options, tempTestFolder string) {
 	terraform.Destroy(t, terraformOptions)
-	os.RemoveAll(tempTestFolder)
+	_ = os.RemoveAll(tempTestFolder)
 }
 
 // Test the Terraform module in examples/complete using Terratest.
@@ -577,10 +577,10 @@ func TestExamplesCompleteWithWebsiteRedirectAll(t *testing.T) {
 
 	// Run `terraform outputAll` to get a map of the output variable, avoiding an error if the output is not found
 	output := terraform.OutputAll(t, terraformOptions)
-	expectedS3BucketId := "eg-test-s3-test-website-" + attributes[0]
+	expectedS3BucketId := "eg-test-s3-test-redirect-" + attributes[0]
 	// Verify we're getting back the outputs we expect
 	assert.Equal(t, expectedS3BucketId, output["bucket_id"])
-	assert.Contains(t, output["bucket_website_endpoint"], "eg-test-s3-test-website-"+attributes[0])
+	assert.Contains(t, output["bucket_website_endpoint"], "eg-test-s3-test-redirect-"+attributes[0])
 	assert.NotEmpty(t, output["bucket_website_domain"])
 }
 
@@ -620,5 +620,4 @@ func TestExamplesCompleteDisabled(t *testing.T) {
 	assert.Empty(t, output["user_name"], "When disabled, module should have no outputs.")
 	assert.Empty(t, output["bucket_id"], "When disabled, module should have no outputs.")
 	assert.Empty(t, output["replication_bucket_id"], "When disabled, module should have no outputs.")
-
 }

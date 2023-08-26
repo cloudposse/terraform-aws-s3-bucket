@@ -4,7 +4,7 @@ namespace = "eg"
 
 stage = "test"
 
-name = "s3-test-website"
+name = "s3-test-redirect"
 
 acl = "private"
 

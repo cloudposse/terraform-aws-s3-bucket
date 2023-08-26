@@ -1,4 +1,5 @@
 locals {
+  /*
   # full_lifecycle_rule_schema is just for documentation, not actually used.
   full_lifecycle_rule_schema = {
     enabled = true # bool
@@ -23,7 +24,7 @@ locals {
     }
     transition = [{
       date          = null # string
-      days          = null # integer >= 0
+      days          = null # integer > 0
       storage_class = null # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
     }]
     noncurrent_version_transition = [{
@@ -32,6 +33,7 @@ locals {
       storage_class             = null # string/enum, one of GLACIER, STANDARD_IA, ONEZONE_IA, INTELLIGENT_TIERING, DEEP_ARCHIVE, GLACIER_IR.
     }]
   }
+  */
 
   lifecycle_configuration_rules = var.lifecycle_configuration_rules == null ? [] : var.lifecycle_configuration_rules
   # Normalize the input, filling in missing fields
@@ -156,7 +158,7 @@ locals {
 
 resource "aws_s3_bucket_lifecycle_configuration" "default" {
   count  = local.enabled && length(local.lc_rules) > 0 ? 1 : 0
-  bucket = join("", aws_s3_bucket.default[*].id)
+  bucket = local.bucket_id
 
   dynamic "rule" {
     for_each = local.lc_rules
@@ -244,4 +246,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
     aws_s3_bucket_versioning.default
   ]
 }
-

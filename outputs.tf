@@ -19,7 +19,7 @@ output "bucket_website_endpoint" {
 }
 
 output "bucket_id" {
-  value       = local.enabled ? join("", aws_s3_bucket.default[*].id) : ""
+  value       = local.enabled ? local.bucket_id : ""
   description = "Bucket Name (aka ID)"
 }
 
@@ -76,8 +76,9 @@ output "secret_access_key" {
   sensitive   = true
   value       = module.s3_user.secret_access_key
   description = <<-EOT
-    The secret access key, if `var.user_enabled && var.access_key_enabled && !var.store_access_key_in_ssm`.
-    This will be written to the state file unencrypted, so using `store_access_key_in_ssm` is recommended"
+    The secret access key will be output if created and not stored in SSM. However, the secret access key, if created,
+    will be written to the Terraform state file unencrypted, regardless of any other settings.
+    See the [Terraform documentation](https://www.terraform.io/docs/state/sensitive-data.html) for more details.
     EOT
 }
 

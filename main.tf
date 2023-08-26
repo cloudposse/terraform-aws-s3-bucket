@@ -282,10 +282,10 @@ resource "aws_s3_bucket_replication_configuration" "default" {
 
         content {
           replica_modifications {
-            status = try(source_selection_criteria.value.replica_modifications.status, null)
+            status = try(source_selection_criteria.value.replica_modifications.status, "Disabled")
           }
           sse_kms_encrypted_objects {
-            status = try(source_selection_criteria.value.sse_kms_encrypted_objects.status, null)
+            status = try(source_selection_criteria.value.sse_kms_encrypted_objects.status, "Disabled")
           }
         }
       }

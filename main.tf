@@ -228,7 +228,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
           ))[0]], [])
 
           content {
-            replica_kms_key_id = encryption_configuration
+            replica_kms_key_id = encryption_configuration.value
           }
         }
 

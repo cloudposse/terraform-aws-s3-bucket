@@ -469,6 +469,29 @@ data "aws_iam_policy_document" "bucket_policy" {
       }
     }
   }
+
+  dynamic "statement" {
+    for_each = var.privileged_principal_arns_with_condition
+
+    content {
+      sid     = "AllowPrivilegedPrincipal[${statement.key}]" # add indic
+      actions = var.privileged_principal_actions
+      resources = distinct(flatten([
+        "arn:${local.partition}:s3:::${local.bucket_id}",
+        formatlist("arn:${local.partition}:s3:::${local.bucket_id}/%s*", values(statement.value)[0]),
+      ]))
+      principals {
+        type        = "AWS"
+        identifiers = [keys(statement.value)[0]]
+      }
+      condition {
+        test     = keys(statement.value)[1]
+        variable = values(statement.value)[1][0]
+
+        values = slice(values(statement.value)[1], 1, length(values(statement.value)[1]))
+      }
+    }
+  }
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {
@@ -484,6 +507,7 @@ resource "aws_s3_bucket_policy" "default" {
     var.allow_encrypted_uploads_only ||
     length(var.s3_replication_source_roles) > 0 ||
     length(var.privileged_principal_arns) > 0 ||
+    length(var.privileged_principal_arns_with_condition) > 0 ||
     length(var.source_policy_documents) > 0
   ) ? 1 : 0
 

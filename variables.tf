@@ -404,6 +404,26 @@ variable "privileged_principal_arns" {
   nullable    = false
 }
 
+variable "privileged_principal_arns_with_condition" {
+  type    = list(map(list(string)))
+  default = []
+
+  description = <<-EOT
+    List of maps. The first key of Each map, an IAM Principal ARN, whose associated value is
+    a list of S3 path prefixes to grant `privileged_principal_actions` permissions for that principal,
+    in addition to the bucket itself, which is automatically included. Prefixes should not begin with '/'.
+    The second key of each map, the test of condition, whose associated value is a list of variable and values.
+    example:
+    default = [
+    {
+      ("*")        = [""],
+      StringEquals = ["aws:SourceVpce", "vpce-xxxxxxxxx", "vpce-xxxxxxxxx2"]
+    }
+    ]
+    EOT
+  nullable    = false
+}
+
 variable "privileged_principal_actions" {
   type        = list(string)
   default     = []

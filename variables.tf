@@ -411,6 +411,13 @@ variable "privileged_principal_actions" {
   nullable    = false
 }
 
+variable "source_ip_allow_list" {
+  type        = list(string)
+  default     = []
+  description = "List of IP addresses to allow to perform all actions to the bucket"
+  nullable    = false
+}
+
 variable "transfer_acceleration_enabled" {
   type        = bool
   default     = false

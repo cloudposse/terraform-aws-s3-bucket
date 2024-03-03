@@ -58,8 +58,13 @@ resource "aws_s3_bucket_versioning" "default" {
   }
 }
 
+moved {
+  from = aws_s3_bucket_logging.default[0]
+  to   = aws_s3_bucket_logging.default["enabled"]
+}
+
 resource "aws_s3_bucket_logging" "default" {
-  count = local.enabled && try(length(var.logging), 0) > 0 ? 1 : 0
+  for_each = toset(local.enabled && length(var.logging) > 0 ? ["enabled"] : [])
 
   bucket = local.bucket_id
 

@@ -341,7 +341,7 @@ resource "aws_s3_bucket_object_lock_configuration" "default" {
 
 module "s3_user" {
   source  = "cloudposse/iam-s3-user/aws"
-  version = "1.2.0"
+  version = "1.2.1"
 
   enabled      = local.enabled && var.user_enabled
   s3_actions   = var.allowed_bucket_actions

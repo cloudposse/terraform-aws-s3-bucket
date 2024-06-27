@@ -139,6 +139,13 @@ variable "allow_ssl_requests_only" {
   nullable    = false
 }
 
+variable "enforce_modern_tls" {
+  type        = bool
+  default     = false
+  description = "Set to `true` to require that requests use a modern encryption protocol for data in transit (TLS version 1.2 or higher)"
+  nullable    = false
+}
+
 variable "lifecycle_configuration_rules" {
   type = list(object({
     enabled = optional(bool, true)

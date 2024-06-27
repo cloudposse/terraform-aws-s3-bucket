@@ -425,6 +425,28 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
+    for_each = var.enforce_modern_tls ? [1] : []
+
+    content {
+      sid       = "EnforceTLSVersion"
+      effect    = "Deny"
+      actions   = ["s3:*"]
+      resources = [local.bucket_arn, "${local.bucket_arn}/*"]
+
+      principals {
+        identifiers = ["*"]
+        type        = "*"
+      }
+
+      condition {
+        test     = "NumericLessThan"
+        values   = ["1.2"]
+        variable = "s3:TlsVersion"
+      }
+    }
+  }
+
+  dynamic "statement" {
     for_each = length(var.s3_replication_source_roles) > 0 ? [1] : []
 
     content {

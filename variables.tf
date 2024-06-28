@@ -139,6 +139,12 @@ variable "allow_ssl_requests_only" {
   nullable    = false
 }
 
+variable "minimum_tls_version" {
+  type        = string
+  default     = null
+  description = "Set the minimum TLS version for in-transit traffic"
+}
+
 variable "lifecycle_configuration_rules" {
   type = list(object({
     enabled = optional(bool, true)

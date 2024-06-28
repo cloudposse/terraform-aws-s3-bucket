@@ -139,11 +139,10 @@ variable "allow_ssl_requests_only" {
   nullable    = false
 }
 
-variable "enforce_modern_tls" {
-  type        = bool
-  default     = false
-  description = "Set to `true` to require that requests use a modern encryption protocol for data in transit (TLS version 1.2 or higher)"
-  nullable    = false
+variable "minimum_tls_version" {
+  type        = string
+  default     = null
+  description = "Set the minimum TLS version for in-transit traffic"
 }
 
 variable "lifecycle_configuration_rules" {

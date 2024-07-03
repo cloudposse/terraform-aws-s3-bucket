@@ -14,5 +14,5 @@ lint:
 test/%:
 	@cd examples/complete && \
 	terraform init && \
-	terraform $* -var-file=fixtures.us-west-1.tfvars && \
-	terraform $* -var-file=grants.us-west-1.tfvars
+	terraform $* -var-file=fixtures.us-east-2.tfvars && \
+	terraform $* -var-file=grants.us-east-2.tfvars

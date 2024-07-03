@@ -425,7 +425,7 @@ data "aws_iam_policy_document" "bucket_policy" {
   }
 
   dynamic "statement" {
-    for_each = var.minimum_tls_version != null ? [var.minimum_tls_version] : []
+    for_each = var.minimum_tls_version != null ? toset([var.minimum_tls_version]) : toset([])
 
     content {
       sid       = "EnforceTLSVersion"
@@ -440,7 +440,7 @@ data "aws_iam_policy_document" "bucket_policy" {
 
       condition {
         test     = "NumericLessThan"
-        values   = [each.value]
+        values   = [statement.value]
         variable = "s3:TlsVersion"
       }
     }

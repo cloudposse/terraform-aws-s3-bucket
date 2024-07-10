@@ -451,3 +451,12 @@ variable "bucket_key_enabled" {
   EOT
   nullable    = false
 }
+
+variable "expected_bucket_owner" {
+  type        = string
+  default     = ""
+  description = <<-EOT
+    Account ID of the expected bucket owner. 
+    More information: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-owner-condition.html
+  EOT
+}

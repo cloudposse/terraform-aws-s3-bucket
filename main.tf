@@ -51,7 +51,8 @@ resource "aws_s3_bucket_accelerate_configuration" "default" {
 resource "aws_s3_bucket_versioning" "default" {
   count = local.enabled ? 1 : 0
 
-  bucket = local.bucket_id
+  bucket                = local.bucket_id
+  expected_bucket_owner = var.expected_bucket_owner
 
   versioning_configuration {
     status = local.versioning_enabled ? "Enabled" : "Suspended"
@@ -66,7 +67,8 @@ moved {
 resource "aws_s3_bucket_logging" "default" {
   for_each = toset(local.enabled && length(var.logging) > 0 ? ["enabled"] : [])
 
-  bucket = local.bucket_id
+  bucket                = local.bucket_id
+  expected_bucket_owner = var.expected_bucket_owner
 
   target_bucket = var.logging[0]["bucket_name"]
   target_prefix = var.logging[0]["prefix"]
@@ -77,7 +79,8 @@ resource "aws_s3_bucket_logging" "default" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   count = local.enabled ? 1 : 0
 
-  bucket = local.bucket_id
+  bucket                = local.bucket_id
+  expected_bucket_owner = var.expected_bucket_owner
 
   rule {
     bucket_key_enabled = var.bucket_key_enabled
@@ -166,7 +169,8 @@ resource "aws_s3_bucket_cors_configuration" "default" {
 resource "aws_s3_bucket_acl" "default" {
   count = local.enabled && var.s3_object_ownership != "BucketOwnerEnforced" ? 1 : 0
 
-  bucket = local.bucket_id
+  bucket                = local.bucket_id
+  expected_bucket_owner = var.expected_bucket_owner
 
   # Conflicts with access_control_policy so this is enabled if no grants
   acl = try(length(local.acl_grants), 0) == 0 ? var.acl : null

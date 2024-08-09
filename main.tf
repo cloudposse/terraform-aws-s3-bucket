@@ -1,6 +1,6 @@
 locals {
-  enabled   = module.this.enabled
-  partition = join("", data.aws_partition.current[*].partition)
+  enabled               = module.this.enabled
+  partition             = join("", data.aws_partition.current[*].partition)
   directory_bucket_name = "${local.bucket_name}-${var.availability_zone_id}"
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null

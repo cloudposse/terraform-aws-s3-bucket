@@ -1,7 +1,7 @@
 locals {
   enabled               = module.this.enabled
   partition             = join("", data.aws_partition.current[*].partition)
-  directory_bucket_name = "${local.bucket_name}-${var.availability_zone_id}"
+  directory_bucket_name = var.create_s3_directory_bucket ? "${local.bucket_name}-${var.availability_zone_id}" : ""
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled

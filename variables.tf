@@ -498,6 +498,7 @@ variable "create_s3_directory_bucket" {
   type        = bool
   default     = false
 }
+
 variable "availability_zone_id" {
   description = "The ID of the availability zone."
   type        = string

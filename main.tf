@@ -1,6 +1,7 @@
 locals {
-  enabled   = module.this.enabled
-  partition = join("", data.aws_partition.current[*].partition)
+  enabled               = module.this.enabled
+  partition             = join("", data.aws_partition.current[*].partition)
+  directory_bucket_name = var.create_s3_directory_bucket ? "${local.bucket_name}-${var.availability_zone_id}" : ""
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
@@ -578,4 +579,47 @@ resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
   depends_on       = [aws_s3_bucket_public_access_block.default, aws_s3_bucket_policy.default]
   create_duration  = "30s"
   destroy_duration = "30s"
+}
+// S3 event Bucket Notifications 
+resource "aws_s3_bucket_notification" "bucket_notification" {
+  count  = var.event_notification_details.enabled ? 1 : 0
+  bucket = local.bucket_id
+
+  dynamic "lambda_function" {
+    for_each = var.event_notification_details.lambda_list
+    content {
+      lambda_function_arn = lambda_function.value.arn
+      events              = lambda.value.events
+      filter_prefix       = lambda_function.value.filter_prefix
+      filter_suffix       = lambda_function.value.filter_suffix
+    }
+  }
+
+  dynamic "queue" {
+    for_each = var.event_notification_details.queue_list
+    content {
+      queue_arn = queue.value.queue_arn
+      events    = queue.value.events
+    }
+  }
+
+  dynamic "topic" {
+    for_each = var.event_notification_details.topic_list
+    content {
+      topic_arn = topic.value.topic_arn
+      events    = topic.value.events
+    }
+  }
+}
+
+/// Directory Bucket 
+// https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
+resource "aws_s3_directory_bucket" "default" {
+  count         = var.create_s3_directory_bucket ? 1 : 0
+  bucket        = local.directory_bucket_name
+  force_destroy = var.force_destroy
+
+  location {
+    name = var.availability_zone_id
+  }
 }

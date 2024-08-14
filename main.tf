@@ -234,7 +234,7 @@ resource "aws_s3_bucket_replication_configuration" "default" {
         dynamic "encryption_configuration" {
           for_each = try(
             [rule.value.destination.encryption_configuration.replica_kms_key_id],
-            [rule.value.destination.replica_kms_key_id],
+            [compact(rule.value.destination.replica_kms_key_id)],
             []
           )
 

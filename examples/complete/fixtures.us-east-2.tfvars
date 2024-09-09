@@ -28,3 +28,5 @@ allowed_bucket_actions = [
 ]
 
 bucket_key_enabled = true
+
+minimum_tls_version = "1.2"

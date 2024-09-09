@@ -315,3 +315,9 @@ variable "transfer_acceleration_enabled" {
   default     = true
   description = "Set true to enable Transfer Acceleration (many regions not supported)"
 }
+
+variable "minimum_tls_version" {
+  type        = string
+  default     = null
+  description = "Set the minimum TLS version for in-transit traffic"
+}

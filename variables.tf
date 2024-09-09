@@ -139,6 +139,12 @@ variable "allow_ssl_requests_only" {
   nullable    = false
 }
 
+variable "minimum_tls_version" {
+  type        = string
+  default     = null
+  description = "Set the minimum TLS version for in-transit traffic"
+}
+
 variable "lifecycle_configuration_rules" {
   type = list(object({
     enabled = optional(bool, true)
@@ -450,4 +456,51 @@ variable "bucket_key_enabled" {
   For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html
   EOT
   nullable    = false
+}
+
+variable "expected_bucket_owner" {
+  type        = string
+  default     = null
+  description = <<-EOT
+    Account ID of the expected bucket owner. 
+    More information: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-owner-condition.html
+  EOT
+}
+variable "event_notification_details" {
+  type = object({
+    enabled = bool
+    lambda_list = optional(list(object({
+      lambda_function_arn = string
+      events              = optional(list(string), ["s3:ObjectCreated:*"])
+      filter_prefix       = string
+      filter_suffix       = string
+    })), [])
+
+    queue_list = optional(list(object({
+      queue_arn = string
+      events    = optional(list(string), ["s3:ObjectCreated:*"])
+    })), [])
+
+    topic_list = optional(list(object({
+      topic_arn = string
+      events    = optional(list(string), ["s3:ObjectCreated:*"])
+    })), [])
+
+  })
+  description = "(optional) S3 event notification details"
+  default = {
+    enabled = false
+  }
+}
+
+variable "create_s3_directory_bucket" {
+  description = "Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
+  type        = bool
+  default     = false
+}
+
+variable "availability_zone_id" {
+  description = "The ID of the availability zone."
+  type        = string
+  default     = ""
 }

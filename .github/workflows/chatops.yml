@@ -12,6 +12,6 @@ permissions:
 
 jobs:
   test:
-    uses: cloudposse/.github/.github/workflows/shared-terraform-chatops.yml@main
+    uses: cloudposse/.github/.github/workflows/shared-terraform-chatops.yml@terratest-user-permissions
     if: ${{ github.event.issue.pull_request && contains(github.event.comment.body, '/terratest') }}
     secrets: inherit

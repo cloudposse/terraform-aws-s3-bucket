@@ -588,8 +588,8 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   dynamic "lambda_function" {
     for_each = var.event_notification_details.lambda_list
     content {
-      lambda_function_arn = lambda_function.value.arn
-      events              = lambda.value.events
+      lambda_function_arn = lambda_function.value.lambda_function_arn
+      events              = lambda_function.value.events
       filter_prefix       = lambda_function.value.filter_prefix
       filter_suffix       = lambda_function.value.filter_suffix
     }

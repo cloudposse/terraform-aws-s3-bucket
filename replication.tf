@@ -1,7 +1,7 @@
 resource "aws_iam_role" "replication" {
   count = local.replication_enabled ? 1 : 0
 
-  name                 = "${aws_s3_bucket.default[0].id}-replication"
+  name                 = format("%s-replication, local.bucket_name)
   assume_role_policy   = data.aws_iam_policy_document.replication_sts[0].json
   permissions_boundary = var.s3_replication_permissions_boundary_arn
 

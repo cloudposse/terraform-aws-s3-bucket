@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "replication_sts" {
 resource "aws_iam_policy" "replication" {
   count = local.replication_enabled ? 1 : 0
 
-  name   = "${aws_s3_bucket.default[0].id}-replication"
+  name   = format("%s-replication, local.bucket_name)
   policy = data.aws_iam_policy_document.replication[0].json
 
   tags = module.this.tags

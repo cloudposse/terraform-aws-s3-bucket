@@ -493,7 +493,7 @@ variable "event_notification_details" {
   }
 }
 
-variable "create_s3_directory_bucket" {
+variable "s3_directory_bucket_enabled" {
   description = "Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
   type        = bool
   default     = false

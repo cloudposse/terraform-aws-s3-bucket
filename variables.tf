@@ -496,13 +496,16 @@ variable "event_notification_details" {
 variable "s3_request_payment_configuration" {
   type = object({
     enabled               = bool
-    bucket                = string
-    expected_bucket_owner = string
+    expected_bucket_owner = optional(string)
     payer                 = string
   })
   description = "S3 request payment configuration"
   default = {
     enabled = false
+  }
+  validation {
+    condition     = !contains(["bucketowner", "requester"], lower(var.s3_request_payment_configuration.payer))
+    error_message = "The s3 request payment config's payer must be either BucketOwner or Requester"
   }
 }
 

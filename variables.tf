@@ -505,7 +505,7 @@ variable "s3_request_payment_configuration" {
     payer   = "BucketOwner"
   }
   validation {
-    condition     = !contains(["bucketowner", "requester"], lower(var.s3_request_payment_configuration.payer))
+    condition     = contains(["bucketowner", "requester"], lower(var.s3_request_payment_configuration.payer))
     error_message = "The s3 request payment config's payer must be either BucketOwner or Requester"
   }
 }

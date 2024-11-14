@@ -626,3 +626,11 @@ resource "aws_s3_directory_bucket" "default" {
     name = var.availability_zone_id
   }
 }
+
+resource "aws_s3_bucket_request_payment_configuration" "default" {
+  count = local.enabled && var.s3_request_payment_configuration.enabled ? 1 : 0
+
+  bucket                = local.bucket_id
+  expected_bucket_owner = var.s3_request_payment_configuration.expected_bucket_owner
+  payer                 = lower(var.s3_request_payment_configuration.payer) == "requester" ? "Requester" : "BucketOwner"
+}

@@ -494,6 +494,23 @@ variable "event_notification_details" {
   }
 }
 
+variable "s3_request_payment_configuration" {
+  type = object({
+    enabled               = bool
+    expected_bucket_owner = optional(string)
+    payer                 = string
+  })
+  description = "S3 request payment configuration"
+  default = {
+    enabled = false
+    payer   = "BucketOwner"
+  }
+  validation {
+    condition     = contains(["bucketowner", "requester"], lower(var.s3_request_payment_configuration.payer))
+    error_message = "The s3 request payment config's payer must be either BucketOwner or Requester"
+  }
+}
+
 variable "create_s3_directory_bucket" {
   description = "Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
   type        = bool

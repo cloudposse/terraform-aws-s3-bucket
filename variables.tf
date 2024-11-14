@@ -493,6 +493,19 @@ variable "event_notification_details" {
   }
 }
 
+variable "s3_request_payment_configuration" {
+  type = object({
+    enabled               = bool
+    bucket                = string
+    expected_bucket_owner = string
+    payer                 = string
+  })
+  description = "S3 request payment configuration"
+  default = {
+    enabled = false
+  }
+}
+
 variable "create_s3_directory_bucket" {
   description = "Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
   type        = bool

@@ -580,10 +580,13 @@ resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
   create_duration  = "30s"
   destroy_duration = "30s"
 }
-// S3 event Bucket Notifications 
+
+# S3 event Bucket Notifications 
 resource "aws_s3_bucket_notification" "bucket_notification" {
   count  = var.event_notification_details.enabled ? 1 : 0
   bucket = local.bucket_id
+
+  eventbridge = var.event_notification_details.eventbridge
 
   dynamic "lambda_function" {
     for_each = var.event_notification_details.lambda_list
@@ -612,8 +615,8 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
-/// Directory Bucket 
-// https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
+# Directory Bucket 
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
   count         = local.enabled && var.s3_directory_bucket_enabled ? 1 : 0
   bucket        = local.directory_bucket_name
@@ -622,4 +625,12 @@ resource "aws_s3_directory_bucket" "default" {
   location {
     name = var.availability_zone_id
   }
+}
+
+resource "aws_s3_bucket_request_payment_configuration" "default" {
+  count = local.enabled && var.s3_request_payment_configuration.enabled ? 1 : 0
+
+  bucket                = local.bucket_id
+  expected_bucket_owner = var.s3_request_payment_configuration.expected_bucket_owner
+  payer                 = lower(var.s3_request_payment_configuration.payer) == "requester" ? "Requester" : "BucketOwner"
 }

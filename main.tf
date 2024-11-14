@@ -615,7 +615,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 /// Directory Bucket 
 // https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
-  count         = var.s3_directory_bucket_enabled ? 1 : 0
+  count         = local.enabled && var.s3_directory_bucket_enabled ? 1 : 0
   bucket        = local.directory_bucket_name
   force_destroy = var.force_destroy
 

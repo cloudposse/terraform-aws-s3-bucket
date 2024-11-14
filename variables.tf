@@ -502,6 +502,7 @@ variable "s3_request_payment_configuration" {
   description = "S3 request payment configuration"
   default = {
     enabled = false
+    payer   = "BucketOwner"
   }
   validation {
     condition     = !contains(["bucketowner", "requester"], lower(var.s3_request_payment_configuration.payer))

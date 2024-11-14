@@ -466,9 +466,11 @@ variable "expected_bucket_owner" {
     More information: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-owner-condition.html
   EOT
 }
+
 variable "event_notification_details" {
   type = object({
-    enabled = bool
+    enabled     = bool
+    eventbridge = optional(bool, false)
     lambda_list = optional(list(object({
       lambda_function_arn = string
       events              = optional(list(string), ["s3:ObjectCreated:*"])
@@ -485,9 +487,8 @@ variable "event_notification_details" {
       topic_arn = string
       events    = optional(list(string), ["s3:ObjectCreated:*"])
     })), [])
-
   })
-  description = "(optional) S3 event notification details"
+  description = "S3 event notification details"
   default = {
     enabled = false
   }

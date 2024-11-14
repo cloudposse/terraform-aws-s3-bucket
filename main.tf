@@ -580,10 +580,13 @@ resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
   create_duration  = "30s"
   destroy_duration = "30s"
 }
-// S3 event Bucket Notifications 
+
+# S3 event Bucket Notifications 
 resource "aws_s3_bucket_notification" "bucket_notification" {
   count  = var.event_notification_details.enabled ? 1 : 0
   bucket = local.bucket_id
+
+  eventbridge = var.event_notification_details.eventbridge
 
   dynamic "lambda_function" {
     for_each = var.event_notification_details.lambda_list
@@ -612,8 +615,8 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
-/// Directory Bucket 
-// https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
+# Directory Bucket 
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
   count         = var.create_s3_directory_bucket ? 1 : 0
   bucket        = local.directory_bucket_name

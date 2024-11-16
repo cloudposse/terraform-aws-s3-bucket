@@ -601,16 +601,20 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   dynamic "queue" {
     for_each = var.event_notification_details.queue_list
     content {
-      queue_arn = queue.value.queue_arn
-      events    = queue.value.events
+      queue_arn     = queue.value.queue_arn
+      events        = queue.value.events
+      filter_prefix = queue.value.filter_prefix
+      filter_suffix = queue.value.filter_suffix
     }
   }
 
   dynamic "topic" {
     for_each = var.event_notification_details.topic_list
     content {
-      topic_arn = topic.value.topic_arn
-      events    = topic.value.events
+      topic_arn     = topic.value.topic_arn
+      events        = topic.value.events
+      filter_prefix = topic.value.filter_prefix
+      filter_suffix = topic.value.filter_suffix
     }
   }
 }

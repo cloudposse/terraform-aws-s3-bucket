@@ -474,18 +474,22 @@ variable "event_notification_details" {
     lambda_list = optional(list(object({
       lambda_function_arn = string
       events              = optional(list(string), ["s3:ObjectCreated:*"])
-      filter_prefix       = string
-      filter_suffix       = string
+      filter_prefix       = optional(string)
+      filter_suffix       = optional(string)
     })), [])
 
     queue_list = optional(list(object({
-      queue_arn = string
-      events    = optional(list(string), ["s3:ObjectCreated:*"])
+      queue_arn     = string
+      events        = optional(list(string), ["s3:ObjectCreated:*"])
+      filter_prefix = optional(string)
+      filter_suffix = optional(string)
     })), [])
 
     topic_list = optional(list(object({
-      topic_arn = string
-      events    = optional(list(string), ["s3:ObjectCreated:*"])
+      topic_arn     = string
+      events        = optional(list(string), ["s3:ObjectCreated:*"])
+      filter_prefix = optional(string)
+      filter_suffix = optional(string)
     })), [])
   })
   description = "S3 event notification details"

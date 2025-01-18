@@ -634,3 +634,26 @@ resource "aws_s3_bucket_request_payment_configuration" "default" {
   expected_bucket_owner = var.s3_request_payment_configuration.expected_bucket_owner
   payer                 = lower(var.s3_request_payment_configuration.payer) == "requester" ? "Requester" : "BucketOwner"
 }
+
+# S3 Access Points
+resource "aws_s3_access_point" "example" {
+  # Make the resource optional using the `count` meta-argument
+  count = var.enable_access_point ? 1 : 0
+
+  bucket = local.bucket_id
+  name   = var.s3_access_point_name
+  bucket_account_id = var.bucket_account_id
+  policy = var.policy
+
+  public_access_block_configuration {
+    block_public_acls       = var.block_public_acls
+    block_public_policy     = var.block_public_policy
+    ignore_public_acls      = var.ignore_public_acls
+    restrict_public_buckets = var.restrict_public_buckets
+  }
+
+  # Conditionally add vpc_configuration based on access point origin
+  vpc_configuration {
+    vpc_id = var.access_point_origin == "Internet" ? null : var.vpc_id
+  }
+}

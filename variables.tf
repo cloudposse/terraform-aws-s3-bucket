@@ -9,6 +9,40 @@ variable "acl" {
     EOT
 }
 
+variable "enable_access_point" {
+  description = "Whether to enable the creation of the S3 Access Point."
+  type        = bool
+  default     = false
+}
+
+variable "access_point_origin" {
+  description = "The origin of the S3 Access Point. Valid values are 'internet' or 'vpc'."
+  type        = string
+  default     = "Internet" 
+}
+
+variable "bucket_account_id" {
+  description = "The account ID of the S3 bucket."
+  type        = string
+  default     = ""
+}
+
+variable "vpc_id" {
+  description = "The ID of the VPC to associate with the S3 Access Point."
+  type        = string
+  default     = ""
+}
+variable "policy" {
+  description = "The policy document for the S3 Access Point."
+  type        = string
+  default     = ""
+}
+
+variable "s3_access_point_name" {
+  description = "Name of the S3 Access Point."
+  type        = string
+  default     = "" 
+}
 variable "grants" {
   type = list(object({
     id          = string

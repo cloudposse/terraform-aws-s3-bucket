@@ -10,7 +10,7 @@ output "bucket_regional_domain_name" {
 
 output "bucket_website_domain" {
   value       = join("", aws_s3_bucket_website_configuration.default[*].website_domain, aws_s3_bucket_website_configuration.redirect[*].website_domain)
-  description = "The bucket website domain, if website is enabled"
+  description = "The bucket website domain if website is enabled"
 }
 
 output "bucket_website_endpoint" {

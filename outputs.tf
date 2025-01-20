@@ -5,7 +5,7 @@ output "bucket_domain_name" {
 
 output "bucket_regional_domain_name" {
   value       = local.enabled ? join("", aws_s3_bucket.default[*].bucket_regional_domain_name) : ""
-  description = "The bucket region-specific domain name"
+  description = "The bucket region-specific,domain name"
 }
 
 output "bucket_website_domain" {

@@ -1,7 +1,7 @@
 locals {
   enabled               = module.this.enabled
   partition             = join("", data.aws_partition.current[*].partition)
-  directory_bucket_name = var.create_s3_directory_bucket ? "${local.bucket_name}-${var.availability_zone_id}" : ""
+  directory_bucket_name = var.s3_directory_bucket_enabled ? "${local.bucket_name}-${var.availability_zone_id}" : ""
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
@@ -622,7 +622,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 # Directory Bucket 
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
-  count         = var.create_s3_directory_bucket ? 1 : 0
+  count         = local.enabled && var.s3_directory_bucket_enabled ? 1 : 0
   bucket        = local.directory_bucket_name
   force_destroy = var.force_destroy
 

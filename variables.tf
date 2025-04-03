@@ -420,7 +420,14 @@ variable "privileged_principal_actions" {
 variable "source_ip_allow_list" {
   type        = list(string)
   default     = []
-  description = "List of IP addresses to allow to perform all actions to the bucket"
+  description = "List of IP addresses to allow to perform all actions to the bucket. Add a CICD IP or VPN IP here or the bucket is a risk of getting locked out. To only deny s3 object access by IP, see `var.source_ip_allow_list_s3_objects`."
+  nullable    = false
+}
+
+variable "source_ip_allow_list_s3_objects" {
+  type        = list(string)
+  default     = []
+  description = "List of IP addresses to allow to perform all s3 object actions to the bucket"
   nullable    = false
 }
 

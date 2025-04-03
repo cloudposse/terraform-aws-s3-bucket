@@ -520,9 +520,27 @@ data "aws_iam_policy_document" "bucket_policy" {
         values   = var.source_ip_allow_list
       }
     }
-
   }
 
+  dynamic "statement" { 
+    for_each = length(var.source_ip_allow_list_s3_objects) > 0 ? [1] : [] 
+
+    content { 
+      sid       = "AllowIPPrincipalsOnObjects" 
+      effect    = "Deny" 
+      actions   = ["s3:*"] 
+      resources = ["${local.bucket_arn}/*"] 
+      principals { 
+        identifiers = ["*"] 
+        type        = "*" 
+      } 
+      condition { 
+        test     = "NotIpAddress" 
+        variable = "aws:SourceIp" 
+        values   = var.source_ip_allow_list_s3_objects 
+      } 
+    } 
+  }
 }
 
 data "aws_iam_policy_document" "aggregated_policy" {

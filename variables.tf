@@ -462,7 +462,7 @@ variable "expected_bucket_owner" {
   type        = string
   default     = null
   description = <<-EOT
-    Account ID of the expected bucket owner. 
+    Account ID of the expected bucket owner.
     More information: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-owner-condition.html
   EOT
 }
@@ -516,7 +516,17 @@ variable "s3_request_payment_configuration" {
 }
 
 variable "create_s3_directory_bucket" {
-  description = "Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
+  description = "DEPRECATED (use `s3_directory_bucket_enabled`) Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
+  type        = bool
+  default     = false
+}
+
+variable "s3_directory_bucket_enabled" {
+  description = <<-EOT
+  Set this to true to make your s3 bucket a directory bucket. This will generate a bucket will the fully qualified
+  name following the convention: [bucket-name]--[availability-zone-id]--x-s3.
+  For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/directory-bucket-naming-rules.html
+  EOT
   type        = bool
   default     = false
 }

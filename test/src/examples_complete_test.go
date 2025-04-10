@@ -3,15 +3,16 @@ package test
 import (
 	"bytes"
 	"encoding/json"
+	"os"
+	"regexp"
+	"strings"
+	"testing"
+
 	"github.com/gruntwork-io/terratest/modules/aws"
 	"github.com/gruntwork-io/terratest/modules/random"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	testStructure "github.com/gruntwork-io/terratest/modules/test-structure"
 	"github.com/stretchr/testify/assert"
-	"os"
-	"regexp"
-	"strings"
-	"testing"
 )
 
 func cleanup(t *testing.T, terraformOptions *terraform.Options, tempTestFolder string) {
@@ -620,4 +621,76 @@ func TestExamplesCompleteDisabled(t *testing.T) {
 	assert.Empty(t, output["user_name"], "When disabled, module should have no outputs.")
 	assert.Empty(t, output["bucket_id"], "When disabled, module should have no outputs.")
 	assert.Empty(t, output["replication_bucket_id"], "When disabled, module should have no outputs.")
+}
+
+func TestExamplesS3DirectoryBucketNamingBothCreateAndEnabledSet(t *testing.T) {
+	t.Parallel()
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
+
+	rootFolder := "../../"
+	terraformFolderRelativeToRoot := "examples/complete"
+	varFiles := []string{"directory-bucket.us-east-2.tfvars"}
+
+	tempTestFolder := testStructure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: tempTestFolder,
+		Upgrade:      true,
+		// Variables to pass to our Terraform code using -var-file options
+		VarFiles: varFiles,
+		Vars: map[string]interface{}{
+			"attributes": attributes,
+			"enabled":    "true",
+		},
+	}
+
+	// At the end of the test, run `terraform destroy` to clean up any resources that were created
+	defer cleanup(t, terraformOptions, tempTestFolder)
+
+	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
+	terraform.InitAndApply(t, terraformOptions)
+
+	s3BucketID := terraform.Output(t, terraformOptions, "bucket_id")
+
+	expectedS3BucketID := "s3-test--use1-az2--x-s3"
+	// Verify we're getting back the outputs we expect
+	assert.Equal(t, expectedS3BucketID, s3BucketID)
+}
+
+func TestExamplesS3DirectoryBucketBackwardsCompatibleWithCreate(t *testing.T) {
+	t.Parallel()
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
+
+	rootFolder := "../../"
+	terraformFolderRelativeToRoot := "examples/complete"
+	varFiles := []string{"directory-bucket-create-flag.us-east-2.tfvars"}
+
+	tempTestFolder := testStructure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+
+	terraformOptions := &terraform.Options{
+		// The path to where our Terraform code is located
+		TerraformDir: tempTestFolder,
+		Upgrade:      true,
+		// Variables to pass to our Terraform code using -var-file options
+		VarFiles: varFiles,
+		Vars: map[string]interface{}{
+			"attributes": attributes,
+			"enabled":    "true",
+		},
+	}
+
+	// At the end of the test, run `terraform destroy` to clean up any resources that were created
+	defer cleanup(t, terraformOptions, tempTestFolder)
+
+	// This will run `terraform init` and `terraform apply` and fail the test if there are any errors
+	terraform.InitAndApply(t, terraformOptions)
+
+	s3BucketID := terraform.Output(t, terraformOptions, "bucket_id")
+
+	expectedS3BucketID := "s3-test-use1-az2"
+	// Verify we're getting back the outputs we expect
+	assert.Equal(t, expectedS3BucketID, s3BucketID)
 }

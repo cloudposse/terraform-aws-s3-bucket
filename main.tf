@@ -1,7 +1,8 @@
 locals {
-  enabled               = module.this.enabled
-  partition             = join("", data.aws_partition.current[*].partition)
-  directory_bucket_name = var.create_s3_directory_bucket ? "${local.bucket_name}-${var.availability_zone_id}" : ""
+  enabled                               = module.this.enabled
+  partition                             = join("", data.aws_partition.current[*].partition)
+  fully_qualified_directory_bucket_name = var.s3_directory_bucket_enabled ? "${local.bucket_name}--${var.availability_zone_id}--x-s3" : ""
+  directory_bucket_name                 = var.create_s3_directory_bucket && local.fully_qualified_directory_bucket_name != "" ? "${local.bucket_name}-${var.availability_zone_id}" : ""
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
@@ -581,7 +582,7 @@ resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
   destroy_duration = "30s"
 }
 
-# S3 event Bucket Notifications 
+# S3 event Bucket Notifications
 resource "aws_s3_bucket_notification" "bucket_notification" {
   count  = var.event_notification_details.enabled ? 1 : 0
   bucket = local.bucket_id
@@ -619,17 +620,18 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
-# Directory Bucket 
+# Directory Bucket
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
-  count         = var.create_s3_directory_bucket ? 1 : 0
-  bucket        = local.directory_bucket_name
+  count         = var.s3_directory_bucket_enabled || var.create_s3_directory_bucket ? 1 : 0
+  bucket        = var.s3_directory_bucket_enabled ? local.fully_qualified_directory_bucket_name : local.directory_bucket_name
   force_destroy = var.force_destroy
 
   location {
     name = var.availability_zone_id
   }
 }
+
 
 resource "aws_s3_bucket_request_payment_configuration" "default" {
   count = local.enabled && var.s3_request_payment_configuration.enabled ? 1 : 0

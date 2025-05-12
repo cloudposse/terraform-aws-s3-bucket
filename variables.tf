@@ -197,8 +197,8 @@ variable "lifecycle_transition_default_minimum_object_size" {
     Valid values are `all_storage_classes_128K`(default) and `varies_by_storage_class`.
     EOT
   validation {
-    condition     = contains(["all_storage_classes_128K", "varies_by_storage_class"], lower(var.lifecycle_transition_default_minimum_object_size))
-    error_message = "The s3 request payment config's payer must be either BucketOwner or Requester"
+    condition     = contains(["all_storage_classes_128K", "varies_by_storage_class"], var.lifecycle_transition_default_minimum_object_size)
+    error_message = "The default minimum object size for transitions must be either all_storage_classes_128K or varies_by_storage_class"
   }
   nullable = false
 }

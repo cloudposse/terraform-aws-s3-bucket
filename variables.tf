@@ -189,6 +189,19 @@ variable "lifecycle_configuration_rules" {
 }
 # See lifecycle.tf for conversion of deprecated `lifecycle_rules` to `lifecycle_configuration_rules`
 
+variable "lifecycle_transition_default_minimum_object_size" {
+  type        = string
+  default     = "all_storage_classes_128K"
+  description = <<-EOT
+    Specifies the default minimum object size behavior applied to the lifecycle configuration.
+    Valid values are `all_storage_classes_128K`(default) and `varies_by_storage_class`.
+    EOT
+  validation {
+    condition     = contains(["all_storage_classes_128K", "varies_by_storage_class"], lower(var.lifecycle_transition_default_minimum_object_size))
+    error_message = "The s3 request payment config's payer must be either BucketOwner or Requester"
+  }
+  nullable = false
+}
 
 variable "cors_configuration" {
   type = list(object({

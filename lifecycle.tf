@@ -157,8 +157,9 @@ locals {
 
 
 resource "aws_s3_bucket_lifecycle_configuration" "default" {
-  count  = local.enabled && length(local.lc_rules) > 0 ? 1 : 0
-  bucket = local.bucket_id
+  count                                  = local.enabled && length(local.lc_rules) > 0 ? 1 : 0
+  bucket                                 = local.bucket_id
+  transition_default_minimum_object_size = var.lifecycle_transition_default_minimum_object_size
 
   dynamic "rule" {
     for_each = local.lc_rules

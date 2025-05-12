@@ -189,6 +189,19 @@ variable "lifecycle_configuration_rules" {
 }
 # See lifecycle.tf for conversion of deprecated `lifecycle_rules` to `lifecycle_configuration_rules`
 
+variable "lifecycle_transition_default_minimum_object_size" {
+  type        = string
+  default     = "all_storage_classes_128K"
+  description = <<-EOT
+    Specifies the default minimum object size behavior applied to the lifecycle configuration.
+    Valid values are `all_storage_classes_128K`(default) and `varies_by_storage_class`.
+    EOT
+  validation {
+    condition     = contains(["all_storage_classes_128K", "varies_by_storage_class"], var.lifecycle_transition_default_minimum_object_size)
+    error_message = "The default minimum object size for transitions must be either all_storage_classes_128K or varies_by_storage_class"
+  }
+  nullable = false
+}
 
 variable "cors_configuration" {
   type = list(object({

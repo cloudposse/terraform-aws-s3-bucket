@@ -3,7 +3,7 @@
 <!-- markdownlint-disable -->
 <a href="https://cpco.io/homepage"><img src="https://github.com/cloudposse/terraform-aws-s3-bucket/blob/main/.github/banner.png?raw=true" alt="Project Banner"/></a><br/>
     <p align="right">
-<a href="https://github.com/cloudposse/terraform-aws-s3-bucket/actions"><img src="https://github.com/cloudposse/terraform-aws-s3-bucket/workflows/test/badge.svg?branch=master" alt="GitHub Action Tests"/></a><a href="https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://github.com/cloudposse/terraform-aws-s3-bucket/commits"><img src="https://img.shields.io/github/last-commit/cloudposse/terraform-aws-s3-bucket.svg?style=for-the-badge" alt="Last Updated"/></a><a href="https://slack.cloudposse.com"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a></p>
+<a href="https://github.com/cloudposse/terraform-aws-s3-bucket/actions"><img src="https://github.com/cloudposse/terraform-aws-s3-bucket/workflows/test/badge.svg?branch=master" alt="GitHub Action Tests"/></a><a href="https://github.com/cloudposse/terraform-aws-s3-bucket/releases/latest"><img src="https://img.shields.io/github/release/cloudposse/terraform-aws-s3-bucket.svg?style=for-the-badge" alt="Latest Release"/></a><a href="https://github.com/cloudposse/terraform-aws-s3-bucket/commits"><img src="https://img.shields.io/github/last-commit/cloudposse/terraform-aws-s3-bucket.svg?style=for-the-badge" alt="Last Updated"/></a><a href="https://cloudposse.com/slack"><img src="https://slack.cloudposse.com/for-the-badge.svg" alt="Slack Community"/></a></p>
 <!-- markdownlint-restore -->
 
 <!--
@@ -194,19 +194,6 @@ module "s3_bucket" {
 
 
 <!-- markdownlint-disable -->
-## Makefile Targets
-```text
-Available targets:
-
-  help                                Help screen
-  help/all                            Display help for all targets
-  help/short                          This help short screen
-  lint                                Lint terraform code
-  test/%                              Run Terraform commands in the examples/complete folder; e.g. make test/plan
-
-```
-<!-- markdownlint-restore -->
-<!-- markdownlint-disable -->
 ## Requirements
 
 | Name | Version |
@@ -353,6 +340,11 @@ Available targets:
 | <a name="output_user_name"></a> [user\_name](#output\_user\_name) | Normalized IAM user name |
 | <a name="output_user_unique_id"></a> [user\_unique\_id](#output\_user\_unique\_id) | The user unique ID assigned by AWS |
 <!-- markdownlint-restore -->
+
+
+
+
+
 
 
 ## Related Projects

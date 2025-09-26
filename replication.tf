@@ -1,7 +1,7 @@
 resource "aws_iam_role" "replication" {
   count = local.replication_enabled ? 1 : 0
 
-  name                 = format("%s-replication", local.bucket_name)
+  name                 = local.s3_replication_iam_role_name
   assume_role_policy   = data.aws_iam_policy_document.replication_sts[0].json
   permissions_boundary = var.s3_replication_permissions_boundary_arn
 
@@ -65,6 +65,22 @@ data "aws_iam_policy_document" "replication" {
       try(length(var.s3_replica_bucket_arn), 0) > 0 ? ["${var.s3_replica_bucket_arn}/*"] : [],
       [for rule in local.s3_replication_rules : "${rule.destination_bucket}/*" if try(length(rule.destination_bucket), 0) > 0],
       [for rule in local.s3_replication_rules : "${rule.destination.bucket}/*" if try(length(rule.destination.bucket), 0) > 0],
+    ))
+  }
+
+  statement {
+    sid    = "AllowKMSForReplication"
+    effect = "Allow"
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:ReEncrypt*",
+      "kms:GenerateDataKey*",
+      "kms:DescribeKey"
+    ]
+
+    resources = toset(concat(
+      [for rule in local.s3_replication_rules : "${rule.encryption_configuration.replica_kms_key_id}" if try(length(rule.encryption_configuration.replica_kms_key_id), 0) > 0],
     ))
   }
 }

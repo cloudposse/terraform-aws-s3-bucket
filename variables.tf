@@ -336,6 +336,12 @@ variable "s3_replication_permissions_boundary_arn" {
   description = "Permissions boundary ARN for the created IAM replication role."
 }
 
+variable "s3_replication_iam_role_name" {
+  type        = string
+  default     = null
+  description = "Name of the created IAM replication role."
+}
+
 variable "bucket_name" {
   type        = string
   default     = null
@@ -462,7 +468,7 @@ variable "expected_bucket_owner" {
   type        = string
   default     = null
   description = <<-EOT
-    Account ID of the expected bucket owner. 
+    Account ID of the expected bucket owner.
     More information: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-owner-condition.html
   EOT
 }

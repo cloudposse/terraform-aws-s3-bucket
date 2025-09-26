@@ -5,6 +5,7 @@ locals {
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
+  s3_replication_iam_role_name  = coalesce(var.s3_replication_iam_role_name, format("%s-replication", local.bucket_name))
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 
@@ -581,7 +582,7 @@ resource "time_sleep" "wait_for_aws_s3_bucket_settings" {
   destroy_duration = "30s"
 }
 
-# S3 event Bucket Notifications 
+# S3 event Bucket Notifications
 resource "aws_s3_bucket_notification" "bucket_notification" {
   count  = var.event_notification_details.enabled ? 1 : 0
   bucket = local.bucket_id
@@ -619,7 +620,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
-# Directory Bucket 
+# Directory Bucket
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
   count         = var.create_s3_directory_bucket ? 1 : 0

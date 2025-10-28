@@ -75,7 +75,7 @@ resource "aws_s3_bucket_logging" "default" {
   target_prefix = var.logging[0]["prefix"]
 
   dynamic target_object_key_format {
-    for_each = try(var.logging[0]["object_key_partition_date"], "") != "" ? [1] : []
+    for_each = try(var.logging[0]["object_key_partition_date"], "") != "" ? [true] : []
     content {
       partitioned_prefix {
         partition_date_source = var.logging[0]["object_key_partition_date"]

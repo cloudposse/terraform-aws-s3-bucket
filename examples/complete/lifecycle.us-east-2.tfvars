@@ -136,7 +136,7 @@ lifecycle_rules = [
   {
     prefix  = null
     enabled = true
-    tags    = {}
+    tags    = { "archive" : "true" }
 
     enable_glacier_transition            = false
     enable_deeparchive_transition        = true

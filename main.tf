@@ -5,6 +5,7 @@ locals {
 
   object_lock_enabled           = local.enabled && var.object_lock_configuration != null
   replication_enabled           = local.enabled && var.s3_replication_enabled
+  s3_replication_iam_role_name  = coalesce(var.s3_replication_iam_role_name, format("%s-replication", local.bucket_name))
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
 

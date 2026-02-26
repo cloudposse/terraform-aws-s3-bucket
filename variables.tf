@@ -515,6 +515,28 @@ variable "s3_request_payment_configuration" {
   }
 }
 
+variable "intelligent_tiering_configuration" {
+  type = list(object({
+    name   = string
+    status = optional(string, "Enabled")
+    filter = optional(object({
+      prefix = optional(string)
+      tags   = optional(map(string))
+    }))
+    tiering = list(object({
+      access_tier = string
+      days        = number
+    }))
+  }))
+  default     = []
+  description = <<-EOT
+    A list of S3 Intelligent-Tiering configurations for the bucket.
+    Each configuration controls archive access tiers within the INTELLIGENT_TIERING storage class.
+    `access_tier` must be `ARCHIVE_ACCESS` or `DEEP_ARCHIVE_ACCESS`.
+  EOT
+  nullable    = false
+}
+
 variable "create_s3_directory_bucket" {
   description = "Control the creation of the S3 directory bucket. Set to true to create the bucket, false to skip."
   type        = bool

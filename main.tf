@@ -619,7 +619,33 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
   }
 }
 
-# Directory Bucket 
+# Intelligent-Tiering Configuration
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_intelligent_tiering_configuration
+resource "aws_s3_bucket_intelligent_tiering_configuration" "default" {
+  for_each = { for config in var.intelligent_tiering_configuration : config.name => config if local.enabled }
+
+  bucket = local.bucket_id
+  name   = each.value.name
+  status = each.value.status
+
+  dynamic "filter" {
+    for_each = each.value.filter != null ? [each.value.filter] : []
+    content {
+      prefix = filter.value.prefix
+      tags   = filter.value.tags
+    }
+  }
+
+  dynamic "tiering" {
+    for_each = each.value.tiering
+    content {
+      access_tier = tiering.value.access_tier
+      days        = tiering.value.days
+    }
+  }
+}
+
+# Directory Bucket
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_directory_bucket
 resource "aws_s3_directory_bucket" "default" {
   count         = var.create_s3_directory_bucket ? 1 : 0

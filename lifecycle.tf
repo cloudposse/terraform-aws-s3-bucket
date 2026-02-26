@@ -56,7 +56,7 @@ locals {
       object_size_greater_than = try(rule.filter_and.object_size_greater_than, null)
       object_size_less_than    = try(rule.filter_and.object_size_less_than, null)
       prefix                   = try(length(rule.filter_and.prefix), 0) == 0 ? null : rule.filter_and.prefix
-      tags                     = try(length(rule.filter_and.tags), 0) == 0 ? {} : rule.filter_and.tags
+      tags                     = try(length(rule.filter_and.tags), 0) == 0 ? null : rule.filter_and.tags
     }
     # We use "!= true" because it covers !null as well as !false, and allows the "null" option to be on the same line.
     expiration = (try(rule.expiration.date, null) == null &&

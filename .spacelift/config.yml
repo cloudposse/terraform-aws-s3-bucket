@@ -1,22 +1,2 @@
 version: 1
-module_version: 0.0.3
-
-test_defaults:
-  environment:
-  runner_image: "312851193143.dkr.ecr.us-west-2.amazonaws.com/infrastructure"
-
-  before_init:
-    - spacelift-configure-paths
-    - spacelift-git-use-https
-
-tests:
-  - name: Test S3 Buckets
-    # project_root can be set if your test case is not stored in the root directory
-    project_root: module-tests
-    terraform_version: 1.3.9
-    environment:
-      TF_VAR_public_bucket_name: uw2-dev-public-bucket-module-test
-      TF_VAR_private_bucket_name: uw2-dev-private-bucket-module-test
-      TF_VAR_tenant: mgmt
-      TF_VAR_region: us-west-2
-      TF_VAR_stage: sandbox
+module_version: 0.0.4

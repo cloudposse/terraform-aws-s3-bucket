@@ -1,0 +1,56 @@
+---
+name: version-check
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - .spacelift/config.yml
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  check-version-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Get PR module_version
+        id: pr
+        run: |
+          VERSION=$(grep '^module_version:' .spacelift/config.yml | awk '{print $2}' | tr -d '"' | tr -d "'")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "PR version: $VERSION"
+
+      - name: Get main module_version
+        id: main
+        run: |
+          git fetch origin main --depth=1
+          VERSION=$(git show origin/main:.spacelift/config.yml | grep '^module_version:' | awk '{print $2}' | tr -d '"' | tr -d "'")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Main version: $VERSION"
+
+      - name: Validate patch increment
+        run: |
+          MAIN="${{ steps.main.outputs.version }}"
+          PR="${{ steps.pr.outputs.version }}"
+
+          echo "Main: $MAIN"
+          echo "PR:   $PR"
+
+          # Parse semver
+          IFS='.' read -r MAIN_MAJOR MAIN_MINOR MAIN_PATCH <<< "$MAIN"
+          IFS='.' read -r PR_MAJOR PR_MINOR PR_PATCH <<< "$PR"
+
+          EXPECTED_PATCH=$((MAIN_PATCH + 1))
+          EXPECTED="${MAIN_MAJOR}.${MAIN_MINOR}.${EXPECTED_PATCH}"
+
+          if [ "$PR" != "$EXPECTED" ]; then
+            echo "::error::module_version must be bumped by exactly one patch version in order to be published. Expected $EXPECTED, got $PR (main is $MAIN)."
+            exit 1
+          fi
+
+          echo "Version bump OK: $MAIN → $PR"

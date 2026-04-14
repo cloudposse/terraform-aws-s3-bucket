@@ -84,7 +84,8 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "default" {
   expected_bucket_owner = var.expected_bucket_owner
 
   rule {
-    bucket_key_enabled = var.bucket_key_enabled
+    bucket_key_enabled       = var.bucket_key_enabled
+    blocked_encryption_types = var.blocked_encryption_types
 
     apply_server_side_encryption_by_default {
       sse_algorithm     = var.sse_algorithm

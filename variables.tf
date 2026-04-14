@@ -458,6 +458,22 @@ variable "bucket_key_enabled" {
   nullable    = false
 }
 
+variable "blocked_encryption_types" {
+  type        = list(string)
+  default     = null
+  description = <<-EOT
+  List of encryption types to block on the bucket, passed to the `rule` block of
+  `aws_s3_bucket_server_side_encryption_configuration`.
+
+  Defaults to `null` (attribute omitted) so the module remains compatible with `hashicorp/aws` provider
+  versions older than 6.22.0, which do not know this field.
+
+  On provider >= 6.22.0, AWS's `GetBucketEncryption` returns `blocked_encryption_types = ["NONE"]` by default,
+  which does not round-trip with an omitted/empty list and causes perpetual in-place diffs on
+  `aws_s3_bucket_server_side_encryption_configuration`. To silence that drift, set this to `["NONE"]`.
+  EOT
+}
+
 variable "expected_bucket_owner" {
   type        = string
   default     = null

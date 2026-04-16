@@ -57,8 +57,9 @@ variable "versioning_enabled" {
 
 variable "logging" {
   type = list(object({
-    bucket_name = string
-    prefix      = string
+    bucket_name               = string
+    prefix                    = string
+    object_key_partition_date = string
   }))
   default     = []
   description = "Bucket access logging configuration. Empty list for no logging, list of 1 to enable logging."

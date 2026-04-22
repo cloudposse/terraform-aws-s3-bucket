@@ -342,6 +342,13 @@ variable "bucket_name" {
   description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
 }
 
+variable "bucket_namespace" {
+  type        = string
+  default     = "global"
+  description = "Namespace for the bucket. Determines bucket naming scope. Valid values: account-regional, global."
+}
+
+
 variable "object_lock_configuration" {
   type = object({
     mode  = string # Valid values are GOVERNANCE and COMPLIANCE.

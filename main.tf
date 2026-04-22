@@ -32,9 +32,10 @@ data "aws_partition" "current" { count = local.enabled ? 1 : 0 }
 data "aws_canonical_user_id" "default" { count = local.enabled ? 1 : 0 }
 
 resource "aws_s3_bucket" "default" {
-  count         = local.enabled ? 1 : 0
-  bucket        = local.bucket_name
-  force_destroy = var.force_destroy
+  count            = local.enabled ? 1 : 0
+  bucket           = local.bucket_name
+  bucket_namespace = var.bucket_namespace
+  force_destroy    = var.force_destroy
 
   object_lock_enabled = local.object_lock_enabled
 

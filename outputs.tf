@@ -18,6 +18,11 @@ output "bucket_website_endpoint" {
   description = "The bucket website endpoint, if website is enabled"
 }
 
+output "bucket_hosted_zone_id" {
+  value       = local.enabled ? one(aws_s3_bucket.default[*].hosted_zone_id) : null
+  description = "The Route 53 Hosted Zone ID for this bucket's region"
+}
+
 output "bucket_id" {
   value       = local.enabled ? local.bucket_id : ""
   description = "Bucket Name (aka ID)"

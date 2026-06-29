@@ -42,6 +42,33 @@ lifecycle_configuration_rules = [
       expired_object_delete_marker = null
     }
 
+    # test explicit empty-string prefix (applies to all objects, renders filter { prefix = "" })
+    # Regression test for https://github.com/cloudposse/terraform-aws-s3-bucket/issues/271
+    filter_and = {
+      prefix = ""
+    }
+    id = "emptyprefix"
+    noncurrent_version_expiration = {
+      newer_noncurrent_versions = 2
+      noncurrent_days           = 30
+    }
+    noncurrent_version_transition = []
+    transition = [
+      {
+        days          = 7
+        storage_class = "GLACIER"
+      },
+    ]
+
+  },
+  {
+    abort_incomplete_multipart_upload_days = 1
+    enabled                                = true
+    expiration = {
+      days                         = null
+      expired_object_delete_marker = null
+    }
+
     # test prefix only
     filter_and = {
       prefix = "prefix1"

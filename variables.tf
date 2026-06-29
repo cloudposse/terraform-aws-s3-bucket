@@ -499,6 +499,7 @@ variable "event_notification_details" {
       events              = optional(list(string), ["s3:ObjectCreated:*"])
       filter_prefix       = optional(string)
       filter_suffix       = optional(string)
+      id                  = optional(string)
     })), [])
 
     queue_list = optional(list(object({
@@ -506,6 +507,7 @@ variable "event_notification_details" {
       events        = optional(list(string), ["s3:ObjectCreated:*"])
       filter_prefix = optional(string)
       filter_suffix = optional(string)
+      id            = optional(string)
     })), [])
 
     topic_list = optional(list(object({
@@ -513,6 +515,7 @@ variable "event_notification_details" {
       events        = optional(list(string), ["s3:ObjectCreated:*"])
       filter_prefix = optional(string)
       filter_suffix = optional(string)
+      id            = optional(string)
     })), [])
   })
   description = "S3 event notification details"

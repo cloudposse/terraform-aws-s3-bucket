@@ -457,7 +457,7 @@ variable "s3_object_ownership" {
 
 variable "bucket_key_enabled" {
   type        = bool
-  default     = false
+  default     = true
   description = <<-EOT
   Set this to true to use Amazon S3 Bucket Keys for SSE-KMS, which may or may not reduce the number of AWS KMS requests.
   For more information, see: https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucket-key.html

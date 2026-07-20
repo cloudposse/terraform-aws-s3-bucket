@@ -349,6 +349,12 @@ variable "bucket_namespace" {
 }
 
 
+variable "object_lock_enabled" {
+  type        = bool
+  default     = false
+  description = "Set to `true` to enable S3 Object Lock on the bucket without configuring a default retention rule, so objects are only protected when a retention period or legal hold is applied per object. Object Lock is also enabled implicitly when `object_lock_configuration` is set. Enabling Object Lock requires versioning and can only be done at bucket creation."
+}
+
 variable "object_lock_configuration" {
   type = object({
     mode  = string # Valid values are GOVERNANCE and COMPLIANCE.
@@ -356,7 +362,7 @@ variable "object_lock_configuration" {
     years = number
   })
   default     = null
-  description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+  description = "A configuration for S3 object locking with a bucket-wide default retention rule. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely. To enable Object Lock without a default retention rule, leave this `null` and set `object_lock_enabled = true` instead."
 }
 
 variable "website_redirect_all_requests_to" {

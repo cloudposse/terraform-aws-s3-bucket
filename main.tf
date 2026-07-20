@@ -3,7 +3,7 @@ locals {
   partition             = join("", data.aws_partition.current[*].partition)
   directory_bucket_name = var.create_s3_directory_bucket ? "${local.bucket_name}-${var.availability_zone_id}" : ""
 
-  object_lock_enabled           = local.enabled && var.object_lock_configuration != null
+  object_lock_enabled           = local.enabled && (var.object_lock_enabled || var.object_lock_configuration != null)
   replication_enabled           = local.enabled && var.s3_replication_enabled
   versioning_enabled            = local.enabled && var.versioning_enabled
   transfer_acceleration_enabled = local.enabled && var.transfer_acceleration_enabled
@@ -337,11 +337,14 @@ resource "aws_s3_bucket_object_lock_configuration" "default" {
 
   object_lock_enabled = "Enabled"
 
-  rule {
-    default_retention {
-      mode  = var.object_lock_configuration.mode
-      days  = var.object_lock_configuration.days
-      years = var.object_lock_configuration.years
+  dynamic "rule" {
+    for_each = var.object_lock_configuration != null ? [var.object_lock_configuration] : []
+    content {
+      default_retention {
+        mode  = rule.value.mode
+        days  = rule.value.days
+        years = rule.value.years
+      }
     }
   }
 }

@@ -45,10 +45,14 @@ locals {
 
     # Due to https://github.com/hashicorp/terraform-provider-aws/issues/23882
     # we have to treat having only the `prefix` set differently than having any other setting.
+    # Use != null (not length > 0) so that prefix = "" is preserved; an empty-string prefix
+    # renders filter { prefix = "" } which applies the rule to all objects without triggering
+    # the "Invalid Attribute Combination" warning in AWS provider < v5.99.0.
+    # See https://github.com/hashicorp/terraform-provider-aws/issues/42112
     filter_prefix_only = (try(rule.filter_and.object_size_greater_than, null) == null &&
       try(rule.filter_and.object_size_less_than, null) == null &&
       try(length(rule.filter_and.tags), 0) == 0 &&
-    try(length(rule.filter_and.prefix), 0) > 0) ? rule.filter_and.prefix : null
+    try(rule.filter_and.prefix, null) != null) ? rule.filter_and.prefix : null
 
     filter_and = (try(rule.filter_and.object_size_greater_than, null) == null &&
       try(rule.filter_and.object_size_less_than, null) == null &&
@@ -95,7 +99,7 @@ locals {
 
     abort_incomplete_multipart_upload_days = rule.abort_incomplete_multipart_upload_days # number
 
-    filter_prefix_only = try(length(rule.prefix), 0) > 0 && try(length(rule.tags), 0) == 0 ? rule.prefix : null
+    filter_prefix_only = try(rule.prefix, null) != null && try(length(rule.tags), 0) == 0 ? rule.prefix : null
     filter_and = try(length(rule.tags), 0) == 0 ? null : {
       object_size_greater_than = null                                   # integer >= 0
       object_size_less_than    = null                                   # integer >= 1
@@ -167,10 +171,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "default" {
       id     = rule.value.id
       status = rule.value.enabled == true ? "Enabled" : "Disabled"
 
-      # Filter is always required due to https://github.com/hashicorp/terraform-provider-aws/issues/23299
+      # A filter block is always required. Use prefix = "" to apply the rule to all objects.
+      # filter {} (empty) triggers "Invalid Attribute Combination" in AWS provider < v5.99.0;
+      # filter { prefix = "" } is the safe form across all provider versions.
+      # See https://github.com/hashicorp/terraform-provider-aws/issues/42112
       dynamic "filter" {
-        for_each = rule.value.filter_prefix_only == null && rule.value.filter_and == null ? ["empty"] : []
-        content {}
+        for_each = rule.value.filter_prefix_only == null && rule.value.filter_and == null ? ["all"] : []
+        content {
+          prefix = ""
+        }
       }
 
       # When only specifying `prefix`, do not use `and` due to https://github.com/hashicorp/terraform-provider-aws/issues/23882

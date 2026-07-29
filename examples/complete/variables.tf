@@ -321,3 +321,21 @@ variable "minimum_tls_version" {
   default     = null
   description = "Set the minimum TLS version for in-transit traffic"
 }
+
+variable "intelligent_tiering_configuration" {
+  type = list(object({
+    name   = string
+    status = optional(string, "Enabled")
+    filter = optional(object({
+      prefix = optional(string)
+      tags   = optional(map(string))
+    }))
+    tiering = list(object({
+      access_tier = string
+      days        = number
+    }))
+  }))
+  default     = []
+  description = "A list of S3 Intelligent-Tiering configurations for the bucket."
+  nullable    = false
+}

@@ -44,5 +44,7 @@ module "s3_bucket" {
   cors_configuration               = var.cors_configuration
   website_redirect_all_requests_to = var.website_redirect_all_requests_to
 
+  intelligent_tiering_configuration = var.intelligent_tiering_configuration
+
   context = module.this.context
 }

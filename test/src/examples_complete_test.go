@@ -584,6 +584,42 @@ func TestExamplesCompleteWithWebsiteRedirectAll(t *testing.T) {
 	assert.NotEmpty(t, output["bucket_website_domain"])
 }
 
+func TestExamplesCompleteWithIntelligentTiering(t *testing.T) {
+	t.Parallel()
+	randID := strings.ToLower(random.UniqueId())
+	attributes := []string{randID}
+
+	rootFolder := "../../"
+	terraformFolderRelativeToRoot := "examples/complete"
+	varFiles := []string{"intelligent-tiering.us-east-2.tfvars"}
+
+	tempTestFolder := testStructure.CopyTerraformFolderToTemp(t, rootFolder, terraformFolderRelativeToRoot)
+
+	terraformOptions := &terraform.Options{
+		TerraformDir: tempTestFolder,
+		Upgrade:      true,
+		VarFiles:     varFiles,
+		Vars: map[string]interface{}{
+			"attributes": attributes,
+		},
+	}
+
+	defer cleanup(t, terraformOptions, tempTestFolder)
+
+	terraform.InitAndApply(t, terraformOptions)
+
+	s3BucketId := terraform.Output(t, terraformOptions, "bucket_id")
+
+	expectedS3BucketId := "eg-test-s3-tiering-test-" + attributes[0]
+	assert.Equal(t, expectedS3BucketId, s3BucketId)
+
+	// Re-apply to verify idempotency
+	results := terraform.Apply(t, terraformOptions)
+	re := regexp.MustCompile(`Resources: [^.]+\.`)
+	match := re.FindString(results)
+	assert.Equal(t, "Resources: 0 added, 0 changed, 0 destroyed.", match, "Re-applying the same configuration should not change any resources")
+}
+
 func TestExamplesCompleteDisabled(t *testing.T) {
 	t.Parallel()
 	randID := strings.ToLower(random.UniqueId())

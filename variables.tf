@@ -342,6 +342,19 @@ variable "bucket_name" {
   description = "Bucket name. If provided, the bucket will be created with this name instead of generating the name from the context"
 }
 
+variable "bucket_namespace" {
+  type        = string
+  default     = "global"
+  description = "Namespace for the bucket. Determines bucket naming scope. Valid values: account-regional, global."
+}
+
+
+variable "object_lock_enabled" {
+  type        = bool
+  default     = false
+  description = "Set to `true` to enable S3 Object Lock on the bucket without configuring a default retention rule, so objects are only protected when a retention period or legal hold is applied per object. Object Lock is also enabled implicitly when `object_lock_configuration` is set. Enabling Object Lock requires versioning and can only be done at bucket creation."
+}
+
 variable "object_lock_configuration" {
   type = object({
     mode  = string # Valid values are GOVERNANCE and COMPLIANCE.
@@ -349,7 +362,7 @@ variable "object_lock_configuration" {
     years = number
   })
   default     = null
-  description = "A configuration for S3 object locking. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely."
+  description = "A configuration for S3 object locking with a bucket-wide default retention rule. With S3 Object Lock, you can store objects using a `write once, read many` (WORM) model. Object Lock can help prevent objects from being deleted or overwritten for a fixed amount of time or indefinitely. To enable Object Lock without a default retention rule, leave this `null` and set `object_lock_enabled = true` instead."
 }
 
 variable "website_redirect_all_requests_to" {
@@ -458,6 +471,22 @@ variable "bucket_key_enabled" {
   nullable    = false
 }
 
+variable "blocked_encryption_types" {
+  type        = list(string)
+  default     = null
+  description = <<-EOT
+  List of encryption types to block on the bucket, passed to the `rule` block of
+  `aws_s3_bucket_server_side_encryption_configuration`.
+
+  Defaults to `null` (attribute omitted) so the module remains compatible with `hashicorp/aws` provider
+  versions older than 6.22.0, which do not know this field.
+
+  On provider >= 6.22.0, AWS's `GetBucketEncryption` returns `blocked_encryption_types = ["NONE"]` by default,
+  which does not round-trip with an omitted/empty list and causes perpetual in-place diffs on
+  `aws_s3_bucket_server_side_encryption_configuration`. To silence that drift, set this to `["NONE"]`.
+  EOT
+}
+
 variable "expected_bucket_owner" {
   type        = string
   default     = null
@@ -513,6 +542,28 @@ variable "s3_request_payment_configuration" {
     condition     = contains(["bucketowner", "requester"], lower(var.s3_request_payment_configuration.payer))
     error_message = "The s3 request payment config's payer must be either BucketOwner or Requester"
   }
+}
+
+variable "intelligent_tiering_configuration" {
+  type = list(object({
+    name   = string
+    status = optional(string, "Enabled")
+    filter = optional(object({
+      prefix = optional(string)
+      tags   = optional(map(string))
+    }))
+    tiering = list(object({
+      access_tier = string
+      days        = number
+    }))
+  }))
+  default     = []
+  description = <<-EOT
+    A list of S3 Intelligent-Tiering configurations for the bucket.
+    Each configuration controls archive access tiers within the INTELLIGENT_TIERING storage class.
+    `access_tier` must be `ARCHIVE_ACCESS` or `DEEP_ARCHIVE_ACCESS`.
+  EOT
+  nullable    = false
 }
 
 variable "create_s3_directory_bucket" {

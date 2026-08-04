@@ -600,6 +600,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
       events              = lambda_function.value.events
       filter_prefix       = lambda_function.value.filter_prefix
       filter_suffix       = lambda_function.value.filter_suffix
+      id                  = lambda_function.value.id
     }
   }
 
@@ -610,6 +611,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
       events        = queue.value.events
       filter_prefix = queue.value.filter_prefix
       filter_suffix = queue.value.filter_suffix
+      id            = queue.value.id
     }
   }
 
@@ -620,6 +622,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
       events        = topic.value.events
       filter_prefix = topic.value.filter_prefix
       filter_suffix = topic.value.filter_suffix
+      id            = topic.value.id
     }
   }
 }

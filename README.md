@@ -67,6 +67,7 @@ but not both. Using SSM Parameter Store is recommended because that will keep th
 via Terraform remote state lookup, but the key will still be stored unencrypted in the Terraform state in any case.
 
 
+
 > [!TIP]
 > #### 👽 Use Atmos with Terraform
 > Cloud Posse uses [`atmos`](https://atmos.tools) to easily orchestrate multiple environments using Terraform. <br/>
@@ -77,6 +78,7 @@ via Terraform remote state lookup, but the key will still be stored unencrypted 
 > <img src="https://github.com/cloudposse/atmos/blob/main/docs/demo.gif?raw=true"/><br/>
 > <i>Example of running <a href="https://atmos.tools"><code>atmos</code></a> to manage infrastructure from our <a href="https://atmos.tools/quick-start/">Quick Start</a> tutorial.</i>
 > </detalis>
+
 
 
 
@@ -204,13 +206,6 @@ module "s3_bucket" {
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.3.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.37.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | >= 0.7 |
-
-## Providers
-
-| Name | Version |
-| ---- | ------- |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.37.0 |
-| <a name="provider_time"></a> [time](#provider\_time) | >= 0.7 |
 
 ## Modules
 
